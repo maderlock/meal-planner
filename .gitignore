@@ -17,8 +17,8 @@ node_modules/
 coverage/
 
 # Next.js
-.next/
-out/
+admin/.next/
+admin/out/
 
 # Production builds
 build/
@@ -51,14 +51,52 @@ next-env.d.ts
 # Vercel
 .vercel
 
-# Frontend specific
-frontend/node_modules/
-frontend/.env
-frontend/.env.*
-!frontend/.env.example
-frontend/coverage/
-frontend/.next/
-frontend/out/
-frontend/build/
-frontend/*.tsbuildinfo
-frontend/next-env.d.ts
+# Admin specific
+admin/node_modules/
+admin/.env
+admin/.env.*
+!admin/.env.example
+admin/coverage/
+admin/.next/
+admin/out/
+admin/build/
+admin/*.tsbuildinfo
+admin/next-env.d.ts
+
+# Flutter/Dart specific
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/build/
+mobile/.pub-cache/
+mobile/.pub/
+mobile/coverage/
+mobile/*.iml
+mobile/*.iws
+mobile/*.ipr
+mobile/.idea/
+mobile/.vscode/
+mobile/.DS_Store
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Flutter/Flutter.framework/
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Flutter/App.framework/
+mobile/ios/Flutter/Flutter.xcconfig
+mobile/ios/Flutter/Debug.xcconfig
+mobile/ios/Flutter/Release.xcconfig
+mobile/ios/Runner.xcworkspace/
+mobile/ios/Runner.xcodeproj/
+mobile/android/.gradle/
+mobile/android/app/debug/
+mobile/android/app/profile/
+mobile/android/app/release/
+mobile/android/local.properties
+mobile/android/.idea/
+mobile/android/build/
+mobile/android/gradle/
+mobile/android/gradlew
+mobile/android/gradlew.bat
+mobile/android/key.properties

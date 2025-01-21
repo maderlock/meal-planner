@@ -1,21 +1,27 @@
 # Meal Planner Application
 
-A comprehensive meal planning application built with modern technologies.
+A comprehensive meal planning application with a Flutter mobile app for customers and a Next.js admin interface.
 
 ## Tech Stack
 
-### Frontend
+### Mobile App (Customer-facing)
+- Flutter for iOS and Android
+- Dart
+- Material Design 3
+- Firebase Authentication
+
+### Admin Interface
 - Next.js 15 with App Router
 - React 18
 - TypeScript
 - Tailwind CSS
 - Turbopack for development
 
-### Backend
+### Backend (Built into Admin)
+- Next.js API Routes
 - PostgreSQL 17
 - Prisma ORM
-- Firebase Authentication (coming soon)
-- Node.js API Routes
+- Firebase Authentication
 
 ### Infrastructure
 - Docker for development environment
@@ -30,14 +36,18 @@ A comprehensive meal planning application built with modern technologies.
 
 ```
 meal-planner/
-├── frontend/
+├── mobile/           # Flutter mobile app for customers
+│   ├── lib/         # Dart source code
+│   ├── ios/         # iOS specific code
+│   └── android/     # Android specific code
+├── admin/           # Next.js admin interface and API
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── api/
+│   │   │   ├── api/        # API endpoints
 │   │   │   │   ├── meals/
 │   │   │   │   └── users/
-│   │   │   ├── meals/
-│   │   │   ├── users/
+│   │   │   ├── meals/      # Admin meal management
+│   │   │   ├── users/      # Admin user management
 │   │   │   ├── layout.tsx
 │   │   │   └── page.tsx
 │   │   └── components/
@@ -52,12 +62,22 @@ meal-planner/
 └── README.md
 ```
 
-## Available Routes
+## Components
 
-### Frontend Pages
-- `/` - Home page
-- `/users` - User management
-- `/meals` - Meal planning
+### Mobile App (Customer)
+- User registration and authentication
+- Meal browsing and planning
+- Recipe viewing and saving
+- Shopping list generation
+- Dietary preferences
+- Push notifications
+
+### Admin Interface
+- User management
+- Meal and recipe management
+- Analytics dashboard
+- Content moderation
+- System configuration
 
 ### API Endpoints
 - `GET /api/users` - Retrieve users
@@ -66,6 +86,15 @@ meal-planner/
 - `POST /api/meals` - Create meal
 
 ## Getting Started
+
+### Prerequisites
+- Node.js 18+
+- Flutter SDK
+- Docker
+- PostgreSQL 17 (via Docker)
+- Firebase project (for authentication)
+
+### Setting Up the Admin Interface
 
 1. Clone the repository:
    ```bash
@@ -84,19 +113,41 @@ meal-planner/
    docker-compose up -d
    ```
 
-4. Set up the frontend:
+4. Set up the admin interface:
    ```bash
-   cd frontend
+   cd admin
    npm install
    npx prisma generate    # Generate Prisma Client
    npx prisma migrate deploy    # Apply database migrations
    npm run dev
    ```
 
-5. Access the application:
-   - Frontend: http://localhost:3000
+5. Access the admin interface:
+   - Admin UI: http://localhost:3000
    - API: http://localhost:3000/api/
    - PostgreSQL: localhost:5432
+
+### Setting Up the Mobile App
+
+1. Install Flutter:
+   ```bash
+   # macOS
+   brew install flutter
+
+   # Other platforms
+   # See https://flutter.dev/docs/get-started/install
+   ```
+
+2. Set up the mobile app:
+   ```bash
+   cd mobile
+   flutter pub get
+   ```
+
+3. Run the app:
+   ```bash
+   flutter run
+   ```
 
 ## Development
 
@@ -109,11 +160,18 @@ The PostgreSQL database is managed through Prisma and includes:
 - Automatic timestamp management
 - Prepared for multi-tenant architecture
 
-### Frontend
+### Admin Interface
 - Modern UI with Tailwind CSS
 - Type-safe development with TypeScript
 - Fast refresh with Turbopack
 - Server-side rendering with Next.js
+
+### Mobile App
+- Material Design 3 for modern UI
+- Offline-first architecture
+- State management with Provider/Riverpod
+- Local storage with SQLite
+- Push notifications
 
 ## Environment Variables
 
@@ -127,7 +185,7 @@ POSTGRES_DB=meal_planner_db
 # Database URL for Prisma
 DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
 
-# Firebase (coming soon)
+# Firebase
 FIREBASE_API_KEY=your_api_key
 FIREBASE_AUTH_DOMAIN=your_auth_domain
 FIREBASE_PROJECT_ID=your_project_id
@@ -152,12 +210,12 @@ To manage database changes:
 1. Make changes to `prisma/schema.prisma`
 2. Create a new migration:
    ```bash
-   cd frontend
+   cd admin
    npx prisma migrate dev --name your_migration_name
    ```
 3. Apply migrations to production:
    ```bash
-   cd frontend
+   cd admin
    npx prisma migrate deploy
    ```
 
