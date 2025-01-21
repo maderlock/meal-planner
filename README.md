@@ -55,6 +55,8 @@ meal-planner/
 │   ├── prisma/
 │   │   ├── schema.prisma
 │   │   └── migrations/
+├── scripts/         # Development and deployment scripts
+│   └── install_macos.sh  # macOS installation script
 ├── local_data/
 │   └── .gitkeep
 ├── docker-compose.yml
@@ -88,13 +90,16 @@ meal-planner/
 ## Getting Started
 
 ### Prerequisites
+- macOS for local development
+- Xcode (for iOS development)
+- Android Studio (for Android development)
 - Node.js 18+
 - Flutter SDK
-- Docker
+- Docker Desktop
 - PostgreSQL 17 (via Docker)
 - Firebase project (for authentication)
 
-### Setting Up the Admin Interface
+### Quick Start (macOS)
 
 1. Clone the repository:
    ```bash
@@ -102,7 +107,43 @@ meal-planner/
    cd meal-planner
    ```
 
-2. Set up environment variables:
+2. Run the installation script:
+   ```bash
+   ./scripts/install_macos.sh
+   ```
+
+   The script will:
+   - Install Homebrew if not present
+   - Install and configure Docker
+   - Install Node.js 18
+   - Install Flutter and its dependencies
+   - Set up the development environment
+   - Create and configure the database
+   - Install project dependencies
+
+3. Complete the manual steps:
+   - Install Xcode from the App Store (if not already installed)
+   - Install Android Studio (if not already installed)
+   - Update the `.env` file with your configuration
+   - Run `flutter doctor` to verify your Flutter installation
+
+4. Start the admin interface:
+   ```bash
+   cd admin && npm run dev
+   ```
+
+### Manual Setup
+
+If you prefer to set up everything manually or are not using macOS, follow these steps:
+
+#### Setting Up the Admin Interface
+
+1. Install dependencies:
+   - Install Docker Desktop
+   - Install Node.js 18+
+   - Install PostgreSQL 17 (via Docker)
+
+2. Configure the environment:
    ```bash
    cp .env.example .env
    ```
@@ -122,12 +163,7 @@ meal-planner/
    npm run dev
    ```
 
-5. Access the admin interface:
-   - Admin UI: http://localhost:3000
-   - API: http://localhost:3000/api/
-   - PostgreSQL: localhost:5432
-
-### Setting Up the Mobile App
+#### Setting Up the Mobile App
 
 1. Install Flutter:
    ```bash
@@ -138,13 +174,17 @@ meal-planner/
    # See https://flutter.dev/docs/get-started/install
    ```
 
-2. Set up the mobile app:
+2. Install platform-specific dependencies:
+   - For iOS: Xcode and CocoaPods
+   - For Android: Android Studio and Android SDK
+
+3. Set up the mobile app:
    ```bash
    cd mobile
    flutter pub get
    ```
 
-3. Run the app:
+4. Run the app:
    ```bash
    flutter run
    ```
