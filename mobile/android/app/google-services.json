@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "178811272006",
+    "project_id": "meal-planner-maderlock",
+    "storage_bucket": "meal-planner-maderlock.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178811272006:android:0c4c898ccb161acc3c0347",
+        "android_client_info": {
+          "package_name": "com.mealplanner.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "178811272006-m3kh4dvfhp50k4bo3uujgrlbqknk0q8h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzagDGbqCFjMbGZ-5V0be2G_byy8gmhgo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "178811272006-m3kh4dvfhp50k4bo3uujgrlbqknk0q8h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
