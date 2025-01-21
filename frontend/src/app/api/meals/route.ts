@@ -1,25 +1,64 @@
 import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { z } from 'zod'
+
+// Schema for meal creation
+const createMealSchema = z.object({
+  name: z.string().min(1).max(255),
+  description: z.string().optional(),
+  userId: z.string().uuid()
+})
 
 export async function GET() {
-  // TODO: Implement meal fetching from database
-  return NextResponse.json({ 
-    meals: [
-      { id: 1, name: 'Sample Meal', description: 'A delicious sample meal' }
-    ] 
-  })
+  try {
+    const meals = await prisma.meal.findMany({
+      include: {
+        user: {
+          select: {
+            username: true
+          }
+        }
+      }
+    })
+    return NextResponse.json(meals, {
+      status: 200
+    })
+  } catch (error) {
+    console.error('Error fetching meals:', error)
+    return NextResponse.json({ error: 'Failed to fetch meals' }, {
+      status: 500
+    })
+  }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    // TODO: Implement meal creation in database
-    return NextResponse.json({ 
-      message: 'Meal created successfully',
-      meal: body 
-    }, { status: 201 })
+    const validatedData = createMealSchema.parse(body)
+
+    const meal = await prisma.meal.create({
+      data: validatedData,
+      include: {
+        user: {
+          select: {
+            username: true
+          }
+        }
+      }
+    })
+
+    return NextResponse.json(meal, {
+      status: 201
+    })
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Invalid request body' 
-    }, { status: 400 })
+    console.error('Error creating meal:', error)
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Invalid request data', details: error.errors }, {
+        status: 400
+      })
+    }
+    return NextResponse.json({ error: 'Failed to create meal' }, {
+      status: 500
+    })
   }
 }

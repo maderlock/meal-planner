@@ -5,7 +5,7 @@ A comprehensive meal planning application built with modern technologies.
 ## Tech Stack
 
 ### Frontend
-- Next.js 14 with App Router
+- Next.js 15 with App Router
 - React 18
 - TypeScript
 - Tailwind CSS
@@ -13,6 +13,7 @@ A comprehensive meal planning application built with modern technologies.
 
 ### Backend
 - PostgreSQL 17
+- Prisma ORM
 - Firebase Authentication (coming soon)
 - Node.js API Routes
 
@@ -41,9 +42,9 @@ meal-planner/
 │   │   │   └── page.tsx
 │   │   └── components/
 │   │       └── Navigation.tsx
-├── backend/
-│   └── db/
-│       └── init.sql
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   └── migrations/
 ├── local_data/
 │   └── .gitkeep
 ├── docker-compose.yml
@@ -83,10 +84,12 @@ meal-planner/
    docker-compose up -d
    ```
 
-4. Start the Next.js development server:
+4. Set up the frontend:
    ```bash
    cd frontend
    npm install
+   npx prisma generate    # Generate Prisma Client
+   npx prisma migrate deploy    # Apply database migrations
    npm run dev
    ```
 
@@ -98,9 +101,11 @@ meal-planner/
 ## Development
 
 ### Database
-The PostgreSQL database includes:
+The PostgreSQL database is managed through Prisma and includes:
+- Prisma Schema defining the data model
+- Database migrations for version control
 - UUID extension for unique identifiers
-- Users table with Firebase UID integration
+- Type-safe database access
 - Automatic timestamp management
 - Prepared for multi-tenant architecture
 
@@ -119,6 +124,9 @@ POSTGRES_USER=meal_planner_user
 POSTGRES_PASSWORD=your_secure_password
 POSTGRES_DB=meal_planner_db
 
+# Database URL for Prisma
+DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}"
+
 # Firebase (coming soon)
 FIREBASE_API_KEY=your_api_key
 FIREBASE_AUTH_DOMAIN=your_auth_domain
@@ -136,6 +144,22 @@ JWT_ISSUER=meal_planner_api
 JWT_AUDIENCE=meal_planner_client
 JWT_ALGORITHM=HS256
 ```
+
+## Database Migrations
+
+To manage database changes:
+
+1. Make changes to `prisma/schema.prisma`
+2. Create a new migration:
+   ```bash
+   cd frontend
+   npx prisma migrate dev --name your_migration_name
+   ```
+3. Apply migrations to production:
+   ```bash
+   cd frontend
+   npx prisma migrate deploy
+   ```
 
 ## Contributing
 
