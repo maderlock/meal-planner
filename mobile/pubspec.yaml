@@ -1,0 +1,101 @@
+name: meal_planner
+description: "A comprehensive meal planning mobile application"
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  # State Management
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+  
+  # Routing
+  go_router: ^13.0.1
+  
+  # Network and API
+  dio: ^5.4.0
+  json_annotation: ^4.8.1
+  
+  # Authentication
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.3
+  google_sign_in: ^6.2.1
+  
+  # Storage
+  shared_preferences: ^2.2.2
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  
+  # UI Components
+  flutter_hooks: ^0.20.3
+  google_fonts: ^6.1.0
+  cached_network_image: ^3.3.0
+  shimmer: ^3.0.0
+  flutter_svg: ^2.0.9
+  
+  # Utilities
+  intl: ^0.19.0
+  logger: ^2.0.2+1
+  freezed_annotation: ^2.4.1
+  uuid: ^4.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
+  freezed: ^2.4.6
+  flutter_gen_runner: ^5.3.2
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.8
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/fonts/
+    
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true
+  web:
+    generate: false
+  windows:
+    generate: false
+  macos:
+    generate: false
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/images/splash.png
+  branding: assets/images/splash_branding.png
+  color_dark: "#121212"
+  image_dark: assets/images/splash_dark.png
+  branding_dark: assets/images/splash_branding_dark.png
+  android_12:
+    image: assets/images/splash_android12.png
+    icon_background_color: "#FFFFFF"
+    image_dark: assets/images/splash_android12_dark.png
+    icon_background_color_dark: "#121212"
