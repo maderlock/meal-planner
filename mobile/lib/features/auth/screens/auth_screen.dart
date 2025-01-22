@@ -16,6 +16,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _passwordController = TextEditingController();
   bool _isLogin = true;
   bool _isLoading = false;
+  Widget? _error;
 
   @override
   void dispose() {
@@ -27,7 +28,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
 
     try {
       if (_isLogin) {
@@ -41,18 +45,90 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               password: _passwordController.text,
             );
       }
+    } on AuthException catch (e) {
+      setState(() {
+        if (e.isEmailInUse) {
+          _error = Column(
+            children: [
+              Text(
+                e.message,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isLogin = true;
+                    _error = null;
+                  });
+                },
+                child: const Text('Go to Login'),
+              ),
+            ],
+          );
+        } else if (e.isGoogleAccount) {
+          _error = Column(
+            children: [
+              Text(
+                e.message,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                onPressed: _isLoading ? null : () async {
+                  try {
+                    setState(() {
+                      _isLoading = true;
+                      _error = null;
+                    });
+                    await ref.read(authServiceProvider.notifier).signInWithGoogle();
+                  } catch (e) {
+                    setState(() {
+                      _error = Text(
+                        e.toString(),
+                        style: TextStyle(color: Theme.of(context).colorScheme.error),
+                        textAlign: TextAlign.center,
+                      );
+                    });
+                  } finally {
+                    if (mounted) {
+                      setState(() {
+                        _isLoading = false;
+                      });
+                    }
+                  }
+                },
+                icon: Image.asset(
+                  'assets/images/google_logo.png',
+                  height: 24.0,
+                ),
+                label: const Text('Sign in with Google'),
+              ),
+            ],
+          );
+        } else {
+          _error = Text(
+            e.message,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+            textAlign: TextAlign.center,
+          );
+        }
+      });
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+      setState(() {
+        _error = Text(
+          e.toString(),
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
+          textAlign: TextAlign.center,
         );
-      }
+      });
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -133,6 +209,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     },
                   ),
                   const SizedBox(height: 24),
+                  if (_error != null) _error!,
                   AppButton(
                     onPressed: _isLoading ? null : _submit,
                     label: _isLogin ? 'Sign In' : 'Sign Up',

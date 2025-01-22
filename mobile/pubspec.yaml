@@ -25,6 +25,8 @@ dependencies:
   firebase_core: ^2.24.2
   firebase_auth: ^4.15.3
   google_sign_in: ^6.2.1
+  sign_in_with_apple: ^5.0.0
+  crypto: ^3.0.3
   
   # Storage
   shared_preferences: ^2.2.2
