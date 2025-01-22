@@ -27,6 +27,12 @@ check_brew() {
     if ! command -v brew &> /dev/null; then
         print_status "Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        
+        # Add Homebrew to PATH
+        if [[ $(uname -m) == "arm64" ]]; then
+            echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
     else
         print_success "Homebrew is already installed"
     fi
@@ -49,32 +55,29 @@ check_docker() {
     if ! docker info &> /dev/null; then
         print_error "Docker daemon is not running. Please start Docker and try again"
         exit 1
-    else
-        print_success "Docker daemon is running"
     fi
+    print_success "Docker is running"
 }
 
-# Install Node.js
+# Install Node.js and npm
 install_node() {
-    print_status "Checking if Node.js is installed..."
+    print_status "Checking Node.js installation..."
     if ! command -v node &> /dev/null; then
         print_status "Installing Node.js..."
-        brew install node@18
+        brew install node@20
         print_success "Node.js installed"
     else
-        NODE_VERSION=$(node -v)
-        if [[ ${NODE_VERSION:1:2} -lt 18 ]]; then
-            print_status "Upgrading Node.js to v18..."
-            brew install node@18
-        else
-            print_success "Node.js v${NODE_VERSION} is already installed"
-        fi
+        print_success "Node.js is already installed"
     fi
+
+    # Install pnpm
+    print_status "Installing pnpm..."
+    npm install -g pnpm
 }
 
 # Install Flutter and dependencies
 install_flutter() {
-    print_status "Checking if Flutter is installed..."
+    print_status "Checking Flutter installation..."
     if ! command -v flutter &> /dev/null; then
         print_status "Installing Flutter..."
         brew install --cask flutter
@@ -82,81 +85,92 @@ install_flutter() {
         print_success "Flutter is already installed"
     fi
 
-    # Check if Xcode is installed
-    print_status "Checking if Xcode is installed..."
-    if ! command -v xcodebuild &> /dev/null; then
-        print_error "Xcode is not installed. Please install Xcode from the App Store"
-        print_error "After installing Xcode, run:"
-        print_error "sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer"
-        print_error "sudo xcodebuild -runFirstLaunch"
-    else
-        print_success "Xcode is installed"
-    fi
-
-    # Check if CocoaPods is installed
-    print_status "Checking if CocoaPods is installed..."
+    # Install CocoaPods
+    print_status "Installing CocoaPods..."
     if ! command -v pod &> /dev/null; then
-        print_status "Installing CocoaPods..."
-        sudo gem install cocoapods
-    else
-        print_success "CocoaPods is already installed"
+        brew install cocoapods
+    fi
+    
+    # Install Ruby (required for CocoaPods)
+    print_status "Installing Ruby..."
+    if ! command -v rbenv &> /dev/null; then
+        brew install rbenv ruby-build
+        echo 'eval "$(rbenv init -)"' >> ~/.zshrc
+        source ~/.zshrc
+        rbenv install 3.4.1
+        rbenv global 3.4.1
     fi
 
-    # Check if Android Studio is installed
-    print_status "Checking if Android Studio is installed..."
-    if [ ! -d "/Applications/Android Studio.app" ]; then
-        print_error "Android Studio is not installed"
-        print_error "Please download and install Android Studio from:"
-        print_error "https://developer.android.com/studio"
-    else
-        print_success "Android Studio is installed"
-    fi
+    # Set up Flutter
+    print_status "Setting up Flutter..."
+    flutter config --no-analytics
+    flutter doctor
+    
+    # Accept Android licenses
+    print_status "Accepting Android licenses..."
+    flutter doctor --android-licenses
 }
 
 # Setup development environment
 setup_dev_env() {
     print_status "Setting up development environment..."
 
-    # Create .env file if it doesn't exist
-    if [ ! -f .env ]; then
-        print_status "Creating .env file..."
-        cp .env.example .env
-        print_success "Created .env file. Please update it with your configuration"
+    # Install PostgreSQL
+    print_status "Installing PostgreSQL..."
+    if ! command -v psql &> /dev/null; then
+        brew install postgresql@14
+        brew services start postgresql@14
     fi
 
-    # Install admin dependencies
-    print_status "Installing admin dependencies..."
-    cd admin && npm install
-    
-    # Generate Prisma client and run migrations
-    print_status "Setting up database..."
-    npx prisma generate
-    docker-compose up -d postgres
-    sleep 5  # Wait for postgres to start
-    npx prisma migrate deploy
-    
-    cd ..
-    print_success "Development environment setup complete"
+    # Install development tools
+    print_status "Installing development tools..."
+    brew install git watchman
+
+    # Set up environment variables
+    print_status "Setting up environment variables..."
+    if [ ! -f .env ]; then
+        cp .env.example .env
+        print_status "Created .env file from .env.example"
+        print_status "Please update the .env file with your configuration"
+    fi
+
+    # Create mobile app symlink for .env
+    if [ ! -f mobile/.env ]; then
+        cd mobile && ln -s ../.env .env && cd ..
+        print_status "Created .env symlink in mobile directory"
+    fi
+
+    # Install project dependencies
+    print_status "Installing project dependencies..."
+    pnpm install
+    cd mobile && flutter pub get && cd ..
+    cd api && pnpm install && cd ..
+    cd web && pnpm install && cd ..
 }
 
 # Main installation process
 main() {
-    echo "Starting installation process for Meal Planner..."
+    print_status "Starting installation process..."
     
+    # Check system requirements
     check_brew
     check_docker
+    
+    # Install main dependencies
     install_node
     install_flutter
+    
+    # Setup development environment
     setup_dev_env
     
     print_success "Installation complete!"
-    print_status "Next steps:"
-    echo "1. Update the .env file with your configuration"
-    echo "2. Install Xcode from the App Store if not already installed"
-    echo "3. Install Android Studio if not already installed"
-    echo "4. Run 'flutter doctor' to verify your Flutter installation"
-    echo "5. Start the admin interface with 'cd admin && npm run dev'"
+    print_status "Please restart your terminal for all changes to take effect"
+    print_status "Run 'make help' to see available commands"
 }
+
+# Set environment variables for CocoaPods
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 # Run main installation
 main
