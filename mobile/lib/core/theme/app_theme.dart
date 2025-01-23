@@ -1,12 +1,41 @@
+/// Theme configuration for the application.
+/// 
+/// This file is responsible for:
+/// - Defining the app's visual theme including colors, typography, and component styles
+/// - Providing both light and dark theme variants
+/// - Maintaining consistent styling across the application
+/// 
+/// Referenced by:
+/// - Used in main.dart for app-wide theme configuration
+/// - Referenced by all UI components for consistent styling
+/// 
+/// Dependencies:
+/// - Uses Flutter's material design system
+/// - Uses Google Fonts for typography
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// AppTheme class for managing light and dark theme configurations.
 class AppTheme {
-  static const _primaryColor = Color(0xFF4CAF50);
-  static const _secondaryColor = Color(0xFF2196F3);
-  static const _errorColor = Color(0xFFE57373);
-  static const _backgroundColor = Color(0xFFF5F5F5);
+  /// Private constructor to prevent instantiation.
+  AppTheme._();
 
+  /// Primary color for the application.
+  static const Color _primaryColor = Color(0xFF4CAF50);
+
+  /// Secondary color for the application.
+  static const Color _secondaryColor = Color(0xFF2196F3);
+
+  /// Error color for the application.
+  static const Color _errorColor = Color(0xFFE57373);
+
+  /// Background color for light theme.
+  static const Color _backgroundColor = Color(0xFFF5F5F5);
+
+  /// Light theme configuration.
+  /// 
+  /// Returns a ThemeData object with light theme settings.
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -74,6 +103,9 @@ class AppTheme {
     );
   }
 
+  /// Dark theme configuration.
+  /// 
+  /// Returns a ThemeData object with dark theme settings.
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,

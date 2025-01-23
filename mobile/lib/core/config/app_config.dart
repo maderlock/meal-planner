@@ -1,37 +1,75 @@
+/// Configuration class for application-wide settings.
+/// 
+/// This file is responsible for:
+/// - Managing environment-specific configurations
+/// - Storing app-wide constants and settings
+/// - Providing access to configuration values throughout the app
+/// 
+/// Referenced by:
+/// - Used by ApiClient for base URL configuration
+/// - Used by main.dart for app initialization
+/// - Used throughout the app for environment-specific behavior
+/// 
+/// Dependencies:
+/// - No external package dependencies
+/// - Used as a singleton throughout the app
+
 import 'package:flutter/foundation.dart';
 
+/// Enum representing different environments for the application.
 enum Environment { dev, staging, prod }
 
+/// Configuration class for application-wide settings.
 class AppConfig {
-  static final AppConfig _instance = AppConfig._internal();
-  factory AppConfig() => _instance;
+  /// Private constructor to prevent instantiation from outside.
   AppConfig._internal();
 
-  static const String appName = 'Meal Planner';
-  late Environment environment;
-  late String apiBaseUrl;
-  late String apiKey;
+  /// Singleton instance of AppConfig.
+  static final AppConfig _instance = AppConfig._internal();
+  factory AppConfig() => _instance;
 
+  /// Application name.
+  static const String appName = 'Meal Planner';
+
+  /// Environment in which the app is running.
+  late final Environment _env;
+  /// Base URL for API requests.
+  late final String _apiBaseUrl;
+  /// API key for authentication.
+  late final String _apiKey;
+
+  /// Checks if the app is running in development environment.
+  bool get isDevelopment => _env == Environment.dev;
+  /// Checks if the app is running in staging environment.
+  bool get isStaging => _env == Environment.staging;
+  /// Checks if the app is running in production environment.
+  bool get isProduction => _env == Environment.prod;
+  /// Checks if crashlytics data should be collected.
+  bool get shouldCollectCrashlytics => !isDevelopment;
+  /// Checks if analytics data should be reported.
+  bool get shouldReportAnalytics => !isDevelopment;
+
+  /// Base URL for API requests.
+  String get apiBaseUrl => _apiBaseUrl;
+  /// API key for authentication.
+  String get apiKey => _apiKey;
+
+  /// Initializes the AppConfig instance with environment-specific settings.
   void initialize({
     required Environment env,
     required String baseUrl,
     required String key,
   }) {
-    environment = env;
-    apiBaseUrl = baseUrl;
-    apiKey = key;
+    _env = env;
+    _apiBaseUrl = baseUrl;
+    _apiKey = key;
   }
 
-  bool get isDevelopment => environment == Environment.dev;
-  bool get isStaging => environment == Environment.staging;
-  bool get isProduction => environment == Environment.prod;
-  bool get shouldCollectCrashlytics => !isDevelopment;
-  bool get shouldReportAnalytics => !isDevelopment;
-
+  /// Resets the AppConfig instance to its initial state for testing purposes.
   @visibleForTesting
   void reset() {
-    environment = Environment.dev;
-    apiBaseUrl = '';
-    apiKey = '';
+    _env = Environment.dev;
+    _apiBaseUrl = '';
+    _apiKey = '';
   }
 }
