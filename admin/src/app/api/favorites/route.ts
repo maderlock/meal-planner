@@ -1,3 +1,30 @@
+/**
+ * Favorites API Route
+ * 
+ * Manages user's favorite meals functionality, allowing users
+ * to mark and unmark meals as favorites and retrieve their
+ * favorite meal list.
+ * 
+ * Endpoints:
+ * - GET: List user's favorite meals
+ * - POST: Add meal to favorites
+ * - DELETE: Remove meal from favorites
+ * 
+ * Features:
+ * - User-specific favorites
+ * - Pagination support
+ * - Automatic sorting by recently added
+ * 
+ * Used By:
+ * - Mobile app favorites feature
+ * - Meal selection interface
+ * 
+ * Related Files:
+ * - meals/route.ts: Main meals endpoint
+ * - meal_service.dart: Mobile app integration
+ * - favorites.test.ts: API tests
+ */
+
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'

@@ -1,3 +1,31 @@
+/**
+ * Weekly Meal Plans API Route
+ * 
+ * Manages the creation, retrieval, and modification of weekly meal plans.
+ * This is a core feature of the meal planning system that allows users
+ * to organize their meals for the week.
+ * 
+ * Endpoints:
+ * - GET: Retrieves user's weekly plans
+ * - POST: Creates a new weekly plan
+ * - PUT: Updates an existing plan
+ * - DELETE: Removes a plan
+ * 
+ * Features:
+ * - Automatic date range calculation
+ * - Meal assignment validation
+ * - User-specific plan isolation
+ * 
+ * Used By:
+ * - Mobile app weekly planning feature
+ * - Admin dashboard for plan management
+ * 
+ * Related Files:
+ * - [id]/assignments/route.ts: Manages meal assignments
+ * - weekly_plan_model.dart: Mobile app model
+ * - meal_service.dart: Mobile app service integration
+ */
+
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'

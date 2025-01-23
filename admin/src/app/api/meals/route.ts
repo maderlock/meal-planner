@@ -1,3 +1,33 @@
+/**
+ * Meals API Route
+ * 
+ * Central endpoint for managing the meal/recipe database.
+ * Provides CRUD operations for meals with support for
+ * filtering, searching, and pagination.
+ * 
+ * Endpoints:
+ * - GET: List meals with filters
+ * - POST: Create new meal
+ * - PATCH: Update meal details
+ * - DELETE: Remove meal
+ * 
+ * Features:
+ * - Full-text search
+ * - Category filtering
+ * - Pagination support
+ * - Image handling
+ * 
+ * Used By:
+ * - Mobile app meal browsing
+ * - Weekly plan meal selection
+ * - Favorites management
+ * 
+ * Related Files:
+ * - meal_model.dart: Mobile app model
+ * - meal_service.dart: Mobile app service
+ * - favorites/route.ts: Favorite meals management
+ */
+
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'

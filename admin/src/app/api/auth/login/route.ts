@@ -1,3 +1,28 @@
+/**
+ * Authentication Login API Route
+ * 
+ * Handles user login requests and session management.
+ * 
+ * Endpoint: POST /api/auth/login
+ * 
+ * Request Body:
+ * - email: User's email address
+ * - password: User's password
+ * 
+ * Response:
+ * - 200: Returns user data and sets session cookie
+ * - 401: Invalid credentials
+ * - 500: Server error
+ * 
+ * Used By:
+ * - Mobile app authentication
+ * - Admin dashboard login
+ * 
+ * Related Files:
+ * - auth.test.ts: API tests
+ * - auth_service.dart: Mobile app integration
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';

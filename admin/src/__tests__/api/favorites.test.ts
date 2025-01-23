@@ -1,3 +1,27 @@
+/**
+ * Favorites API Tests
+ * 
+ * Comprehensive test suite for the favorites API endpoints.
+ * Ensures proper functionality of favorite meal management,
+ * including adding, removing, and listing favorites.
+ * 
+ * Test Coverage:
+ * - User authentication requirements
+ * - Adding meals to favorites
+ * - Removing meals from favorites
+ * - Listing user's favorites
+ * - Error handling
+ * - Edge cases
+ * 
+ * Related Components:
+ * - favorites/route.ts: API implementation
+ * - meal_service.dart: Mobile client
+ * - Favorites model in schema.prisma
+ * 
+ * Run Tests:
+ * npm run test favorites.test.ts
+ */
+
 import { NextResponse } from 'next/server'
 import { GET, POST, DELETE } from '@/app/api/favorites/route'
 import { mockUser, mockMeal, mockFavoriteMeal, stripDateFields } from '../helpers/testUtils'

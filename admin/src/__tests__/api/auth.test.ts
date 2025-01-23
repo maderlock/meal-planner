@@ -1,3 +1,28 @@
+/**
+ * Authentication API Tests
+ * 
+ * Test suite for the authentication system endpoints.
+ * Validates the security and functionality of user
+ * authentication, registration, and profile management.
+ * 
+ * Test Coverage:
+ * - User registration
+ * - Login/logout flow
+ * - Password reset
+ * - Profile updates
+ * - Session management
+ * - Security measures
+ * - Input validation
+ * 
+ * Related Components:
+ * - auth/* routes: API implementations
+ * - auth_service.dart: Mobile client
+ * - User model in schema.prisma
+ * 
+ * Run Tests:
+ * npm run test auth.test.ts
+ */
+
 import { describe, expect, it, beforeEach } from '@jest/globals';
 import { prismaMock } from '../../../jest.setup';
 import { NextRequest } from 'next/server';

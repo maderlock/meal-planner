@@ -1,3 +1,24 @@
+/**
+ * Meal Planner Database Schema
+ * 
+ * This schema defines the core data structures for the Meal Planner application.
+ * It includes models for user management, meal planning, and recipe organization.
+ * 
+ * Key Models:
+ * - User: Manages user accounts and authentication
+ * - Meal: Represents individual meals/recipes
+ * - WeeklyPlan: Organizes meal assignments for the week
+ * - MealAssignment: Links meals to specific days in weekly plans
+ * - Favorite: Tracks user's favorite meals
+ * 
+ * Used By:
+ * - Admin API routes for data management
+ * - Mobile app through API integration
+ * - Authentication system for user management
+ * 
+ * Database: PostgreSQL (Production), SQLite (Development)
+ */
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
