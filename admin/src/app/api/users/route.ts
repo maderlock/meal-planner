@@ -16,6 +16,7 @@ export async function GET() {
         id: true,
         email: true,
         username: true,
+        firebaseUid: true,
         createdAt: true
       }
     })
@@ -40,6 +41,7 @@ export async function POST(request: Request) {
         id: true,
         email: true,
         username: true,
+        firebaseUid: true,
         createdAt: true
       }
     })

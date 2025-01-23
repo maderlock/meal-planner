@@ -21,9 +21,11 @@ export async function GET(request: Request) {
     const weekStartDate = searchParams.get('weekStartDate')
 
     if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, {
-        status: 400
-      })
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+    }
+
+    let query: any = {
+      where: { userId }
     }
 
     let date = new Date()
@@ -35,11 +37,10 @@ export async function GET(request: Request) {
     }
     date.setHours(0, 0, 0, 0)
 
+    query.where.weekStartDate = date
+
     let weeklyPlan = await prisma.weeklyPlan.findFirst({
-      where: {
-        userId,
-        weekStartDate: date
-      },
+      ...query,
       include: {
         mealPlans: {
           include: {
@@ -50,30 +51,19 @@ export async function GET(request: Request) {
     })
 
     if (!weeklyPlan) {
-      // Create new weekly plan if none exists
-      weeklyPlan = await prisma.weeklyPlan.create({
-        data: {
-          userId,
-          weekStartDate: date
-        },
-        include: {
-          mealPlans: {
-            include: {
-              meal: true
-            }
-          }
-        }
-      })
+      return NextResponse.json(
+        { error: 'Weekly plan not found' },
+        { status: 404 }
+      )
     }
 
-    return NextResponse.json(weeklyPlan, {
-      status: 200
-    })
+    return NextResponse.json(weeklyPlan)
   } catch (error) {
     console.error('Error fetching weekly plan:', error)
-    return NextResponse.json({ error: 'Failed to fetch weekly plan' }, {
-      status: 500
-    })
+    return NextResponse.json(
+      { error: 'Failed to fetch weekly plan' },
+      { status: 500 }
+    )
   }
 }
 
@@ -93,18 +83,15 @@ export async function POST(request: Request) {
       }
     })
 
-    return NextResponse.json(weeklyPlan, {
-      status: 201
-    })
+    return NextResponse.json(weeklyPlan, { status: 201 })
   } catch (error) {
     console.error('Error creating weekly plan:', error)
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request data', details: error.errors }, {
-        status: 400
-      })
+      return NextResponse.json({ error: 'Invalid request data' }, { status: 400 })
     }
-    return NextResponse.json({ error: 'Failed to create weekly plan' }, {
-      status: 500
-    })
+    return NextResponse.json(
+      { error: 'Failed to create weekly plan' },
+      { status: 500 }
+    )
   }
 }

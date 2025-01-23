@@ -1,43 +1,66 @@
 import { describe, expect, it, beforeEach } from '@jest/globals'
-import { mockMeal, mockPrisma, mockUser, stripDateFields } from '../helpers/testUtils'
+import { mockMeal, mockUser, mockFavoriteMeal, stripDateFields } from '../helpers/testUtils'
 import { GET, POST, PATCH } from '@/app/api/meals/route'
-
-jest.mock('@/lib/prisma', () => ({
-  prisma: mockPrisma
-}))
+import { prismaMock } from '../../../jest.setup'
 
 describe('Meals API', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockPrisma.meal.findMany.mockResolvedValue([mockMeal])
-    mockPrisma.meal.create.mockResolvedValue(mockMeal)
-    mockPrisma.meal.update.mockResolvedValue(mockMeal)
   })
 
   describe('GET /api/meals', () => {
-    it('should return all meals with user information', async () => {
+    it('should return all meals', async () => {
+      prismaMock.meal.findMany.mockResolvedValue([mockMeal])
+
       const request = new Request('http://localhost:3000/api/meals')
       const response = await GET(request)
       const data = await response.json()
 
       expect(response.status).toBe(200)
-      expect(stripDateFields(data[0])).toEqual(stripDateFields(mockMeal))
-      expect(mockPrisma.meal.findMany).toHaveBeenCalledWith({
-        where: {},
-        include: {
-          user: {
-            select: {
-              username: true
-            }
-          }
+      expect(data).toEqual([mockMeal])
+      expect(prismaMock.meal.findMany).toHaveBeenCalled()
+    })
+
+    it('should return empty array when no meals exist', async () => {
+      prismaMock.meal.findMany.mockResolvedValue([])
+
+      const request = new Request('http://localhost:3000/api/meals')
+      const response = await GET(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data).toEqual([])
+    })
+
+    it('should return meals with favorite status for a user', async () => {
+      prismaMock.meal.findMany.mockResolvedValue([mockMeal])
+      prismaMock.favoriteMeal.findMany.mockResolvedValue([mockFavoriteMeal])
+
+      const request = new Request(
+        'http://localhost:3000/api/meals?userId=' + mockUser.id
+      )
+      const response = await GET(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(stripDateFields(data[0])).toEqual(stripDateFields({
+        ...mockMeal,
+        isFavorite: true
+      }))
+      expect(prismaMock.favoriteMeal.findMany).toHaveBeenCalledWith({
+        where: {
+          userId: mockUser.id
         },
-        orderBy: {
-          name: 'asc'
+        select: {
+          mealId: true
         }
       })
     })
 
-    it('should filter by user ID and favorite status', async () => {
+    it('should filter by favorites only', async () => {
+      prismaMock.meal.findMany.mockResolvedValue([mockMeal])
+      prismaMock.favoriteMeal.findMany.mockResolvedValue([mockFavoriteMeal])
+
       const request = new Request(
         'http://localhost:3000/api/meals?userId=' + mockUser.id + '&favoritesOnly=true'
       )
@@ -45,27 +68,22 @@ describe('Meals API', () => {
       const data = await response.json()
 
       expect(response.status).toBe(200)
-      expect(stripDateFields(data[0])).toEqual(stripDateFields(mockMeal))
-      expect(mockPrisma.meal.findMany).toHaveBeenCalledWith({
+      expect(stripDateFields(data[0])).toEqual(stripDateFields({
+        ...mockMeal,
+        isFavorite: true
+      }))
+      expect(prismaMock.favoriteMeal.findMany).toHaveBeenCalledWith({
         where: {
-          userId: mockUser.id,
-          isFavorite: true
+          userId: mockUser.id
         },
-        include: {
-          user: {
-            select: {
-              username: true
-            }
-          }
-        },
-        orderBy: {
-          name: 'asc'
+        select: {
+          mealId: true
         }
       })
     })
 
     it('should handle errors', async () => {
-      mockPrisma.meal.findMany.mockRejectedValue(new Error('Database error'))
+      prismaMock.meal.findMany.mockRejectedValue(new Error('Database error'))
       const request = new Request('http://localhost:3000/api/meals')
       const response = await GET(request)
       const data = await response.json()
@@ -80,17 +98,18 @@ describe('Meals API', () => {
       const newMeal = {
         name: 'New Test Meal',
         description: 'A new test meal',
-        userId: mockUser.id,
-        isFavorite: true
+        ingredients: ['New Ingredient 1', 'New Ingredient 2'],
+        instructions: ['New Step 1', 'New Step 2'],
+        imageUrl: 'https://example.com/new-image.jpg'
       }
 
-      mockPrisma.meal.create.mockResolvedValueOnce({
-        ...mockMeal,
-        ...newMeal
-      })
+      prismaMock.meal.create.mockResolvedValue({ ...mockMeal, ...newMeal })
 
       const request = new Request('http://localhost:3000/api/meals', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(newMeal)
       })
 
@@ -98,28 +117,35 @@ describe('Meals API', () => {
       const data = await response.json()
 
       expect(response.status).toBe(201)
-      expect(stripDateFields(data)).toEqual(
-        stripDateFields({
-          ...mockMeal,
-          ...newMeal
-        })
-      )
-      expect(mockPrisma.meal.create).toHaveBeenCalledWith({
-        data: newMeal,
-        include: {
-          user: {
-            select: {
-              username: true
-            }
-          }
-        }
+      expect(data).toMatchObject(newMeal)
+      expect(prismaMock.meal.create).toHaveBeenCalledWith({
+        data: newMeal
       })
+    })
+
+    it('should return 400 if request data is invalid', async () => {
+      const request = new Request('http://localhost:3000/api/meals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      })
+
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.error).toBe('Invalid request data')
     })
 
     it('should handle validation errors', async () => {
       const request = new Request('http://localhost:3000/api/meals', {
         method: 'POST',
-        body: JSON.stringify({})
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: '' })
       })
 
       const response = await POST(request)
@@ -134,9 +160,10 @@ describe('Meals API', () => {
     it('should update a meal', async () => {
       const updates = {
         name: 'Updated Test Meal',
-        description: 'An updated test meal',
-        isFavorite: true
+        description: 'An updated test meal'
       }
+
+      prismaMock.meal.update.mockResolvedValue({ ...mockMeal, ...updates })
 
       const request = new Request(
         'http://localhost:3000/api/meals?id=' + mockMeal.id,
@@ -146,38 +173,21 @@ describe('Meals API', () => {
         }
       )
 
-      mockPrisma.meal.update.mockResolvedValueOnce({
-        ...mockMeal,
-        ...updates
-      })
-
       const response = await PATCH(request)
       const data = await response.json()
 
       expect(response.status).toBe(200)
-      expect(stripDateFields(data)).toEqual(
-        stripDateFields({
-          ...mockMeal,
-          ...updates
-        })
-      )
-      expect(mockPrisma.meal.update).toHaveBeenCalledWith({
+      expect(data).toMatchObject(updates)
+      expect(prismaMock.meal.update).toHaveBeenCalledWith({
         where: { id: mockMeal.id },
-        data: updates,
-        include: {
-          user: {
-            select: {
-              username: true
-            }
-          }
-        }
+        data: updates
       })
     })
 
-    it('should handle missing ID', async () => {
+    it('should handle missing id', async () => {
       const request = new Request('http://localhost:3000/api/meals', {
         method: 'PATCH',
-        body: JSON.stringify({ name: 'Updated Test Meal' })
+        body: JSON.stringify({})
       })
 
       const response = await PATCH(request)
@@ -185,6 +195,22 @@ describe('Meals API', () => {
 
       expect(response.status).toBe(400)
       expect(data.error).toBe('Meal ID is required')
+    })
+
+    it('should handle validation errors', async () => {
+      const request = new Request(
+        'http://localhost:3000/api/meals?id=' + mockMeal.id,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ name: '' })
+        }
+      )
+
+      const response = await PATCH(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(data.error).toBe('Invalid request data')
     })
   })
 })

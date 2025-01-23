@@ -6,15 +6,18 @@ import { z } from 'zod'
 const createMealSchema = z.object({
   name: z.string().min(1).max(255),
   description: z.string().optional(),
-  userId: z.string().uuid(),
-  isFavorite: z.boolean().optional().default(false)
+  ingredients: z.array(z.string()).optional().default([]),
+  instructions: z.array(z.string()).optional().default([]),
+  imageUrl: z.string().optional()
 })
 
 // Schema for meal update
 const updateMealSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   description: z.string().optional(),
-  isFavorite: z.boolean().optional()
+  ingredients: z.array(z.string()).optional(),
+  instructions: z.array(z.string()).optional(),
+  imageUrl: z.string().optional()
 })
 
 export async function GET(request: Request) {
@@ -23,24 +26,34 @@ export async function GET(request: Request) {
     const userId = searchParams.get('userId')
     const favoritesOnly = searchParams.get('favoritesOnly') === 'true'
 
-    const where = {
-      ...(userId && { userId }),
-      ...(favoritesOnly && { isFavorite: true })
-    }
-
-    const meals = await prisma.meal.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            username: true
-          }
-        }
-      },
+    let meals = await prisma.meal.findMany({
       orderBy: {
         name: 'asc'
       }
     })
+
+    if (userId) {
+      const favorites = await prisma.favoriteMeal.findMany({
+        where: {
+          userId
+        },
+        select: {
+          mealId: true
+        }
+      })
+
+      const favoriteMealIds = new Set(favorites.map(f => f.mealId))
+      
+      meals = meals.map(meal => ({
+        ...meal,
+        isFavorite: favoriteMealIds.has(meal.id)
+      }))
+
+      if (favoritesOnly) {
+        meals = meals.filter(meal => meal.isFavorite)
+      }
+    }
+
     return NextResponse.json(meals, {
       status: 200
     })
@@ -58,14 +71,7 @@ export async function POST(request: Request) {
     const validatedData = createMealSchema.parse(body)
 
     const meal = await prisma.meal.create({
-      data: validatedData,
-      include: {
-        user: {
-          select: {
-            username: true
-          }
-        }
-      }
+      data: validatedData
     })
 
     return NextResponse.json(meal, {
@@ -100,14 +106,7 @@ export async function PATCH(request: Request) {
 
     const meal = await prisma.meal.update({
       where: { id },
-      data: validatedData,
-      include: {
-        user: {
-          select: {
-            username: true
-          }
-        }
-      }
+      data: validatedData
     })
 
     return NextResponse.json(meal, {

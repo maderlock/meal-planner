@@ -1,62 +1,62 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
-import { mockUser, mockPrisma, stripDateFields } from '../helpers/testUtils'
+import { NextResponse } from 'next/server'
 import { GET, POST } from '@/app/api/users/route'
-
-jest.mock('@/lib/prisma', () => ({
-  prisma: mockPrisma
-}))
+import { mockUser } from '../helpers/testUtils'
+import { prismaMock } from '../../../jest.setup'
 
 describe('Users API', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockPrisma.user.findMany.mockResolvedValue([mockUser])
-    mockPrisma.user.create.mockResolvedValue(mockUser)
   })
 
   describe('GET /api/users', () => {
     it('should return all users', async () => {
+      prismaMock.user.findMany.mockResolvedValue([mockUser])
+
       const request = new Request('http://localhost:3000/api/users')
       const response = await GET(request)
       const data = await response.json()
 
       expect(response.status).toBe(200)
-      expect(stripDateFields(data[0])).toEqual(stripDateFields(mockUser))
-      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
+      expect(data).toEqual([mockUser])
+      expect(prismaMock.user.findMany).toHaveBeenCalledWith({
         select: {
           id: true,
           email: true,
           username: true,
+          firebaseUid: true,
           createdAt: true
         }
       })
     })
 
     it('should handle errors', async () => {
-      mockPrisma.user.findMany.mockRejectedValue(new Error('Database error'))
+      prismaMock.user.findMany.mockRejectedValue(new Error('Database error'))
+
       const request = new Request('http://localhost:3000/api/users')
       const response = await GET(request)
       const data = await response.json()
 
       expect(response.status).toBe(500)
-      expect(data).toEqual({ error: 'Failed to fetch users' })
+      expect(data.error).toBe('Failed to fetch users')
     })
   })
 
   describe('POST /api/users', () => {
     it('should create a new user', async () => {
       const newUser = {
-        email: 'test@example.com',
-        username: 'testuser',
-        firebaseUid: 'firebase123'
+        email: 'new@example.com',
+        username: 'newuser',
+        name: 'New User',
+        firebaseUid: 'firebase456'
       }
 
-      mockPrisma.user.create.mockResolvedValueOnce({
-        ...mockUser,
-        ...newUser
-      })
+      prismaMock.user.create.mockResolvedValue({ ...mockUser, ...newUser })
 
       const request = new Request('http://localhost:3000/api/users', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(newUser)
       })
 
@@ -64,16 +64,24 @@ describe('Users API', () => {
       const data = await response.json()
 
       expect(response.status).toBe(201)
-      expect(stripDateFields(data)).toEqual(stripDateFields({
-        ...mockUser,
-        ...newUser
-      }))
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({
-        data: newUser,
+      expect(data).toMatchObject({
+        id: mockUser.id,
+        email: newUser.email,
+        username: newUser.username,
+        firebaseUid: newUser.firebaseUid,
+        createdAt: mockUser.createdAt
+      })
+      expect(prismaMock.user.create).toHaveBeenCalledWith({
+        data: {
+          email: newUser.email,
+          username: newUser.username,
+          firebaseUid: newUser.firebaseUid
+        },
         select: {
           id: true,
           email: true,
           username: true,
+          firebaseUid: true,
           createdAt: true
         }
       })
@@ -82,6 +90,9 @@ describe('Users API', () => {
     it('should handle validation errors', async () => {
       const request = new Request('http://localhost:3000/api/users', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({})
       })
 
@@ -93,14 +104,21 @@ describe('Users API', () => {
     })
 
     it('should handle database errors', async () => {
-      mockPrisma.user.create.mockRejectedValue(new Error('Database error'))
+      const newUser = {
+        email: 'new@example.com',
+        username: 'newuser',
+        name: 'New User',
+        firebaseUid: 'firebase456'
+      }
+
+      prismaMock.user.create.mockRejectedValue(new Error('Database error'))
+
       const request = new Request('http://localhost:3000/api/users', {
         method: 'POST',
-        body: JSON.stringify({
-          email: 'test@example.com',
-          username: 'testuser',
-          firebaseUid: 'firebase123'
-        })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newUser)
       })
 
       const response = await POST(request)
