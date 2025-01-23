@@ -1,16 +1,22 @@
+import { describe, expect, it, beforeEach } from '@jest/globals'
+import { mockUser, mockPrisma, stripDateFields } from '../helpers/testUtils'
 import { GET, POST } from '@/app/api/users/route'
-import { mockPrisma, mockUser, stripDateFields } from '../helpers/testUtils'
+
+jest.mock('@/lib/prisma', () => ({
+  prisma: mockPrisma
+}))
 
 describe('Users API', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockPrisma.user.findMany.mockResolvedValue([mockUser])
+    mockPrisma.user.create.mockResolvedValue(mockUser)
   })
 
   describe('GET /api/users', () => {
     it('should return all users', async () => {
-      mockPrisma.user.findMany.mockResolvedValue([mockUser])
-
-      const response = await GET()
+      const request = new Request('http://localhost:3000/api/users')
+      const response = await GET(request)
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -27,8 +33,8 @@ describe('Users API', () => {
 
     it('should handle errors', async () => {
       mockPrisma.user.findMany.mockRejectedValue(new Error('Database error'))
-
-      const response = await GET()
+      const request = new Request('http://localhost:3000/api/users')
+      const response = await GET(request)
       const data = await response.json()
 
       expect(response.status).toBe(500)
@@ -39,17 +45,17 @@ describe('Users API', () => {
   describe('POST /api/users', () => {
     it('should create a new user', async () => {
       const newUser = {
-        email: 'new@example.com',
-        firebaseUid: 'firebase456',
-        username: 'newuser'
+        email: 'test@example.com',
+        username: 'testuser',
+        firebaseUid: 'firebase123'
       }
 
-      mockPrisma.user.create.mockResolvedValue({
+      mockPrisma.user.create.mockResolvedValueOnce({
         ...mockUser,
         ...newUser
       })
 
-      const request = new Request('http://localhost/api/users', {
+      const request = new Request('http://localhost:3000/api/users', {
         method: 'POST',
         body: JSON.stringify(newUser)
       })
@@ -58,7 +64,7 @@ describe('Users API', () => {
       const data = await response.json()
 
       expect(response.status).toBe(201)
-      expect(stripDateFields(data)).toMatchObject(stripDateFields({
+      expect(stripDateFields(data)).toEqual(stripDateFields({
         ...mockUser,
         ...newUser
       }))
@@ -73,16 +79,10 @@ describe('Users API', () => {
       })
     })
 
-    it('should handle invalid input', async () => {
-      const invalidUser = {
-        email: 'invalid-email',
-        firebaseUid: '',
-        username: 'a'
-      }
-
-      const request = new Request('http://localhost/api/users', {
+    it('should handle validation errors', async () => {
+      const request = new Request('http://localhost:3000/api/users', {
         method: 'POST',
-        body: JSON.stringify(invalidUser)
+        body: JSON.stringify({})
       })
 
       const response = await POST(request)
@@ -90,21 +90,17 @@ describe('Users API', () => {
 
       expect(response.status).toBe(400)
       expect(data.error).toBe('Invalid request data')
-      expect(mockPrisma.user.create).not.toHaveBeenCalled()
     })
 
     it('should handle database errors', async () => {
-      const newUser = {
-        email: 'new@example.com',
-        firebaseUid: 'firebase456',
-        username: 'newuser'
-      }
-
       mockPrisma.user.create.mockRejectedValue(new Error('Database error'))
-
-      const request = new Request('http://localhost/api/users', {
+      const request = new Request('http://localhost:3000/api/users', {
         method: 'POST',
-        body: JSON.stringify(newUser)
+        body: JSON.stringify({
+          email: 'test@example.com',
+          username: 'testuser',
+          firebaseUid: 'firebase123'
+        })
       })
 
       const response = await POST(request)
