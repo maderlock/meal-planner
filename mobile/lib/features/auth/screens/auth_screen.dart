@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meal_planner/features/auth/services/auth_service.dart';
-import 'package:meal_planner/shared/widgets/app_button.dart';
+import 'package:meal_planner/features/common/widgets/loading_overlay.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -14,9 +14,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLogin = true;
   bool _isLoading = false;
-  Widget? _error;
+  bool _isLogin = true;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -30,99 +30,24 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
     setState(() {
       _isLoading = true;
-      _error = null;
+      _errorMessage = null;
     });
 
     try {
       if (_isLogin) {
-        await ref.read(authServiceProvider.notifier).signInWithEmail(
-              email: _emailController.text,
-              password: _passwordController.text,
-            );
+        await ref.read(authServiceProvider.notifier).login(
+          _emailController.text,
+          _passwordController.text,
+        );
       } else {
-        await ref.read(authServiceProvider.notifier).signUpWithEmail(
-              email: _emailController.text,
-              password: _passwordController.text,
-            );
+        await ref.read(authServiceProvider.notifier).register(
+          _emailController.text,
+          _passwordController.text,
+        );
       }
     } on AuthException catch (e) {
       setState(() {
-        if (e.isEmailInUse) {
-          _error = Column(
-            children: [
-              Text(
-                e.message,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _isLogin = true;
-                    _error = null;
-                  });
-                },
-                child: const Text('Go to Login'),
-              ),
-            ],
-          );
-        } else if (e.isGoogleAccount) {
-          _error = Column(
-            children: [
-              Text(
-                e.message,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton.icon(
-                onPressed: _isLoading ? null : () async {
-                  try {
-                    setState(() {
-                      _isLoading = true;
-                      _error = null;
-                    });
-                    await ref.read(authServiceProvider.notifier).signInWithGoogle();
-                  } catch (e) {
-                    setState(() {
-                      _error = Text(
-                        e.toString(),
-                        style: TextStyle(color: Theme.of(context).colorScheme.error),
-                        textAlign: TextAlign.center,
-                      );
-                    });
-                  } finally {
-                    if (mounted) {
-                      setState(() {
-                        _isLoading = false;
-                      });
-                    }
-                  }
-                },
-                icon: Image.asset(
-                  'assets/images/google_logo.png',
-                  height: 24.0,
-                ),
-                label: const Text('Sign in with Google'),
-              ),
-            ],
-          );
-        } else {
-          _error = Text(
-            e.message,
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-            textAlign: TextAlign.center,
-          );
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _error = Text(
-          e.toString(),
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-          textAlign: TextAlign.center,
-        );
+        _errorMessage = e.message;
       });
     } finally {
       if (mounted) {
@@ -133,108 +58,136 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
   }
 
-  Future<void> _signInWithGoogle() async {
-    setState(() => _isLoading = true);
+  Future<void> _resetPassword() async {
+    if (_emailController.text.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your email address';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
-      await ref.read(authServiceProvider.notifier).signInWithGoogle();
-    } catch (e) {
+      await ref.read(authServiceProvider.notifier).resetPassword(
+        _emailController.text,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
+          const SnackBar(
+            content: Text('Password reset email sent'),
           ),
         );
       }
+    } on AuthException catch (e) {
+      setState(() {
+        _errorMessage = e.message;
+      });
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    _isLogin ? 'Welcome Back' : 'Create Account',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
+    return LoadingOverlay(
+      isLoading: _isLoading,
+      child: Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      _isLogin ? 'Welcome Back' : 'Create Account',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                      textAlign: TextAlign.center,
                     ),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Please enter a valid email';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
+                    const SizedBox(height: 32),
+                    if (_errorMessage != null) ...[
+                      Text(
+                        _errorMessage!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
+                        if (!value.contains('@')) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
                     ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
-                      }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  if (_error != null) _error!,
-                  AppButton(
-                    onPressed: _isLoading ? null : _submit,
-                    label: _isLogin ? 'Sign In' : 'Sign Up',
-                    isLoading: _isLoading,
-                  ),
-                  const SizedBox(height: 16),
-                  AppButton(
-                    onPressed: _isLoading ? null : _signInWithGoogle,
-                    label: 'Continue with Google',
-                    variant: AppButtonVariant.secondary,
-                    isLoading: _isLoading,
-                    icon: Icons.g_mobiledata,
-                  ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () => setState(() => _isLogin = !_isLogin),
-                    child: Text(
-                      _isLogin
-                          ? 'Don\'t have an account? Sign Up'
-                          : 'Already have an account? Sign In',
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: const InputDecoration(
+                        labelText: 'Password',
+                        border: OutlineInputBorder(),
+                      ),
+                      obscureText: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        if (!_isLogin && value.length < 8) {
+                          return 'Password must be at least 8 characters';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    FilledButton(
+                      onPressed: _submit,
+                      child: Text(_isLogin ? 'Login' : 'Sign Up'),
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _isLogin = !_isLogin;
+                          _errorMessage = null;
+                        });
+                      },
+                      child: Text(
+                        _isLogin
+                            ? 'Need an account? Sign up'
+                            : 'Have an account? Login',
+                      ),
+                    ),
+                    if (_isLogin) ...[
+                      TextButton(
+                        onPressed: _resetPassword,
+                        child: const Text('Forgot Password?'),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
           ),

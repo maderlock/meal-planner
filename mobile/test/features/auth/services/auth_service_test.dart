@@ -1,193 +1,182 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meal_planner/features/auth/models/user_model.dart';
 import 'package:meal_planner/features/auth/services/auth_service.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockFirebaseAuth extends Mock implements FirebaseAuth {
-  bool _shouldThrowError = false;
-
-  void setThrowError(bool shouldThrow) {
-    _shouldThrowError = shouldThrow;
-  }
-
-  @override
-  Stream<User?> authStateChanges() {
-    return Stream.fromIterable([]);  // Empty stream to maintain loading state
-  }
-
-  @override
-  Future<UserCredential> createUserWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
-    if (_shouldThrowError) {
-      throw FirebaseAuthException(code: 'error');
-    }
-    return MockUserCredential();
-  }
-
-  @override
-  Future<UserCredential> signInWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
-    if (_shouldThrowError) {
-      throw FirebaseAuthException(code: 'error');
-    }
-    return MockUserCredential();
-  }
-
-  @override
-  Future<UserCredential> signInWithCredential(AuthCredential credential) async {
-    if (_shouldThrowError) {
-      throw FirebaseAuthException(code: 'error');
-    }
-    return MockUserCredential();
-  }
-}
-
-class MockUserCredential extends Mock implements UserCredential {
-  @override
-  User? get user => MockUser();
-}
-
-class MockUser extends Mock implements User {
-  @override
-  String get uid => 'test-uid';
-  
-  @override
-  String? get email => 'test@example.com';
-  
-  @override
-  String? get displayName => 'Test User';
-  
-  @override
-  String? get photoURL => null;
-  
-  @override
-  bool get emailVerified => true;
-}
-
-class MockGoogleSignIn extends Mock implements GoogleSignIn {
-  @override
-  Future<GoogleSignInAccount?> signIn() async => MockGoogleSignInAccount();
-}
-
-class MockGoogleSignInAccount extends Mock implements GoogleSignInAccount {
-  @override
-  Future<GoogleSignInAuthentication> get authentication async => MockGoogleSignInAuthentication();
-}
-
-class MockGoogleSignInAuthentication extends Mock implements GoogleSignInAuthentication {
-  @override
-  String get accessToken => 'access-token';
-  
-  @override
-  String get idToken => 'id-token';
-}
-
-class MockAuthCredential extends Mock implements AuthCredential {}
-
-class TestAuthService extends AuthService {
-  TestAuthService({
-    required FirebaseAuth firebaseAuth,
-    required GoogleSignIn googleSignIn,
-  }) : super(
-          firebaseAuth: firebaseAuth,
-          googleSignIn: googleSignIn,
-        );
-
-  @override
-  AsyncValue<UserModel?> get debugState => state;
-}
+class MockAuthServiceApi extends Mock implements AuthServiceApi {}
+class MockDio extends Mock implements Dio {}
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue(MockGoogleSignInAccount());
-    registerFallbackValue(MockGoogleSignInAuthentication());
-    registerFallbackValue(MockUserCredential());
-    registerFallbackValue(MockUser());
-    registerFallbackValue(MockAuthCredential());
-  });
-
-  late MockFirebaseAuth mockFirebaseAuth;
-  late MockGoogleSignIn mockGoogleSignIn;
-  late TestAuthService authService;
+  late AuthService authService;
+  late MockAuthServiceApi mockApi;
+  late MockDio mockDio;
 
   setUp(() {
-    mockFirebaseAuth = MockFirebaseAuth();
-    mockGoogleSignIn = MockGoogleSignIn();
-    authService = TestAuthService(
-      firebaseAuth: mockFirebaseAuth,
-      googleSignIn: mockGoogleSignIn,
-    );
+    mockApi = MockAuthServiceApi();
+    mockDio = MockDio();
+    authService = AuthService(mockApi, mockDio);
   });
 
-  test('initial state is loading', () {
-    expect(authService.debugState, isA<AsyncLoading>());
-  });
+  final mockUser = UserModel(
+    id: 'test-uid',
+    email: 'test@example.com',
+    displayName: 'Test User',
+    photoUrl: null,
+    emailVerified: false,
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  );
 
-  group('signUpWithEmail', () {
-    test('signUpWithEmail successfully creates new user', () async {
-      mockFirebaseAuth.setThrowError(false);
-      final user = await authService.signUpWithEmail(
-        email: 'test@example.com',
-        password: 'password123',
+  group('register', () {
+    test('should register user successfully', () async {
+      when(() => mockApi.register({
+        'email': 'test@example.com',
+        'password': 'password123',
+      })).thenAnswer((_) async => mockUser);
+
+      final user = await authService.register(
+        'test@example.com',
+        'password123',
       );
 
       expect(user.email, equals('test@example.com'));
       expect(user.id, equals('test-uid'));
+      expect(authService.state, equals(user));
     });
 
-    test('throws exception when user creation fails', () async {
-      mockFirebaseAuth.setThrowError(true);
-      expect(
-        () => authService.signUpWithEmail(
-          email: 'test@example.com',
-          password: 'password123',
+    test('should throw AuthException on network error', () async {
+      when(() => mockApi.register(any())).thenThrow(
+        DioException(
+          type: DioExceptionType.connectionTimeout,
+          requestOptions: RequestOptions(),
         ),
-        throwsA(isA<AuthException>()),
-      );
-    });
-  });
-
-  group('signInWithEmail', () {
-    test('signInWithEmail successfully signs in user', () async {
-      mockFirebaseAuth.setThrowError(false);
-      final user = await authService.signInWithEmail(
-        email: 'test@example.com',
-        password: 'password123',
       );
 
-      expect(user.email, equals('test@example.com'));
-      expect(user.id, equals('test-uid'));
-    });
-
-    test('throws exception when sign in fails', () async {
-      mockFirebaseAuth.setThrowError(true);
       expect(
-        () => authService.signInWithEmail(
-          email: 'test@example.com',
-          password: 'password123',
+        () => authService.register('test@example.com', 'password123'),
+        throwsA(
+          isA<AuthException>()
+              .having((e) => e.isNetworkError, 'isNetworkError', true),
         ),
-        throwsA(isA<AuthException>()),
       );
     });
   });
 
-  group('signInWithGoogle', () {
-    test('signInWithGoogle successfully signs in with Google', () async {
-      mockFirebaseAuth.setThrowError(false);
-      final user = await authService.signInWithGoogle();
+  group('login', () {
+    test('should login user successfully', () async {
+      when(() => mockApi.login({
+        'email': 'test@example.com',
+        'password': 'password123',
+      })).thenAnswer((_) async => mockUser);
+
+      final user = await authService.login(
+        'test@example.com',
+        'password123',
+      );
 
       expect(user.email, equals('test@example.com'));
       expect(user.id, equals('test-uid'));
-      expect(user.displayName, equals('Test User'));
-      expect(user.photoUrl, isNull);
-      expect(user.emailVerified, isTrue);
+      expect(authService.state, equals(user));
+    });
+
+    test('should throw AuthException on invalid credentials', () async {
+      when(() => mockApi.login(any())).thenThrow(
+        DioException(
+          type: DioExceptionType.badResponse,
+          response: Response(
+            statusCode: 401,
+            requestOptions: RequestOptions(),
+          ),
+          requestOptions: RequestOptions(),
+        ),
+      );
+
+      expect(
+        () => authService.login('test@example.com', 'wrong-password'),
+        throwsA(
+          isA<AuthException>()
+              .having((e) => e.isAuthError, 'isAuthError', true),
+        ),
+      );
+    });
+  });
+
+  group('getCurrentUser', () {
+    test('should get current user successfully', () async {
+      when(() => mockApi.getCurrentUser())
+          .thenAnswer((_) async => mockUser);
+
+      final user = await authService.getCurrentUser();
+
+      expect(user.email, equals('test@example.com'));
+      expect(user.id, equals('test-uid'));
+      expect(authService.state, equals(user));
+    });
+
+    test('should throw AuthException when not authenticated', () async {
+      when(() => mockApi.getCurrentUser()).thenThrow(
+        DioException(
+          type: DioExceptionType.badResponse,
+          response: Response(
+            statusCode: 401,
+            requestOptions: RequestOptions(),
+          ),
+          requestOptions: RequestOptions(),
+        ),
+      );
+
+      expect(
+        authService.getCurrentUser,
+        throwsA(
+          isA<AuthException>()
+              .having((e) => e.isAuthError, 'isAuthError', true),
+        ),
+      );
+    });
+  });
+
+  group('logout', () {
+    test('should logout successfully', () async {
+      when(() => mockApi.logout()).thenAnswer((_) async => null);
+
+      await authService.logout();
+
+      expect(authService.state, isNull);
+    });
+  });
+
+  group('updateProfile', () {
+    test('should update profile successfully', () async {
+      final updatedUser = mockUser.copyWith(
+        displayName: 'Updated Name',
+        photoUrl: 'https://example.com/photo.jpg',
+      );
+
+      when(() => mockApi.updateProfile({
+        'displayName': 'Updated Name',
+        'photoUrl': 'https://example.com/photo.jpg',
+      })).thenAnswer((_) async => updatedUser);
+
+      final user = await authService.updateProfile(
+        displayName: 'Updated Name',
+        photoUrl: 'https://example.com/photo.jpg',
+      );
+
+      expect(user.displayName, equals('Updated Name'));
+      expect(user.photoUrl, equals('https://example.com/photo.jpg'));
+      expect(authService.state, equals(user));
+    });
+  });
+
+  group('resetPassword', () {
+    test('should request password reset successfully', () async {
+      when(() => mockApi.resetPassword({'email': 'test@example.com'}))
+          .thenAnswer((_) async => null);
+
+      await authService.resetPassword('test@example.com');
+      verify(() => mockApi.resetPassword({'email': 'test@example.com'}))
+          .called(1);
     });
   });
 }

@@ -6,51 +6,82 @@ part of 'weekly_plan_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$WeeklyPlanModelImpl _$$WeeklyPlanModelImplFromJson(
-        Map<String, dynamic> json) =>
-    _$WeeklyPlanModelImpl(
+MealAssignment _$MealAssignmentFromJson(Map<String, dynamic> json) =>
+    MealAssignment(
       id: json['id'] as String,
-      userId: json['user_id'] as String,
-      weekStartDate: DateTime.parse(json['week_start_date'] as String),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-      mealPlans: (json['meal_plans'] as List<dynamic>?)
-              ?.map((e) => MealPlanItem.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
+      weeklyPlanId: json['weeklyPlanId'] as String,
+      mealId: json['mealId'] as String,
+      dayOfWeek: (json['dayOfWeek'] as num).toInt(),
+      mealType: json['mealType'] as String,
+      note: json['note'] as String?,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$$WeeklyPlanModelImplToJson(
-        _$WeeklyPlanModelImpl instance) =>
+Map<String, dynamic> _$MealAssignmentToJson(MealAssignment instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'user_id': instance.userId,
-      'week_start_date': instance.weekStartDate.toIso8601String(),
-      'created_at': instance.createdAt.toIso8601String(),
-      'updated_at': instance.updatedAt.toIso8601String(),
-      'meal_plans': instance.mealPlans,
+      'weeklyPlanId': instance.weeklyPlanId,
+      'mealId': instance.mealId,
+      'dayOfWeek': instance.dayOfWeek,
+      'mealType': instance.mealType,
+      'note': instance.note,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'updatedAt': instance.updatedAt.toIso8601String(),
     };
 
-_$MealPlanItemImpl _$$MealPlanItemImplFromJson(Map<String, dynamic> json) =>
-    _$MealPlanItemImpl(
+_$WeeklyPlanImpl _$$WeeklyPlanImplFromJson(Map<String, dynamic> json) =>
+    _$WeeklyPlanImpl(
       id: json['id'] as String,
-      weeklyPlanId: json['weekly_plan_id'] as String,
-      mealId: json['meal_id'] as String,
-      dayOfWeek: (json['day_of_week'] as num).toInt(),
-      mealType: json['meal_type'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-      meal: MealModel.fromJson(json['meal'] as Map<String, dynamic>),
+      userId: json['userId'] as String,
+      startDate: DateTime.parse(json['startDate'] as String),
+      endDate: DateTime.parse(json['endDate'] as String),
+      assignments: (json['assignments'] as List<dynamic>)
+          .map((e) => MealAssignment.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$$MealPlanItemImplToJson(_$MealPlanItemImpl instance) =>
+Map<String, dynamic> _$$WeeklyPlanImplToJson(_$WeeklyPlanImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'weekly_plan_id': instance.weeklyPlanId,
-      'meal_id': instance.mealId,
-      'day_of_week': instance.dayOfWeek,
-      'meal_type': instance.mealType,
-      'created_at': instance.createdAt.toIso8601String(),
-      'updated_at': instance.updatedAt.toIso8601String(),
-      'meal': instance.meal,
+      'userId': instance.userId,
+      'startDate': instance.startDate.toIso8601String(),
+      'endDate': instance.endDate.toIso8601String(),
+      'assignments': instance.assignments,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'updatedAt': instance.updatedAt.toIso8601String(),
+    };
+
+_$CreateWeeklyPlanRequestImpl _$$CreateWeeklyPlanRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$CreateWeeklyPlanRequestImpl(
+      userId: json['userId'] as String,
+      startDate: DateTime.parse(json['startDate'] as String),
+      endDate: DateTime.parse(json['endDate'] as String),
+    );
+
+Map<String, dynamic> _$$CreateWeeklyPlanRequestImplToJson(
+        _$CreateWeeklyPlanRequestImpl instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+      'startDate': instance.startDate.toIso8601String(),
+      'endDate': instance.endDate.toIso8601String(),
+    };
+
+_$UpdateWeeklyPlanRequestImpl _$$UpdateWeeklyPlanRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$UpdateWeeklyPlanRequestImpl(
+      id: json['id'] as String,
+      startDate: DateTime.parse(json['startDate'] as String),
+      endDate: DateTime.parse(json['endDate'] as String),
+    );
+
+Map<String, dynamic> _$$UpdateWeeklyPlanRequestImplToJson(
+        _$UpdateWeeklyPlanRequestImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'startDate': instance.startDate.toIso8601String(),
+      'endDate': instance.endDate.toIso8601String(),
     };

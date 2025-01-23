@@ -14,70 +14,68 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-WeeklyPlanModel _$WeeklyPlanModelFromJson(Map<String, dynamic> json) {
-  return _WeeklyPlanModel.fromJson(json);
+WeeklyPlan _$WeeklyPlanFromJson(Map<String, dynamic> json) {
+  return _WeeklyPlan.fromJson(json);
 }
 
 /// @nodoc
-mixin _$WeeklyPlanModel {
+mixin _$WeeklyPlan {
   String get id => throw _privateConstructorUsedError;
-  @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'week_start_date')
-  DateTime get weekStartDate => throw _privateConstructorUsedError;
-  @JsonKey(name: 'created_at')
+  DateTime get startDate => throw _privateConstructorUsedError;
+  DateTime get endDate => throw _privateConstructorUsedError;
+  List<MealAssignment> get assignments => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
-  @JsonKey(name: 'updated_at')
   DateTime get updatedAt => throw _privateConstructorUsedError;
-  @JsonKey(name: 'meal_plans')
-  List<MealPlanItem> get mealPlans => throw _privateConstructorUsedError;
 
-  /// Serializes this WeeklyPlanModel to a JSON map.
+  /// Serializes this WeeklyPlan to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of WeeklyPlanModel
+  /// Create a copy of WeeklyPlan
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $WeeklyPlanModelCopyWith<WeeklyPlanModel> get copyWith =>
+  $WeeklyPlanCopyWith<WeeklyPlan> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $WeeklyPlanModelCopyWith<$Res> {
-  factory $WeeklyPlanModelCopyWith(
-          WeeklyPlanModel value, $Res Function(WeeklyPlanModel) then) =
-      _$WeeklyPlanModelCopyWithImpl<$Res, WeeklyPlanModel>;
+abstract class $WeeklyPlanCopyWith<$Res> {
+  factory $WeeklyPlanCopyWith(
+          WeeklyPlan value, $Res Function(WeeklyPlan) then) =
+      _$WeeklyPlanCopyWithImpl<$Res, WeeklyPlan>;
   @useResult
   $Res call(
       {String id,
-      @JsonKey(name: 'user_id') String userId,
-      @JsonKey(name: 'week_start_date') DateTime weekStartDate,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt,
-      @JsonKey(name: 'meal_plans') List<MealPlanItem> mealPlans});
+      String userId,
+      DateTime startDate,
+      DateTime endDate,
+      List<MealAssignment> assignments,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
-class _$WeeklyPlanModelCopyWithImpl<$Res, $Val extends WeeklyPlanModel>
-    implements $WeeklyPlanModelCopyWith<$Res> {
-  _$WeeklyPlanModelCopyWithImpl(this._value, this._then);
+class _$WeeklyPlanCopyWithImpl<$Res, $Val extends WeeklyPlan>
+    implements $WeeklyPlanCopyWith<$Res> {
+  _$WeeklyPlanCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of WeeklyPlanModel
+  /// Create a copy of WeeklyPlan
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? id = null,
     Object? userId = null,
-    Object? weekStartDate = null,
+    Object? startDate = null,
+    Object? endDate = null,
+    Object? assignments = null,
     Object? createdAt = null,
     Object? updatedAt = null,
-    Object? mealPlans = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -88,10 +86,18 @@ class _$WeeklyPlanModelCopyWithImpl<$Res, $Val extends WeeklyPlanModel>
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      weekStartDate: null == weekStartDate
-          ? _value.weekStartDate
-          : weekStartDate // ignore: cast_nullable_to_non_nullable
+      startDate: null == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      endDate: null == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      assignments: null == assignments
+          ? _value.assignments
+          : assignments // ignore: cast_nullable_to_non_nullable
+              as List<MealAssignment>,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -100,52 +106,50 @@ class _$WeeklyPlanModelCopyWithImpl<$Res, $Val extends WeeklyPlanModel>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      mealPlans: null == mealPlans
-          ? _value.mealPlans
-          : mealPlans // ignore: cast_nullable_to_non_nullable
-              as List<MealPlanItem>,
     ) as $Val);
   }
 }
 
 /// @nodoc
-abstract class _$$WeeklyPlanModelImplCopyWith<$Res>
-    implements $WeeklyPlanModelCopyWith<$Res> {
-  factory _$$WeeklyPlanModelImplCopyWith(_$WeeklyPlanModelImpl value,
-          $Res Function(_$WeeklyPlanModelImpl) then) =
-      __$$WeeklyPlanModelImplCopyWithImpl<$Res>;
+abstract class _$$WeeklyPlanImplCopyWith<$Res>
+    implements $WeeklyPlanCopyWith<$Res> {
+  factory _$$WeeklyPlanImplCopyWith(
+          _$WeeklyPlanImpl value, $Res Function(_$WeeklyPlanImpl) then) =
+      __$$WeeklyPlanImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
       {String id,
-      @JsonKey(name: 'user_id') String userId,
-      @JsonKey(name: 'week_start_date') DateTime weekStartDate,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt,
-      @JsonKey(name: 'meal_plans') List<MealPlanItem> mealPlans});
+      String userId,
+      DateTime startDate,
+      DateTime endDate,
+      List<MealAssignment> assignments,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
-class __$$WeeklyPlanModelImplCopyWithImpl<$Res>
-    extends _$WeeklyPlanModelCopyWithImpl<$Res, _$WeeklyPlanModelImpl>
-    implements _$$WeeklyPlanModelImplCopyWith<$Res> {
-  __$$WeeklyPlanModelImplCopyWithImpl(
-      _$WeeklyPlanModelImpl _value, $Res Function(_$WeeklyPlanModelImpl) _then)
+class __$$WeeklyPlanImplCopyWithImpl<$Res>
+    extends _$WeeklyPlanCopyWithImpl<$Res, _$WeeklyPlanImpl>
+    implements _$$WeeklyPlanImplCopyWith<$Res> {
+  __$$WeeklyPlanImplCopyWithImpl(
+      _$WeeklyPlanImpl _value, $Res Function(_$WeeklyPlanImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of WeeklyPlanModel
+  /// Create a copy of WeeklyPlan
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? id = null,
     Object? userId = null,
-    Object? weekStartDate = null,
+    Object? startDate = null,
+    Object? endDate = null,
+    Object? assignments = null,
     Object? createdAt = null,
     Object? updatedAt = null,
-    Object? mealPlans = null,
   }) {
-    return _then(_$WeeklyPlanModelImpl(
+    return _then(_$WeeklyPlanImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
@@ -154,10 +158,18 @@ class __$$WeeklyPlanModelImplCopyWithImpl<$Res>
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      weekStartDate: null == weekStartDate
-          ? _value.weekStartDate
-          : weekStartDate // ignore: cast_nullable_to_non_nullable
+      startDate: null == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      endDate: null == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      assignments: null == assignments
+          ? _value._assignments
+          : assignments // ignore: cast_nullable_to_non_nullable
+              as List<MealAssignment>,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -166,464 +178,507 @@ class __$$WeeklyPlanModelImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      mealPlans: null == mealPlans
-          ? _value._mealPlans
-          : mealPlans // ignore: cast_nullable_to_non_nullable
-              as List<MealPlanItem>,
     ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$WeeklyPlanModelImpl implements _WeeklyPlanModel {
-  const _$WeeklyPlanModelImpl(
+class _$WeeklyPlanImpl implements _WeeklyPlan {
+  const _$WeeklyPlanImpl(
       {required this.id,
-      @JsonKey(name: 'user_id') required this.userId,
-      @JsonKey(name: 'week_start_date') required this.weekStartDate,
-      @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'updated_at') required this.updatedAt,
-      @JsonKey(name: 'meal_plans')
-      final List<MealPlanItem> mealPlans = const []})
-      : _mealPlans = mealPlans;
+      required this.userId,
+      required this.startDate,
+      required this.endDate,
+      required final List<MealAssignment> assignments,
+      required this.createdAt,
+      required this.updatedAt})
+      : _assignments = assignments;
 
-  factory _$WeeklyPlanModelImpl.fromJson(Map<String, dynamic> json) =>
-      _$$WeeklyPlanModelImplFromJson(json);
+  factory _$WeeklyPlanImpl.fromJson(Map<String, dynamic> json) =>
+      _$$WeeklyPlanImplFromJson(json);
 
   @override
   final String id;
   @override
-  @JsonKey(name: 'user_id')
   final String userId;
   @override
-  @JsonKey(name: 'week_start_date')
-  final DateTime weekStartDate;
+  final DateTime startDate;
   @override
-  @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime endDate;
+  final List<MealAssignment> _assignments;
   @override
-  @JsonKey(name: 'updated_at')
-  final DateTime updatedAt;
-  final List<MealPlanItem> _mealPlans;
-  @override
-  @JsonKey(name: 'meal_plans')
-  List<MealPlanItem> get mealPlans {
-    if (_mealPlans is EqualUnmodifiableListView) return _mealPlans;
+  List<MealAssignment> get assignments {
+    if (_assignments is EqualUnmodifiableListView) return _assignments;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_mealPlans);
+    return EqualUnmodifiableListView(_assignments);
   }
 
   @override
+  final DateTime createdAt;
+  @override
+  final DateTime updatedAt;
+
+  @override
   String toString() {
-    return 'WeeklyPlanModel(id: $id, userId: $userId, weekStartDate: $weekStartDate, createdAt: $createdAt, updatedAt: $updatedAt, mealPlans: $mealPlans)';
+    return 'WeeklyPlan(id: $id, userId: $userId, startDate: $startDate, endDate: $endDate, assignments: $assignments, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$WeeklyPlanModelImpl &&
+            other is _$WeeklyPlanImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.userId, userId) || other.userId == userId) &&
-            (identical(other.weekStartDate, weekStartDate) ||
-                other.weekStartDate == weekStartDate) &&
+            (identical(other.startDate, startDate) ||
+                other.startDate == startDate) &&
+            (identical(other.endDate, endDate) || other.endDate == endDate) &&
+            const DeepCollectionEquality()
+                .equals(other._assignments, _assignments) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
-            const DeepCollectionEquality()
-                .equals(other._mealPlans, _mealPlans));
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, userId, weekStartDate,
-      createdAt, updatedAt, const DeepCollectionEquality().hash(_mealPlans));
+  int get hashCode => Object.hash(runtimeType, id, userId, startDate, endDate,
+      const DeepCollectionEquality().hash(_assignments), createdAt, updatedAt);
 
-  /// Create a copy of WeeklyPlanModel
+  /// Create a copy of WeeklyPlan
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$WeeklyPlanModelImplCopyWith<_$WeeklyPlanModelImpl> get copyWith =>
-      __$$WeeklyPlanModelImplCopyWithImpl<_$WeeklyPlanModelImpl>(
-          this, _$identity);
+  _$$WeeklyPlanImplCopyWith<_$WeeklyPlanImpl> get copyWith =>
+      __$$WeeklyPlanImplCopyWithImpl<_$WeeklyPlanImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$WeeklyPlanModelImplToJson(
+    return _$$WeeklyPlanImplToJson(
       this,
     );
   }
 }
 
-abstract class _WeeklyPlanModel implements WeeklyPlanModel {
-  const factory _WeeklyPlanModel(
+abstract class _WeeklyPlan implements WeeklyPlan {
+  const factory _WeeklyPlan(
       {required final String id,
-      @JsonKey(name: 'user_id') required final String userId,
-      @JsonKey(name: 'week_start_date') required final DateTime weekStartDate,
-      @JsonKey(name: 'created_at') required final DateTime createdAt,
-      @JsonKey(name: 'updated_at') required final DateTime updatedAt,
-      @JsonKey(name: 'meal_plans')
-      final List<MealPlanItem> mealPlans}) = _$WeeklyPlanModelImpl;
+      required final String userId,
+      required final DateTime startDate,
+      required final DateTime endDate,
+      required final List<MealAssignment> assignments,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$WeeklyPlanImpl;
 
-  factory _WeeklyPlanModel.fromJson(Map<String, dynamic> json) =
-      _$WeeklyPlanModelImpl.fromJson;
+  factory _WeeklyPlan.fromJson(Map<String, dynamic> json) =
+      _$WeeklyPlanImpl.fromJson;
 
   @override
   String get id;
   @override
-  @JsonKey(name: 'user_id')
   String get userId;
   @override
-  @JsonKey(name: 'week_start_date')
-  DateTime get weekStartDate;
+  DateTime get startDate;
   @override
-  @JsonKey(name: 'created_at')
+  DateTime get endDate;
+  @override
+  List<MealAssignment> get assignments;
+  @override
   DateTime get createdAt;
   @override
-  @JsonKey(name: 'updated_at')
   DateTime get updatedAt;
-  @override
-  @JsonKey(name: 'meal_plans')
-  List<MealPlanItem> get mealPlans;
 
-  /// Create a copy of WeeklyPlanModel
+  /// Create a copy of WeeklyPlan
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$WeeklyPlanModelImplCopyWith<_$WeeklyPlanModelImpl> get copyWith =>
+  _$$WeeklyPlanImplCopyWith<_$WeeklyPlanImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
-MealPlanItem _$MealPlanItemFromJson(Map<String, dynamic> json) {
-  return _MealPlanItem.fromJson(json);
+CreateWeeklyPlanRequest _$CreateWeeklyPlanRequestFromJson(
+    Map<String, dynamic> json) {
+  return _CreateWeeklyPlanRequest.fromJson(json);
 }
 
 /// @nodoc
-mixin _$MealPlanItem {
-  String get id => throw _privateConstructorUsedError;
-  @JsonKey(name: 'weekly_plan_id')
-  String get weeklyPlanId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'meal_id')
-  String get mealId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'day_of_week')
-  int get dayOfWeek => throw _privateConstructorUsedError;
-  @JsonKey(name: 'meal_type')
-  String get mealType => throw _privateConstructorUsedError;
-  @JsonKey(name: 'created_at')
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  @JsonKey(name: 'updated_at')
-  DateTime get updatedAt => throw _privateConstructorUsedError;
-  MealModel get meal => throw _privateConstructorUsedError;
+mixin _$CreateWeeklyPlanRequest {
+  String get userId => throw _privateConstructorUsedError;
+  DateTime get startDate => throw _privateConstructorUsedError;
+  DateTime get endDate => throw _privateConstructorUsedError;
 
-  /// Serializes this MealPlanItem to a JSON map.
+  /// Serializes this CreateWeeklyPlanRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of MealPlanItem
+  /// Create a copy of CreateWeeklyPlanRequest
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $MealPlanItemCopyWith<MealPlanItem> get copyWith =>
+  $CreateWeeklyPlanRequestCopyWith<CreateWeeklyPlanRequest> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $MealPlanItemCopyWith<$Res> {
-  factory $MealPlanItemCopyWith(
-          MealPlanItem value, $Res Function(MealPlanItem) then) =
-      _$MealPlanItemCopyWithImpl<$Res, MealPlanItem>;
+abstract class $CreateWeeklyPlanRequestCopyWith<$Res> {
+  factory $CreateWeeklyPlanRequestCopyWith(CreateWeeklyPlanRequest value,
+          $Res Function(CreateWeeklyPlanRequest) then) =
+      _$CreateWeeklyPlanRequestCopyWithImpl<$Res, CreateWeeklyPlanRequest>;
   @useResult
-  $Res call(
-      {String id,
-      @JsonKey(name: 'weekly_plan_id') String weeklyPlanId,
-      @JsonKey(name: 'meal_id') String mealId,
-      @JsonKey(name: 'day_of_week') int dayOfWeek,
-      @JsonKey(name: 'meal_type') String mealType,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt,
-      MealModel meal});
-
-  $MealModelCopyWith<$Res> get meal;
+  $Res call({String userId, DateTime startDate, DateTime endDate});
 }
 
 /// @nodoc
-class _$MealPlanItemCopyWithImpl<$Res, $Val extends MealPlanItem>
-    implements $MealPlanItemCopyWith<$Res> {
-  _$MealPlanItemCopyWithImpl(this._value, this._then);
+class _$CreateWeeklyPlanRequestCopyWithImpl<$Res,
+        $Val extends CreateWeeklyPlanRequest>
+    implements $CreateWeeklyPlanRequestCopyWith<$Res> {
+  _$CreateWeeklyPlanRequestCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of MealPlanItem
+  /// Create a copy of CreateWeeklyPlanRequest
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? weeklyPlanId = null,
-    Object? mealId = null,
-    Object? dayOfWeek = null,
-    Object? mealType = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
-    Object? meal = null,
+    Object? userId = null,
+    Object? startDate = null,
+    Object? endDate = null,
   }) {
     return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      weeklyPlanId: null == weeklyPlanId
-          ? _value.weeklyPlanId
-          : weeklyPlanId // ignore: cast_nullable_to_non_nullable
-              as String,
-      mealId: null == mealId
-          ? _value.mealId
-          : mealId // ignore: cast_nullable_to_non_nullable
-              as String,
-      dayOfWeek: null == dayOfWeek
-          ? _value.dayOfWeek
-          : dayOfWeek // ignore: cast_nullable_to_non_nullable
-              as int,
-      mealType: null == mealType
-          ? _value.mealType
-          : mealType // ignore: cast_nullable_to_non_nullable
-              as String,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
+      startDate: null == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      updatedAt: null == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
+      endDate: null == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      meal: null == meal
-          ? _value.meal
-          : meal // ignore: cast_nullable_to_non_nullable
-              as MealModel,
     ) as $Val);
   }
-
-  /// Create a copy of MealPlanItem
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $MealModelCopyWith<$Res> get meal {
-    return $MealModelCopyWith<$Res>(_value.meal, (value) {
-      return _then(_value.copyWith(meal: value) as $Val);
-    });
-  }
 }
 
 /// @nodoc
-abstract class _$$MealPlanItemImplCopyWith<$Res>
-    implements $MealPlanItemCopyWith<$Res> {
-  factory _$$MealPlanItemImplCopyWith(
-          _$MealPlanItemImpl value, $Res Function(_$MealPlanItemImpl) then) =
-      __$$MealPlanItemImplCopyWithImpl<$Res>;
+abstract class _$$CreateWeeklyPlanRequestImplCopyWith<$Res>
+    implements $CreateWeeklyPlanRequestCopyWith<$Res> {
+  factory _$$CreateWeeklyPlanRequestImplCopyWith(
+          _$CreateWeeklyPlanRequestImpl value,
+          $Res Function(_$CreateWeeklyPlanRequestImpl) then) =
+      __$$CreateWeeklyPlanRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String id,
-      @JsonKey(name: 'weekly_plan_id') String weeklyPlanId,
-      @JsonKey(name: 'meal_id') String mealId,
-      @JsonKey(name: 'day_of_week') int dayOfWeek,
-      @JsonKey(name: 'meal_type') String mealType,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt,
-      MealModel meal});
-
-  @override
-  $MealModelCopyWith<$Res> get meal;
+  $Res call({String userId, DateTime startDate, DateTime endDate});
 }
 
 /// @nodoc
-class __$$MealPlanItemImplCopyWithImpl<$Res>
-    extends _$MealPlanItemCopyWithImpl<$Res, _$MealPlanItemImpl>
-    implements _$$MealPlanItemImplCopyWith<$Res> {
-  __$$MealPlanItemImplCopyWithImpl(
-      _$MealPlanItemImpl _value, $Res Function(_$MealPlanItemImpl) _then)
+class __$$CreateWeeklyPlanRequestImplCopyWithImpl<$Res>
+    extends _$CreateWeeklyPlanRequestCopyWithImpl<$Res,
+        _$CreateWeeklyPlanRequestImpl>
+    implements _$$CreateWeeklyPlanRequestImplCopyWith<$Res> {
+  __$$CreateWeeklyPlanRequestImplCopyWithImpl(
+      _$CreateWeeklyPlanRequestImpl _value,
+      $Res Function(_$CreateWeeklyPlanRequestImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of MealPlanItem
+  /// Create a copy of CreateWeeklyPlanRequest
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
-    Object? weeklyPlanId = null,
-    Object? mealId = null,
-    Object? dayOfWeek = null,
-    Object? mealType = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
-    Object? meal = null,
+    Object? userId = null,
+    Object? startDate = null,
+    Object? endDate = null,
   }) {
-    return _then(_$MealPlanItemImpl(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
+    return _then(_$CreateWeeklyPlanRequestImpl(
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      weeklyPlanId: null == weeklyPlanId
-          ? _value.weeklyPlanId
-          : weeklyPlanId // ignore: cast_nullable_to_non_nullable
-              as String,
-      mealId: null == mealId
-          ? _value.mealId
-          : mealId // ignore: cast_nullable_to_non_nullable
-              as String,
-      dayOfWeek: null == dayOfWeek
-          ? _value.dayOfWeek
-          : dayOfWeek // ignore: cast_nullable_to_non_nullable
-              as int,
-      mealType: null == mealType
-          ? _value.mealType
-          : mealType // ignore: cast_nullable_to_non_nullable
-              as String,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
+      startDate: null == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      updatedAt: null == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
+      endDate: null == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      meal: null == meal
-          ? _value.meal
-          : meal // ignore: cast_nullable_to_non_nullable
-              as MealModel,
     ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$MealPlanItemImpl implements _MealPlanItem {
-  const _$MealPlanItemImpl(
-      {required this.id,
-      @JsonKey(name: 'weekly_plan_id') required this.weeklyPlanId,
-      @JsonKey(name: 'meal_id') required this.mealId,
-      @JsonKey(name: 'day_of_week') required this.dayOfWeek,
-      @JsonKey(name: 'meal_type') required this.mealType,
-      @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'updated_at') required this.updatedAt,
-      required this.meal});
+class _$CreateWeeklyPlanRequestImpl implements _CreateWeeklyPlanRequest {
+  const _$CreateWeeklyPlanRequestImpl(
+      {required this.userId, required this.startDate, required this.endDate});
 
-  factory _$MealPlanItemImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MealPlanItemImplFromJson(json);
+  factory _$CreateWeeklyPlanRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$CreateWeeklyPlanRequestImplFromJson(json);
 
   @override
-  final String id;
+  final String userId;
   @override
-  @JsonKey(name: 'weekly_plan_id')
-  final String weeklyPlanId;
+  final DateTime startDate;
   @override
-  @JsonKey(name: 'meal_id')
-  final String mealId;
-  @override
-  @JsonKey(name: 'day_of_week')
-  final int dayOfWeek;
-  @override
-  @JsonKey(name: 'meal_type')
-  final String mealType;
-  @override
-  @JsonKey(name: 'created_at')
-  final DateTime createdAt;
-  @override
-  @JsonKey(name: 'updated_at')
-  final DateTime updatedAt;
-  @override
-  final MealModel meal;
+  final DateTime endDate;
 
   @override
   String toString() {
-    return 'MealPlanItem(id: $id, weeklyPlanId: $weeklyPlanId, mealId: $mealId, dayOfWeek: $dayOfWeek, mealType: $mealType, createdAt: $createdAt, updatedAt: $updatedAt, meal: $meal)';
+    return 'CreateWeeklyPlanRequest(userId: $userId, startDate: $startDate, endDate: $endDate)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$MealPlanItemImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.weeklyPlanId, weeklyPlanId) ||
-                other.weeklyPlanId == weeklyPlanId) &&
-            (identical(other.mealId, mealId) || other.mealId == mealId) &&
-            (identical(other.dayOfWeek, dayOfWeek) ||
-                other.dayOfWeek == dayOfWeek) &&
-            (identical(other.mealType, mealType) ||
-                other.mealType == mealType) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
-            (identical(other.meal, meal) || other.meal == meal));
+            other is _$CreateWeeklyPlanRequestImpl &&
+            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.startDate, startDate) ||
+                other.startDate == startDate) &&
+            (identical(other.endDate, endDate) || other.endDate == endDate));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, weeklyPlanId, mealId,
-      dayOfWeek, mealType, createdAt, updatedAt, meal);
+  int get hashCode => Object.hash(runtimeType, userId, startDate, endDate);
 
-  /// Create a copy of MealPlanItem
+  /// Create a copy of CreateWeeklyPlanRequest
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$MealPlanItemImplCopyWith<_$MealPlanItemImpl> get copyWith =>
-      __$$MealPlanItemImplCopyWithImpl<_$MealPlanItemImpl>(this, _$identity);
+  _$$CreateWeeklyPlanRequestImplCopyWith<_$CreateWeeklyPlanRequestImpl>
+      get copyWith => __$$CreateWeeklyPlanRequestImplCopyWithImpl<
+          _$CreateWeeklyPlanRequestImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$MealPlanItemImplToJson(
+    return _$$CreateWeeklyPlanRequestImplToJson(
       this,
     );
   }
 }
 
-abstract class _MealPlanItem implements MealPlanItem {
-  const factory _MealPlanItem(
-      {required final String id,
-      @JsonKey(name: 'weekly_plan_id') required final String weeklyPlanId,
-      @JsonKey(name: 'meal_id') required final String mealId,
-      @JsonKey(name: 'day_of_week') required final int dayOfWeek,
-      @JsonKey(name: 'meal_type') required final String mealType,
-      @JsonKey(name: 'created_at') required final DateTime createdAt,
-      @JsonKey(name: 'updated_at') required final DateTime updatedAt,
-      required final MealModel meal}) = _$MealPlanItemImpl;
+abstract class _CreateWeeklyPlanRequest implements CreateWeeklyPlanRequest {
+  const factory _CreateWeeklyPlanRequest(
+      {required final String userId,
+      required final DateTime startDate,
+      required final DateTime endDate}) = _$CreateWeeklyPlanRequestImpl;
 
-  factory _MealPlanItem.fromJson(Map<String, dynamic> json) =
-      _$MealPlanItemImpl.fromJson;
+  factory _CreateWeeklyPlanRequest.fromJson(Map<String, dynamic> json) =
+      _$CreateWeeklyPlanRequestImpl.fromJson;
+
+  @override
+  String get userId;
+  @override
+  DateTime get startDate;
+  @override
+  DateTime get endDate;
+
+  /// Create a copy of CreateWeeklyPlanRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$CreateWeeklyPlanRequestImplCopyWith<_$CreateWeeklyPlanRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+UpdateWeeklyPlanRequest _$UpdateWeeklyPlanRequestFromJson(
+    Map<String, dynamic> json) {
+  return _UpdateWeeklyPlanRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$UpdateWeeklyPlanRequest {
+  String get id => throw _privateConstructorUsedError;
+  DateTime get startDate => throw _privateConstructorUsedError;
+  DateTime get endDate => throw _privateConstructorUsedError;
+
+  /// Serializes this UpdateWeeklyPlanRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of UpdateWeeklyPlanRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $UpdateWeeklyPlanRequestCopyWith<UpdateWeeklyPlanRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $UpdateWeeklyPlanRequestCopyWith<$Res> {
+  factory $UpdateWeeklyPlanRequestCopyWith(UpdateWeeklyPlanRequest value,
+          $Res Function(UpdateWeeklyPlanRequest) then) =
+      _$UpdateWeeklyPlanRequestCopyWithImpl<$Res, UpdateWeeklyPlanRequest>;
+  @useResult
+  $Res call({String id, DateTime startDate, DateTime endDate});
+}
+
+/// @nodoc
+class _$UpdateWeeklyPlanRequestCopyWithImpl<$Res,
+        $Val extends UpdateWeeklyPlanRequest>
+    implements $UpdateWeeklyPlanRequestCopyWith<$Res> {
+  _$UpdateWeeklyPlanRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of UpdateWeeklyPlanRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? startDate = null,
+    Object? endDate = null,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      startDate: null == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      endDate: null == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$UpdateWeeklyPlanRequestImplCopyWith<$Res>
+    implements $UpdateWeeklyPlanRequestCopyWith<$Res> {
+  factory _$$UpdateWeeklyPlanRequestImplCopyWith(
+          _$UpdateWeeklyPlanRequestImpl value,
+          $Res Function(_$UpdateWeeklyPlanRequestImpl) then) =
+      __$$UpdateWeeklyPlanRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String id, DateTime startDate, DateTime endDate});
+}
+
+/// @nodoc
+class __$$UpdateWeeklyPlanRequestImplCopyWithImpl<$Res>
+    extends _$UpdateWeeklyPlanRequestCopyWithImpl<$Res,
+        _$UpdateWeeklyPlanRequestImpl>
+    implements _$$UpdateWeeklyPlanRequestImplCopyWith<$Res> {
+  __$$UpdateWeeklyPlanRequestImplCopyWithImpl(
+      _$UpdateWeeklyPlanRequestImpl _value,
+      $Res Function(_$UpdateWeeklyPlanRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of UpdateWeeklyPlanRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? startDate = null,
+    Object? endDate = null,
+  }) {
+    return _then(_$UpdateWeeklyPlanRequestImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      startDate: null == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      endDate: null == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$UpdateWeeklyPlanRequestImpl implements _UpdateWeeklyPlanRequest {
+  const _$UpdateWeeklyPlanRequestImpl(
+      {required this.id, required this.startDate, required this.endDate});
+
+  factory _$UpdateWeeklyPlanRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UpdateWeeklyPlanRequestImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final DateTime startDate;
+  @override
+  final DateTime endDate;
+
+  @override
+  String toString() {
+    return 'UpdateWeeklyPlanRequest(id: $id, startDate: $startDate, endDate: $endDate)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$UpdateWeeklyPlanRequestImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.startDate, startDate) ||
+                other.startDate == startDate) &&
+            (identical(other.endDate, endDate) || other.endDate == endDate));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, id, startDate, endDate);
+
+  /// Create a copy of UpdateWeeklyPlanRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$UpdateWeeklyPlanRequestImplCopyWith<_$UpdateWeeklyPlanRequestImpl>
+      get copyWith => __$$UpdateWeeklyPlanRequestImplCopyWithImpl<
+          _$UpdateWeeklyPlanRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$UpdateWeeklyPlanRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _UpdateWeeklyPlanRequest implements UpdateWeeklyPlanRequest {
+  const factory _UpdateWeeklyPlanRequest(
+      {required final String id,
+      required final DateTime startDate,
+      required final DateTime endDate}) = _$UpdateWeeklyPlanRequestImpl;
+
+  factory _UpdateWeeklyPlanRequest.fromJson(Map<String, dynamic> json) =
+      _$UpdateWeeklyPlanRequestImpl.fromJson;
 
   @override
   String get id;
   @override
-  @JsonKey(name: 'weekly_plan_id')
-  String get weeklyPlanId;
+  DateTime get startDate;
   @override
-  @JsonKey(name: 'meal_id')
-  String get mealId;
-  @override
-  @JsonKey(name: 'day_of_week')
-  int get dayOfWeek;
-  @override
-  @JsonKey(name: 'meal_type')
-  String get mealType;
-  @override
-  @JsonKey(name: 'created_at')
-  DateTime get createdAt;
-  @override
-  @JsonKey(name: 'updated_at')
-  DateTime get updatedAt;
-  @override
-  MealModel get meal;
+  DateTime get endDate;
 
-  /// Create a copy of MealPlanItem
+  /// Create a copy of UpdateWeeklyPlanRequest
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MealPlanItemImplCopyWith<_$MealPlanItemImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  _$$UpdateWeeklyPlanRequestImplCopyWith<_$UpdateWeeklyPlanRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
 }

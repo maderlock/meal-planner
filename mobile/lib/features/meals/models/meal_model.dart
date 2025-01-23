@@ -1,133 +1,81 @@
-/// Model class representing a meal in the application.
+/// Model classes representing meals and their assignments in the application.
 /// 
-/// This file is responsible for:
-/// - Defining the meal data structure
-/// - Handling JSON serialization/deserialization
-/// - Providing immutable meal objects
-/// - Supporting copy operations for state updates
-/// 
-/// Referenced by:
-/// - Used by MealService for data operations
-/// - Used by meal-related screens for display
-/// - Used in weekly meal plans
-/// 
-/// Dependencies:
-/// - No external package dependencies
-/// - Part of the meals feature module
+/// These represent global meals that can be assigned to weekly plans.
+/// The meal contains core information like name, description, and instructions,
+/// but these details are loaded on demand to optimize data transfer.
 
-/// Represents a meal with its properties.
-class MealModel {
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'meal_model.freezed.dart';
+part 'meal_model.g.dart';
+
+@freezed
+class Meal with _$Meal {
   /// Unique identifier for the meal.
-  final String id;
+  const factory Meal({
+    required String id,
+    /// Name of the meal.
+    required String name,
+    /// Brief description of the meal.
+    required String description,
+    /// List of ingredients required for the meal.
+    required List<String> ingredients,
+    /// Step-by-step instructions for preparing the meal.
+    required List<String> instructions,
+    /// URL of the meal's image.
+    required String imageUrl,
+    /// Whether the meal is favorited by the user.
+    @Default(false) bool isFavorite,
+    /// When the meal was created.
+    required DateTime createdAt,
+    /// When the meal was last updated.
+    required DateTime updatedAt,
+  }) = _Meal;
 
-  /// Name of the meal.
-  final String name;
+  /// Creates a meal from a JSON map.
+  factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);
+}
 
-  /// Brief description of the meal.
-  final String description;
+@freezed
+class MealAssignment with _$MealAssignment {
+  /// Unique identifier for the meal assignment.
+  const factory MealAssignment({
+    required String id,
+    /// ID of the weekly plan that the meal is assigned to.
+    required String weeklyPlanId,
+    /// ID of the assigned meal.
+    required String mealId,
+    /// Day of the week that the meal is assigned to.
+    required int dayOfWeek,
+    /// Type of meal (e.g. breakfast, lunch, dinner).
+    required String mealType,
+    /// The assigned meal.
+    required Meal meal,
+    /// When the meal was assigned.
+    required DateTime createdAt,
+    /// When the meal assignment was last updated.
+    required DateTime updatedAt,
+  }) = _MealAssignment;
 
-  /// List of ingredients required for the meal.
-  final List<String> ingredients;
+  /// Creates a meal assignment from a JSON map.
+  factory MealAssignment.fromJson(Map<String, dynamic> json) =>
+      _$MealAssignmentFromJson(json);
+}
 
-  /// Step-by-step instructions for preparing the meal.
-  final List<String> instructions;
+@freezed
+class FavoriteMeal with _$FavoriteMeal {
+  /// ID of the user who favorited the meal.
+  const factory FavoriteMeal({
+    required String userId,
+    /// ID of the favorited meal.
+    required String mealId,
+    /// The favorited meal.
+    required Meal meal,
+    /// When the meal was favorited.
+    required DateTime createdAt,
+  }) = _FavoriteMeal;
 
-  /// URL of the meal's image.
-  final String imageUrl;
-
-  /// Timestamp when the meal was created.
-  final DateTime createdAt;
-
-  /// Timestamp when the meal was last updated.
-  final DateTime updatedAt;
-
-  /// Constructs a new [MealModel] instance.
-  MealModel({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.ingredients,
-    required this.instructions,
-    required this.imageUrl,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  /// Creates a new [MealModel] instance from a JSON object.
-  factory MealModel.fromJson(Map<String, dynamic> json) {
-    return MealModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      ingredients: List<String>.from(json['ingredients'] as List),
-      instructions: List<String>.from(json['instructions'] as List),
-      imageUrl: json['imageUrl'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-    );
-  }
-
-  /// Converts the [MealModel] instance to a JSON object.
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'ingredients': ingredients,
-      'instructions': instructions,
-      'imageUrl': imageUrl,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
-    };
-  }
-
-  /// Creates a copy of the [MealModel] instance with optional updates.
-  MealModel copyWith({
-    String? id,
-    String? name,
-    String? description,
-    List<String>? ingredients,
-    List<String>? instructions,
-    String? imageUrl,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return MealModel(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      ingredients: ingredients ?? this.ingredients,
-      instructions: instructions ?? this.instructions,
-      imageUrl: imageUrl ?? this.imageUrl,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
-
-  @override
-  /// Checks if the [MealModel] instance is equal to another object.
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MealModel &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          name == other.name &&
-          description == other.description &&
-          ingredients == other.ingredients &&
-          instructions == other.instructions &&
-          imageUrl == other.imageUrl &&
-          createdAt == other.createdAt &&
-          updatedAt == other.updatedAt;
-
-  @override
-  /// Returns the hash code for the [MealModel] instance.
-  int get hashCode =>
-      id.hashCode ^
-      name.hashCode ^
-      description.hashCode ^
-      ingredients.hashCode ^
-      instructions.hashCode ^
-      imageUrl.hashCode ^
-      createdAt.hashCode ^
-      updatedAt.hashCode;
+  /// Creates a favorite meal from a JSON map.
+  factory FavoriteMeal.fromJson(Map<String, dynamic> json) =>
+      _$FavoriteMealFromJson(json);
 }

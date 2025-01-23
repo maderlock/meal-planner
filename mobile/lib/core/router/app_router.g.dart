@@ -6,9 +6,11 @@ part of 'app_router.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$routerHash() => r'9c7164b2de87bd13218b57f640f4e7463e8a26d2';
+String _$routerHash() => r'5a2fbcec7b2455461c0871d5f1b659af55f6b04e';
 
-/// See also [router].
+/// Provider for the application router
+///
+/// Copied from [router].
 @ProviderFor(router)
 final routerProvider = AutoDisposeProvider<GoRouter>.internal(
   router,

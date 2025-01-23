@@ -18,9 +18,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:meal_planner/features/auth/screens/auth_screen.dart';
-import 'package:meal_planner/features/auth/services/auth_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:meal_planner/features/auth/providers/auth_provider.dart';
+import 'package:meal_planner/features/auth/screens/auth_screen.dart';
+import 'package:meal_planner/features/home/screens/home_screen.dart';
+import 'package:meal_planner/features/meals/screens/weekly_plan_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -28,25 +30,27 @@ part 'app_router.g.dart';
 class AppRoutes {
   static const String home = '/';
   static const String auth = '/auth';
+  static const String weeklyPlan = '/weekly-plan';
 }
 
 /// Provider for the application router
 @riverpod
 GoRouter router(RouterRef ref) {
-  final authState = ref.watch(authServiceProvider);
+  final authState = ref.watch(authStateProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.auth,
+    initialLocation: AppRoutes.home,
+    debugLogDiagnostics: true,
     redirect: (context, state) {
-      // If the user is not logged in and not on the auth screen, redirect to auth
-      if (authState.value == null &&
-          state.matchedLocation != AppRoutes.auth) {
+      // Handle authentication redirects
+      final isLoggedIn = authState.value != null;
+      final isAuthRoute = state.uri.path == AppRoutes.auth;
+
+      if (!isLoggedIn && state.uri.path != AppRoutes.auth) {
         return AppRoutes.auth;
       }
 
-      // If the user is logged in and on the auth screen, redirect to home
-      if (authState.value != null &&
-          state.matchedLocation == AppRoutes.auth) {
+      if (isLoggedIn && state.uri.path == AppRoutes.auth) {
         return AppRoutes.home;
       }
 
@@ -54,17 +58,36 @@ GoRouter router(RouterRef ref) {
     },
     routes: [
       GoRoute(
+        path: AppRoutes.home,
+        builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.auth,
         builder: (context, state) => const AuthScreen(),
       ),
       GoRoute(
-        path: AppRoutes.home,
-        builder: (context, state) => const Scaffold(
-          body: Center(
-            child: Text('Home Screen - Coming Soon'),
-          ),
+        path: AppRoutes.weeklyPlan,
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          child: const WeeklyPlanScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: animation.drive(
+                Tween<Offset>(
+                  begin: const Offset(1.0, 0.0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeInOut)),
+              ),
+              child: child,
+            );
+          },
         ),
       ),
     ],
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Text('Error: ${state.error}'),
+      ),
+    ),
   );
 }

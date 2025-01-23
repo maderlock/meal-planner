@@ -1,152 +1,127 @@
 /// Service for managing meal-related operations.
 /// 
-/// This file is responsible for:
-/// - Managing CRUD operations for meals
-/// - Handling meal data synchronization with the backend
-/// - Managing weekly meal plans
-/// - Caching meal data locally
-/// 
-/// Referenced by:
-/// - Used by meal-related screens for data operations
-/// - Used by weekly plan screen for meal planning
-/// - Used by meal providers for state management
+/// This service is responsible for:
+/// - Managing meal data in local state
+/// - Handling meal-related operations
+/// - Providing meal data to the UI
 /// 
 /// Dependencies:
-/// - Uses ApiClient for backend communication
-/// - Uses StorageService for local caching
-/// - Uses MealModel for data structure
+/// - Uses Riverpod for state management
+/// - Uses Dio and Retrofit for API calls
 
-import 'package:meal_planner/core/api/api_client.dart';
-import 'package:meal_planner/features/auth/providers/auth_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:meal_planner/features/meals/models/meal_model.dart';
 import 'package:meal_planner/features/meals/models/weekly_plan_model.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
 
 part 'meal_service.g.dart';
 
-/// Service class for managing meal operations
 @riverpod
 class MealService extends _$MealService {
-  /// API client instance for backend communication
-  final _api = ApiClient();
+  final Dio _dio = Dio();
+  late final MealServiceApi _api;
 
   @override
-  FutureOr<void> build() {}
-
-  /// Fetch favorite meals from the backend
-  /// 
-  /// Returns a list of MealModel objects representing the user's favorite meals
-  Future<List<MealModel>> getFavoriteMeals() async {
-    final userId = ref.read(authStateProvider).value?.uid;
-    if (userId == null) throw Exception('User not authenticated');
-
-    final response = await _api.get<List<dynamic>>(
-      '/meals',
-      queryParameters: {
-        'userId': userId,
-        'favoritesOnly': true,
-      },
-    );
-
-    return response.data!
-        .map((meal) => MealModel.fromJson(meal as Map<String, dynamic>))
-        .toList();
+  FutureOr<void> build() async {
+    _api = MealServiceApi(_dio, baseUrl: 'https://api.example.com');
   }
 
-  /// Create a new meal
-  /// 
-  /// Returns the newly created MealModel object
-  Future<MealModel> createMeal({
-    required String name,
-    String? description,
-    bool isFavorite = false,
-  }) async {
-    final userId = ref.read(authStateProvider).value?.uid;
-    if (userId == null) throw Exception('User not authenticated');
-
-    final response = await _api.post<Map<String, dynamic>>(
-      '/meals',
-      data: {
-        'name': name,
-        'description': description,
-        'userId': userId,
-        'isFavorite': isFavorite,
-      },
-    );
-
-    return MealModel.fromJson(response.data!);
+  Future<List<MealModel>> getMeals() async {
+    final response = await _api.getMeals();
+    return response.map((meal) => MealModel.fromJson(meal.toJson())).toList();
   }
 
-  /// Update an existing meal
-  /// 
-  /// Returns the updated MealModel object
-  Future<MealModel> updateMeal({
-    required String id,
-    String? name,
-    String? description,
-    bool? isFavorite,
-  }) async {
-    final response = await _api.patch<Map<String, dynamic>>(
-      '/meals',
-      queryParameters: {'id': id},
-      data: {
-        if (name != null) 'name': name,
-        if (description != null) 'description': description,
-        if (isFavorite != null) 'isFavorite': isFavorite,
-      },
-    );
-
-    return MealModel.fromJson(response.data!);
+  Future<MealModel> getMeal(String id) async {
+    final response = await _api.getMeal(id);
+    return MealModel.fromJson(response.toJson());
   }
 
-  /// Get the current week's meal plan
-  /// 
-  /// Returns the WeeklyPlanModel object representing the current week's meal plan
-  Future<WeeklyPlanModel> getCurrentWeekPlan() async {
-    final userId = ref.read(authStateProvider).value?.uid;
-    if (userId == null) throw Exception('User not authenticated');
-
-    final response = await _api.get<Map<String, dynamic>>(
-      '/weekly-plans',
-      queryParameters: {'userId': userId},
-    );
-
-    return WeeklyPlanModel.fromJson(response.data!);
+  Future<List<WeeklyPlanModel>> getWeeklyPlans() async {
+    final response = await _api.getWeeklyPlans();
+    return response.map((plan) => WeeklyPlanModel.fromJson(plan.toJson())).toList();
   }
 
-  /// Update a meal plan
-  /// 
-  /// Updates the meal plan with the given meal ID, day of week, and meal type
-  Future<void> updateMealPlan({
-    required String weeklyPlanId,
-    required String mealId,
-    required int dayOfWeek,
-    required String mealType,
-  }) async {
-    await _api.post<Map<String, dynamic>>(
-      '/weekly-plans/$weeklyPlanId/meals',
-      data: {
-        'mealId': mealId,
-        'dayOfWeek': dayOfWeek,
-        'mealType': mealType,
-      },
-    );
+  Future<WeeklyPlanModel> getWeeklyPlan(String id) async {
+    final response = await _api.getWeeklyPlan(id);
+    return WeeklyPlanModel.fromJson(response.toJson());
   }
 
-  /// Remove a meal plan
-  /// 
-  /// Removes the meal plan with the given day of week and meal type
-  Future<void> removeMealPlan({
-    required String weeklyPlanId,
-    required int dayOfWeek,
-    required String mealType,
-  }) async {
-    await _api.delete(
-      '/weekly-plans/$weeklyPlanId/meals',
-      queryParameters: {
-        'dayOfWeek': dayOfWeek,
-        'mealType': mealType,
-      },
-    );
+  Future<WeeklyPlanModel> createWeeklyPlan(CreateWeeklyPlanRequest request) async {
+    final response = await _api.createWeeklyPlan(request);
+    return WeeklyPlanModel.fromJson(response.toJson());
   }
+
+  Future<WeeklyPlanModel> updateWeeklyPlan(String id, UpdateWeeklyPlanRequest request) async {
+    final response = await _api.updateWeeklyPlan(id, request);
+    return WeeklyPlanModel.fromJson(response.toJson());
+  }
+
+  Future<void> assignMeal(String weeklyPlanId, Map<String, dynamic> assignment) async {
+    await _api.assignMeal(weeklyPlanId, assignment);
+  }
+
+  Future<void> removeAssignment(String weeklyPlanId, String assignmentId) async {
+    await _api.removeAssignment(weeklyPlanId, assignmentId);
+  }
+
+  Future<List<MealModel>> getFavorites() async {
+    final response = await _api.getFavorites();
+    return response.map((favorite) => MealModel.fromJson(favorite.toJson())).toList();
+  }
+
+  Future<void> addFavorite(Map<String, String> request) async {
+    await _api.addFavorite(request);
+  }
+
+  Future<void> removeFavorite(String mealId) async {
+    await _api.removeFavorite(mealId);
+  }
+}
+
+@RestApi()
+abstract class MealServiceApi {
+  factory MealServiceApi(Dio dio, {String baseUrl}) = _MealServiceApi;
+
+  @GET('/api/meals')
+  Future<List<Meal>> getMeals();
+
+  @GET('/api/meals/{id}')
+  Future<Meal> getMeal(@Path('id') String id);
+
+  @GET('/api/weekly-plans')
+  Future<List<WeeklyPlan>> getWeeklyPlans();
+
+  @GET('/api/weekly-plans/{id}')
+  Future<WeeklyPlan> getWeeklyPlan(@Path('id') String id);
+
+  @POST('/api/weekly-plans')
+  Future<WeeklyPlan> createWeeklyPlan(@Body() CreateWeeklyPlanRequest request);
+
+  @PATCH('/api/weekly-plans/{id}')
+  Future<WeeklyPlan> updateWeeklyPlan(
+    @Path('id') String id,
+    @Body() UpdateWeeklyPlanRequest request,
+  );
+
+  @POST('/api/weekly-plans/{id}/assignments')
+  Future<MealAssignment> assignMeal(
+    @Path('id') String weeklyPlanId,
+    @Body() Map<String, dynamic> assignment,
+  );
+
+  @DELETE('/api/weekly-plans/{weeklyPlanId}/assignments/{assignmentId}')
+  Future<void> removeAssignment(
+    @Path('weeklyPlanId') String weeklyPlanId,
+    @Path('assignmentId') String assignmentId,
+  );
+
+  @GET('/api/favorites')
+  Future<List<FavoriteMeal>> getFavorites();
+
+  @POST('/api/favorites')
+  Future<FavoriteMeal> addFavorite(@Body() Map<String, String> request);
+
+  @DELETE('/api/favorites/{mealId}')
+  Future<void> removeFavorite(@Path('mealId') String mealId);
 }
