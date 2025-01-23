@@ -6,6 +6,9 @@ import 'package:meal_planner/core/config/app_config.dart';
 import 'package:meal_planner/core/router/app_router.dart';
 import 'package:meal_planner/core/storage/storage_service.dart';
 import 'package:meal_planner/core/theme/app_theme.dart';
+import 'package:meal_planner/features/auth/providers/auth_provider.dart';
+import 'package:meal_planner/features/auth/screens/auth_screen.dart';
+import 'package:meal_planner/features/home/screens/home_screen.dart';
 import 'package:meal_planner/firebase_options.dart';
 
 Future<void> main() async {
@@ -42,6 +45,7 @@ class MealPlannerApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final authState = ref.watch(authStateProvider);
 
     return MaterialApp.router(
       title: AppConfig.appName,
@@ -50,6 +54,19 @@ class MealPlannerApp extends ConsumerWidget {
       themeMode: ThemeMode.system,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
+      home: authState.when(
+        data: (user) => user == null ? const AuthScreen() : const HomeScreen(),
+        loading: () => const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        error: (error, stack) => Scaffold(
+          body: Center(
+            child: Text('Error: $error'),
+          ),
+        ),
+      ),
     );
   }
 }
