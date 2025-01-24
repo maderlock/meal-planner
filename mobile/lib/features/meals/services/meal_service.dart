@@ -14,114 +14,126 @@ import 'package:meal_planner/features/meals/models/meal_model.dart';
 import 'package:meal_planner/features/meals/models/weekly_plan_model.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
+import 'package:json_annotation/json_annotation.dart';
+import '../../../core/network/api_client.dart';
+import '../../../core/config/app_config.dart';
 
 part 'meal_service.g.dart';
 
 @riverpod
 class MealService extends _$MealService {
-  final Dio _dio = Dio();
   late final MealServiceApi _api;
 
   @override
-  FutureOr<void> build() async {
-    _api = MealServiceApi(_dio, baseUrl: 'https://api.example.com');
-  }
-
-  Future<List<MealModel>> getMeals() async {
-    final response = await _api.getMeals();
-    return response.map((meal) => MealModel.fromJson(meal.toJson())).toList();
-  }
-
-  Future<MealModel> getMeal(String id) async {
-    final response = await _api.getMeal(id);
-    return MealModel.fromJson(response.toJson());
+  FutureOr<List<WeeklyPlanModel>> build() async {
+    final dio = ref.watch(dioProvider);
+    _api = MealServiceApi(dio, baseUrl: AppConfig.instance.baseUrl);
+    return getWeeklyPlans();
   }
 
   Future<List<WeeklyPlanModel>> getWeeklyPlans() async {
-    final response = await _api.getWeeklyPlans();
-    return response.map((plan) => WeeklyPlanModel.fromJson(plan.toJson())).toList();
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() => _api.getWeeklyPlans());
+    return state.value ?? [];
   }
 
   Future<WeeklyPlanModel> getWeeklyPlan(String id) async {
     final response = await _api.getWeeklyPlan(id);
-    return WeeklyPlanModel.fromJson(response.toJson());
+    return response;
+  }
+
+  Future<List<MealModel>> getMeals() async {
+    final response = await _api.getMeals();
+    return response;
+  }
+
+  Future<MealModel> getMeal(String id) async {
+    final response = await _api.getMeal(id);
+    return response;
   }
 
   Future<WeeklyPlanModel> createWeeklyPlan(CreateWeeklyPlanRequest request) async {
     final response = await _api.createWeeklyPlan(request);
-    return WeeklyPlanModel.fromJson(response.toJson());
+    await getWeeklyPlans(); // Refresh state
+    return response;
   }
 
-  Future<WeeklyPlanModel> updateWeeklyPlan(String id, UpdateWeeklyPlanRequest request) async {
+  Future<WeeklyPlanModel> updateWeeklyPlan(
+    String id,
+    UpdateWeeklyPlanRequest request,
+  ) async {
     final response = await _api.updateWeeklyPlan(id, request);
-    return WeeklyPlanModel.fromJson(response.toJson());
+    await getWeeklyPlans(); // Refresh state
+    return response;
   }
 
   Future<void> assignMeal(String weeklyPlanId, Map<String, dynamic> assignment) async {
     await _api.assignMeal(weeklyPlanId, assignment);
+    await getWeeklyPlans(); // Refresh state
   }
 
   Future<void> removeAssignment(String weeklyPlanId, String assignmentId) async {
     await _api.removeAssignment(weeklyPlanId, assignmentId);
+    await getWeeklyPlans(); // Refresh state
   }
 
   Future<List<MealModel>> getFavorites() async {
     final response = await _api.getFavorites();
-    return response.map((favorite) => MealModel.fromJson(favorite.toJson())).toList();
+    return response;
   }
 
-  Future<void> addFavorite(Map<String, String> request) async {
-    await _api.addFavorite(request);
+  Future<void> addFavorite(String mealId) async {
+    await _api.addFavorite({'mealId': mealId});
   }
 
-  Future<void> removeFavorite(String mealId) async {
-    await _api.removeFavorite(mealId);
+  Future<void> removeFavorite(String id) async {
+    await _api.removeFavorite(id);
   }
 }
 
 @RestApi()
 abstract class MealServiceApi {
-  factory MealServiceApi(Dio dio, {String baseUrl}) = _MealServiceApi;
+  factory MealServiceApi(Dio dio, {String? baseUrl}) = _MealServiceApi;
 
-  @GET('/api/meals')
-  Future<List<Meal>> getMeals();
+  @GET('/meals')
+  Future<List<MealModel>> getMeals();
 
-  @GET('/api/meals/{id}')
-  Future<Meal> getMeal(@Path('id') String id);
+  @GET('/meals/{id}')
+  Future<MealModel> getMeal(@Path('id') String id);
 
-  @GET('/api/weekly-plans')
-  Future<List<WeeklyPlan>> getWeeklyPlans();
+  @GET('/weekly-plans')
+  Future<List<WeeklyPlanModel>> getWeeklyPlans();
 
-  @GET('/api/weekly-plans/{id}')
-  Future<WeeklyPlan> getWeeklyPlan(@Path('id') String id);
+  @GET('/weekly-plans/{id}')
+  Future<WeeklyPlanModel> getWeeklyPlan(@Path('id') String id);
 
-  @POST('/api/weekly-plans')
-  Future<WeeklyPlan> createWeeklyPlan(@Body() CreateWeeklyPlanRequest request);
+  @POST('/weekly-plans')
+  Future<WeeklyPlanModel> createWeeklyPlan(@Body() CreateWeeklyPlanRequest request);
 
-  @PATCH('/api/weekly-plans/{id}')
-  Future<WeeklyPlan> updateWeeklyPlan(
+  @PUT('/weekly-plans/{id}')
+  Future<WeeklyPlanModel> updateWeeklyPlan(
     @Path('id') String id,
     @Body() UpdateWeeklyPlanRequest request,
   );
 
-  @POST('/api/weekly-plans/{id}/assignments')
-  Future<MealAssignment> assignMeal(
-    @Path('id') String weeklyPlanId,
+  @POST('/weekly-plans/{id}/assignments')
+  Future<void> assignMeal(
+    @Path('id') String id,
     @Body() Map<String, dynamic> assignment,
   );
 
-  @DELETE('/api/weekly-plans/{weeklyPlanId}/assignments/{assignmentId}')
+  @DELETE('/weekly-plans/{id}/assignments/{assignmentId}')
   Future<void> removeAssignment(
-    @Path('weeklyPlanId') String weeklyPlanId,
+    @Path('id') String id,
     @Path('assignmentId') String assignmentId,
   );
 
-  @GET('/api/favorites')
-  Future<List<FavoriteMeal>> getFavorites();
+  @GET('/meals/favorites')
+  Future<List<MealModel>> getFavorites();
 
-  @POST('/api/favorites')
-  Future<FavoriteMeal> addFavorite(@Body() Map<String, String> request);
+  @POST('/meals/favorites')
+  Future<void> addFavorite(@Body() Map<String, String> request);
 
-  @DELETE('/api/favorites/{mealId}')
-  Future<void> removeFavorite(@Path('mealId') String mealId);
+  @DELETE('/meals/favorites/{id}')
+  Future<void> removeFavorite(@Path('id') String id);
 }

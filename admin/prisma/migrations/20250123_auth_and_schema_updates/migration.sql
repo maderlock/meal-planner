@@ -22,7 +22,5 @@ ALTER TABLE "weekly_plans" ADD COLUMN IF NOT EXISTS "end_date" TIMESTAMP WITH TI
 
 -- Add indexes for better query performance
 CREATE INDEX IF NOT EXISTS "weekly_plans_user_id_idx" ON "weekly_plans"("user_id");
-CREATE INDEX IF NOT EXISTS "meal_assignments_weekly_plan_id_idx" ON "meal_assignments"("weekly_plan_id");
-CREATE INDEX IF NOT EXISTS "meal_assignments_meal_id_idx" ON "meal_assignments"("meal_id");
-CREATE INDEX IF NOT EXISTS "favorite_meals_user_id_idx" ON "favorite_meals"("user_id");
-CREATE INDEX IF NOT EXISTS "favorite_meals_meal_id_idx" ON "favorite_meals"("meal_id");
+CREATE INDEX IF NOT EXISTS "meal_plans_weekly_plan_id_idx" ON "meal_plans"("weekly_plan_id");
+CREATE INDEX IF NOT EXISTS "meal_plans_meal_id_idx" ON "meal_plans"("meal_id");

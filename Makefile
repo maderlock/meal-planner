@@ -26,7 +26,7 @@ install:
 # Run the API server
 run-api:
 	@echo "Starting API server..."
-	@cd api && npm run dev
+	@cd admin && npm run dev
 
 # Run the mobile app (iOS simulator by default)
 run-mobile:

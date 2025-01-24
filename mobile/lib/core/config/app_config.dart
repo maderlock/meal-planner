@@ -26,7 +26,9 @@ class AppConfig {
 
   /// Singleton instance of AppConfig.
   static final AppConfig _instance = AppConfig._internal();
-  factory AppConfig() => _instance;
+
+  /// Public getter for the singleton instance.
+  static AppConfig get instance => _instance;
 
   /// Application name.
   static const String appName = 'Meal Planner';
@@ -37,6 +39,11 @@ class AppConfig {
   late final String _apiBaseUrl;
   /// API key for authentication.
   late final String _apiKey;
+
+  /// Get the base URL for API requests.
+  String get baseUrl => _apiBaseUrl;
+  /// Get the API key.
+  String get apiKey => _apiKey;
 
   /// Checks if the app is running in development environment.
   bool get isDevelopment => _env == Environment.dev;
@@ -49,11 +56,6 @@ class AppConfig {
   /// Checks if analytics data should be reported.
   bool get shouldReportAnalytics => !isDevelopment;
 
-  /// Base URL for API requests.
-  String get apiBaseUrl => _apiBaseUrl;
-  /// API key for authentication.
-  String get apiKey => _apiKey;
-
   /// Initializes the AppConfig instance with environment-specific settings.
   void initialize({
     required Environment env,
@@ -65,7 +67,8 @@ class AppConfig {
     _apiKey = key;
   }
 
-  /// Resets the AppConfig instance to its initial state for testing purposes.
+  /// Resets the configuration to default values.
+  /// Useful for testing and development.
   @visibleForTesting
   void reset() {
     _env = Environment.dev;

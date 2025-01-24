@@ -26,31 +26,35 @@
  * - meal_service.dart: Mobile app service integration
  */
 
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyAuth } from '@/lib/auth'
+import { jwtService } from '@/lib/jwt'
 import { z } from 'zod'
 
 // Schema for weekly plan creation
-const createWeeklyPlanSchema = z.object({
-  userId: z.string().uuid(),
-  weekStartDate: z.coerce.date()
+const weeklyPlanSchema = z.object({
+  weekStartDate: z.string().transform(str => new Date(str))
 })
 
-// Schema for meal plan update
-const updateMealPlanSchema = z.object({
-  mealId: z.string().uuid(),
-  mealType: z.enum(['lunch', 'dinner'])
-})
-
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
-    const weekStartDate = searchParams.get('weekStartDate')
-
+    console.log('GET /api/weekly-plans - Request received');
+    
+    // Verify authentication
+    const userId = await verifyAuth(request);
+    console.log('Authentication result:', { userId });
+    
     if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+      console.log('Unauthorized - no valid userId');
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
+
+    const { searchParams } = new URL(request.url)
+    const weekStartDate = searchParams.get('weekStartDate')
 
     let query: any = {
       where: { userId }
@@ -78,6 +82,8 @@ export async function GET(request: Request) {
       }
     })
 
+    console.log(`Found weekly plan for user ${userId}`);
+    
     if (!weeklyPlan) {
       return NextResponse.json(
         { error: 'Weekly plan not found' },
@@ -95,28 +101,38 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Verify authentication
+    const userId = await verifyAuth(request)
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
-    const validatedData = createWeeklyPlanSchema.parse(body)
+    const result = weeklyPlanSchema.safeParse(body)
+
+    if (!result.success) {
+      return NextResponse.json(
+        { error: 'Week start date is required' },
+        { status: 400 }
+      )
+    }
 
     const weeklyPlan = await prisma.weeklyPlan.create({
-      data: validatedData,
-      include: {
-        mealPlans: {
-          include: {
-            meal: true
-          }
-        }
+      data: {
+        userId,
+        weekStartDate: result.data.weekStartDate,
+        meals: []
       }
     })
 
     return NextResponse.json(weeklyPlan, { status: 201 })
   } catch (error) {
     console.error('Error creating weekly plan:', error)
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request data' }, { status: 400 })
-    }
     return NextResponse.json(
       { error: 'Failed to create weekly plan' },
       { status: 500 }

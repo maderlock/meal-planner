@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/meal_model.dart';
 import '../models/weekly_plan_model.dart';
 import '../services/meal_service.dart';
+import '../../../core/network/api_client.dart';
 
 class WeeklyPlanScreen extends ConsumerStatefulWidget {
   const WeeklyPlanScreen({super.key});
@@ -17,8 +18,8 @@ class WeeklyPlanScreen extends ConsumerStatefulWidget {
 }
 
 class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
-  WeeklyPlan? _currentPlan;
-  List<Meal>? _availableMeals;
+  WeeklyPlanModel? _currentPlan;
+  List<MealModel>? _availableMeals;
   bool _isLoading = true;
 
   @override
@@ -30,8 +31,8 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      final plans = await ref.read(mealServiceProvider).getWeeklyPlans();
-      final meals = await ref.read(mealServiceProvider).getMeals();
+      final plans = await ref.read(mealServiceProvider.notifier).getWeeklyPlans();
+      final meals = await ref.read(mealServiceProvider.notifier).getMeals();
       
       setState(() {
         _currentPlan = plans.isNotEmpty ? plans.first : null;
@@ -42,55 +43,71 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading weekly plan: $e')),
+          SnackBar(
+            content: Text(
+              e is ApiException 
+                ? e.toUserMessage()
+                : 'Failed to load weekly plan. Please try again.',
+            ),
+            action: e is ApiException && e.statusCode == 401 
+              ? SnackBarAction(
+                  label: 'Login',
+                  onPressed: () {
+                    // Navigate to login screen
+                    Navigator.of(context).pushReplacementNamed('/login');
+                  },
+                )
+              : null,
+          ),
         );
       }
     }
   }
 
-  Future<void> _assignMeal(int dayOfWeek, String mealType) async {
-    if (_currentPlan == null) return;
+  Future<void> _assignMeal(DateTime date) async {
+    if (_currentPlan == null || _availableMeals == null) return;
 
-    final meal = await showDialog<Meal>(
+    final MealType? selectedType = await showDialog<MealType>(
       context: context,
-      builder: (context) => MealSelectionDialog(meals: _availableMeals ?? []),
+      builder: (context) => SimpleDialog(
+        title: const Text('Select Meal Type'),
+        children: MealType.values.map((type) => SimpleDialogOption(
+          onPressed: () => Navigator.pop(context, type),
+          child: Text(type.name.toUpperCase()),
+        )).toList(),
+      ),
     );
 
-    if (meal == null) return;
+    if (selectedType == null) return;
 
-    try {
-      await ref.read(mealServiceProvider).assignMeal(
-        _currentPlan!.id,
-        {
-          'mealId': meal.id,
-          'dayOfWeek': dayOfWeek,
-          'mealType': mealType,
-        },
-      );
-      await _loadData();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error assigning meal: $e')),
+    final MealModel? selectedMeal = await showDialog<MealModel>(
+      context: context,
+      builder: (context) => MealSelectionDialog(meals: _availableMeals!),
+    );
+
+    if (selectedMeal != null && mounted) {
+      try {
+        await ref.read(mealServiceProvider.notifier).assignMeal(
+          _currentPlan!.id,
+          {
+            'mealId': selectedMeal.id,
+            'date': date.toIso8601String(),
+            'type': selectedType.name,
+          },
         );
-      }
-    }
-  }
-
-  Future<void> _removeMeal(String assignmentId) async {
-    if (_currentPlan == null) return;
-
-    try {
-      await ref.read(mealServiceProvider).removeAssignment(
-        _currentPlan!.id,
-        assignmentId,
-      );
-      await _loadData();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error removing meal: $e')),
-        );
+        await _loadData(); // Refresh data
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                e is ApiException 
+                  ? e.toUserMessage()
+                  : 'Failed to assign meal. Please try again.',
+              ),
+            ),
+          );
+        }
       }
     }
   }
@@ -98,121 +115,102 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (_currentPlan == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('No weekly plan found'),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  final now = DateTime.now();
-                  final startOfWeek = now.subtract(
-                    Duration(days: now.weekday - 1),
-                  );
-                  
-                  await ref.read(mealServiceProvider).createWeeklyPlan(
-                    CreateWeeklyPlanRequest(
-                      userId: 'current-user', // Replace with actual user ID
-                      startDate: startOfWeek,
-                      endDate: startOfWeek.add(const Duration(days: 6)),
-                    ),
-                  );
-                  await _loadData();
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error creating plan: $e')),
-                    );
-                  }
-                }
-              },
-              child: const Text('Create Weekly Plan'),
-            ),
-          ],
+      return Scaffold(
+        appBar: AppBar(title: const Text('Weekly Plan')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('No weekly plan found'),
+              ElevatedButton(
+                onPressed: _loadData,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
         ),
       );
     }
 
+    final startDate = _currentPlan!.startDate;
+    final dates = List.generate(7, (index) => 
+      startDate.add(Duration(days: index)),
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Weekly Meal Plan'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadData,
-          ),
-        ],
+        title: Text(
+          _currentPlan!.name ?? 
+          'Week of ${startDate.month}/${startDate.day}',
+        ),
       ),
       body: ListView.builder(
-        itemCount: 7,
+        itemCount: dates.length,
         itemBuilder: (context, index) {
-          final dayOfWeek = index + 1;
+          final date = dates[index];
           final assignments = _currentPlan!.assignments
-              .where((a) => a.dayOfWeek == dayOfWeek)
-              .toList();
+            .where((a) => a.date.year == date.year && 
+                         a.date.month == date.month && 
+                         a.date.day == date.day)
+            .toList()
+            ..sort((a, b) => a.type.index.compareTo(b.type.index));
 
           return Card(
-            margin: const EdgeInsets.all(8),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Text(
-                    _getDayName(dayOfWeek),
-                    style: Theme.of(context).textTheme.titleLarge,
+                ListTile(
+                  title: Text(
+                    '${date.month}/${date.day}',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () => _assignMeal(date),
                   ),
                 ),
-                ...['breakfast', 'lunch', 'dinner'].map((mealType) {
-                  final assignment = assignments.firstWhere(
-                    (a) => a.mealType == mealType,
-                    orElse: () => MealAssignment(
-                      id: '',
-                      weeklyPlanId: _currentPlan!.id,
-                      mealId: '',
-                      dayOfWeek: dayOfWeek,
-                      mealType: mealType,
-                      meal: const Meal(
-                        id: '',
-                        name: '',
-                        description: '',
-                        ingredients: [],
-                        instructions: [],
-                        imageUrl: '',
-                        createdAt: null,
-                        updatedAt: null,
-                      ),
-                      createdAt: DateTime.now(),
-                      updatedAt: DateTime.now(),
+                if (assignments.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text('No meals planned'),
+                  )
+                else
+                  ...assignments.map((assignment) => ListTile(
+                    leading: Text(
+                      assignment.type.name.toUpperCase(),
+                      style: Theme.of(context).textTheme.labelMedium,
                     ),
-                  );
-
-                  return ListTile(
-                    title: Text(mealType.toUpperCase()),
-                    subtitle: Text(assignment.meal.name.isEmpty
-                        ? 'No meal assigned'
-                        : assignment.meal.name),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (assignment.meal.name.isNotEmpty)
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => _removeMeal(assignment.id),
-                          ),
-                        IconButton(
-                          icon: const Icon(Icons.add),
-                          onPressed: () => _assignMeal(dayOfWeek, mealType),
-                        ),
-                      ],
+                    title: Text(assignment.meal.name),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        try {
+                          await ref.read(mealServiceProvider.notifier)
+                            .removeAssignment(_currentPlan!.id, assignment.id);
+                          await _loadData();
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  e is ApiException 
+                                    ? e.toUserMessage()
+                                    : 'Failed to remove meal. Please try again.',
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      },
                     ),
-                  );
-                }),
+                  )),
               ],
             ),
           );
@@ -220,31 +218,10 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
       ),
     );
   }
-
-  String _getDayName(int dayOfWeek) {
-    switch (dayOfWeek) {
-      case 1:
-        return 'Monday';
-      case 2:
-        return 'Tuesday';
-      case 3:
-        return 'Wednesday';
-      case 4:
-        return 'Thursday';
-      case 5:
-        return 'Friday';
-      case 6:
-        return 'Saturday';
-      case 7:
-        return 'Sunday';
-      default:
-        return '';
-    }
-  }
 }
 
 class MealSelectionDialog extends StatelessWidget {
-  final List<Meal> meals;
+  final List<MealModel> meals;
 
   const MealSelectionDialog({
     super.key,
@@ -253,33 +230,12 @@ class MealSelectionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Select a Meal',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-          Flexible(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: meals.length,
-              itemBuilder: (context, index) {
-                final meal = meals[index];
-                return ListTile(
-                  title: Text(meal.name),
-                  subtitle: Text(meal.description),
-                  onTap: () => Navigator.of(context).pop(meal),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+    return SimpleDialog(
+      title: const Text('Select a Meal'),
+      children: meals.map((meal) => SimpleDialogOption(
+        onPressed: () => Navigator.pop(context, meal),
+        child: Text(meal.name),
+      )).toList(),
     );
   }
 }

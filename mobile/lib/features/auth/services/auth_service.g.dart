@@ -3,10 +3,50 @@
 part of 'auth_service.dart';
 
 // **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) => AuthResponse(
+      user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
+      token: json['token'] as String,
+    );
+
+Map<String, dynamic> _$AuthResponseToJson(AuthResponse instance) =>
+    <String, dynamic>{
+      'user': instance.user,
+      'token': instance.token,
+    };
+
+LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) => LoginRequest(
+      email: json['email'] as String,
+      password: json['password'] as String,
+    );
+
+Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) =>
+    <String, dynamic>{
+      'email': instance.email,
+      'password': instance.password,
+    };
+
+RegisterRequest _$RegisterRequestFromJson(Map<String, dynamic> json) =>
+    RegisterRequest(
+      email: json['email'] as String,
+      password: json['password'] as String,
+      username: json['username'] as String?,
+    );
+
+Map<String, dynamic> _$RegisterRequestToJson(RegisterRequest instance) =>
+    <String, dynamic>{
+      'email': instance.email,
+      'password': instance.password,
+      'username': instance.username,
+    };
+
+// **************************************************************************
 // RetrofitGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations
+// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element
 
 class _AuthServiceApi implements AuthServiceApi {
   _AuthServiceApi(
@@ -22,20 +62,20 @@ class _AuthServiceApi implements AuthServiceApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<UserModel> register(Map<String, String> credentials) async {
+  Future<AuthResponse> register(RegisterRequest credentials) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    _data.addAll(credentials);
-    final _options = _setStreamType<UserModel>(Options(
+    _data.addAll(credentials.toJson());
+    final _options = _setStreamType<AuthResponse>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/api/auth/register',
+          '/auth/register',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -45,9 +85,9 @@ class _AuthServiceApi implements AuthServiceApi {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late UserModel _value;
+    late AuthResponse _value;
     try {
-      _value = UserModel.fromJson(_result.data!);
+      _value = AuthResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;
@@ -56,20 +96,20 @@ class _AuthServiceApi implements AuthServiceApi {
   }
 
   @override
-  Future<UserModel> login(Map<String, String> credentials) async {
+  Future<AuthResponse> login(LoginRequest credentials) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    _data.addAll(credentials);
-    final _options = _setStreamType<UserModel>(Options(
+    _data.addAll(credentials.toJson());
+    final _options = _setStreamType<AuthResponse>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/api/auth/login',
+          '/auth/login',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -79,9 +119,9 @@ class _AuthServiceApi implements AuthServiceApi {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late UserModel _value;
+    late AuthResponse _value;
     try {
-      _value = UserModel.fromJson(_result.data!);
+      _value = AuthResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;
@@ -102,7 +142,7 @@ class _AuthServiceApi implements AuthServiceApi {
     )
         .compose(
           _dio.options,
-          '/api/auth/logout',
+          '/auth/logout',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -128,7 +168,7 @@ class _AuthServiceApi implements AuthServiceApi {
     )
         .compose(
           _dio.options,
-          '/api/auth/reset-password',
+          '/auth/reset-password',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -138,73 +178,6 @@ class _AuthServiceApi implements AuthServiceApi {
           baseUrl,
         )));
     await _dio.fetch<void>(_options);
-  }
-
-  @override
-  Future<UserModel> getCurrentUser() async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<UserModel>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/api/auth/me',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late UserModel _value;
-    try {
-      _value = UserModel.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<UserModel> updateProfile(Map<String, String> profile) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(profile);
-    final _options = _setStreamType<UserModel>(Options(
-      method: 'PATCH',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/api/auth/profile',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late UserModel _value;
-    try {
-      _value = UserModel.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

@@ -17,159 +17,201 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retrofit/retrofit.dart';
 import '../models/user_model.dart';
+import '../../../core/config/app_config.dart';
+import '../../../core/network/api_client.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'auth_service.g.dart';
 
 class AuthException implements Exception {
   final String message;
-  final bool isNetworkError;
-  final bool isServerError;
-  final bool isAuthError;
+  final int? statusCode;
 
-  AuthException({
-    required this.message,
-    this.isNetworkError = false,
-    this.isServerError = false,
-    this.isAuthError = false,
-  });
+  AuthException(this.message, {this.statusCode});
+
+  @override
+  String toString() => message;
+}
+
+@JsonSerializable()
+class AuthResponse {
+  final UserModel user;
+  final String token;
+
+  AuthResponse({required this.user, required this.token});
+
+  factory AuthResponse.fromJson(Map<String, dynamic> json) => _$AuthResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$AuthResponseToJson(this);
+}
+
+@JsonSerializable()
+class LoginRequest {
+  final String email;
+  final String password;
+
+  LoginRequest({required this.email, required this.password});
+
+  factory LoginRequest.fromJson(Map<String, dynamic> json) => _$LoginRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$LoginRequestToJson(this);
+}
+
+@JsonSerializable()
+class RegisterRequest {
+  final String email;
+  final String password;
+  final String? username;
+
+  RegisterRequest({required this.email, required this.password, this.username});
+
+  factory RegisterRequest.fromJson(Map<String, dynamic> json) => _$RegisterRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$RegisterRequestToJson(this);
 }
 
 @RestApi()
 abstract class AuthServiceApi {
-  factory AuthServiceApi(Dio dio, {String baseUrl}) = _AuthServiceApi;
+  factory AuthServiceApi(Dio dio, {String? baseUrl}) = _AuthServiceApi;
 
-  @POST('/api/auth/register')
-  Future<UserModel> register(@Body() Map<String, String> credentials);
+  @POST('/auth/register')
+  Future<AuthResponse> register(@Body() RegisterRequest credentials);
 
-  @POST('/api/auth/login')
-  Future<UserModel> login(@Body() Map<String, String> credentials);
+  @POST('/auth/login')
+  Future<AuthResponse> login(@Body() LoginRequest credentials);
 
-  @POST('/api/auth/logout')
+  @POST('/auth/logout')
   Future<void> logout();
 
-  @POST('/api/auth/reset-password')
+  @POST('/auth/reset-password')
   Future<void> resetPassword(@Body() Map<String, String> request);
-
-  @GET('/api/auth/me')
-  Future<UserModel> getCurrentUser();
-
-  @PATCH('/api/auth/profile')
-  Future<UserModel> updateProfile(@Body() Map<String, String> profile);
 }
 
+/// Service for handling authentication operations
 class AuthService extends StateNotifier<UserModel?> {
   final AuthServiceApi _api;
-  final Dio _dio;
 
-  AuthService(this._api, this._dio) : super(null);
+  AuthService(this._api) : super(null);
 
-  Future<UserModel> register(String email, String password) async {
+  /// Register a new user
+  Future<UserModel> register(String email, String password, {String? username}) async {
     try {
-      final user = await _api.register({
-        'email': email,
-        'password': password,
-      });
-      state = user;
-      return user;
+      final response = await _api.register(RegisterRequest(
+        email: email,
+        password: password,
+        username: username,
+      ));
+      state = response.user;
+      await _saveToken(response.token);
+      return response.user;
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
   }
 
+  /// Log in an existing user
   Future<UserModel> login(String email, String password) async {
     try {
-      final user = await _api.login({
-        'email': email,
-        'password': password,
-      });
-      state = user;
-      return user;
+      final response = await _api.login(LoginRequest(
+        email: email,
+        password: password,
+      ));
+      developer.log('Login successful, saving token', name: 'Auth');
+      await _saveToken(response.token);
+      state = response.user;
+      return response.user;
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
   }
 
+  /// Log out the current user
   Future<void> logout() async {
     try {
       await _api.logout();
       state = null;
+      await _removeToken();
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
   }
 
+  /// Reset password for a user
   Future<void> resetPassword(String email) async {
     try {
-      await _api.resetPassword({'email': email});
+      await _api.resetPassword({
+        'email': email,
+      });
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
   }
 
-  Future<UserModel> getCurrentUser() async {
-    try {
-      final user = await _api.getCurrentUser();
-      state = user;
-      return user;
-    } on DioException catch (e) {
-      throw _handleDioError(e);
-    }
+  /// Get the current user
+  UserModel? getCurrentUser() => state;
+
+  /// Get the auth token
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    developer.log('Getting token: ${token != null ? 'Token exists' : 'No token found'}', name: 'Auth');
+    return token;
   }
 
+  /// Save the auth token
+  Future<void> _saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('auth_token', 'Bearer $token');
+    developer.log('Token saved successfully: $token', name: 'Auth');
+  }
+
+  /// Remove the auth token
+  Future<void> _removeToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+    developer.log('Token removed', name: 'Auth');
+  }
+
+  /// Update user profile
   Future<UserModel> updateProfile({
     String? displayName,
     String? photoUrl,
   }) async {
-    try {
-      final updates = <String, String>{};
-      if (displayName != null) updates['displayName'] = displayName;
-      if (photoUrl != null) updates['photoUrl'] = photoUrl;
+    final currentUser = state;
+    if (currentUser == null) {
+      throw AuthException('Not logged in');
+    }
 
-      final user = await _api.updateProfile(updates);
-      state = user;
-      return user;
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+    try {
+      final updatedUser = currentUser.copyWith(
+        displayName: displayName ?? currentUser.displayName,
+        photoUrl: photoUrl ?? currentUser.photoUrl,
+      );
+      state = updatedUser;
+      return updatedUser;
+    } catch (e) {
+      developer.log('Error updating profile', error: e);
+      throw AuthException('Failed to update profile');
     }
   }
 
+  /// Handle Dio errors and convert them to AuthException
   AuthException _handleDioError(DioException e) {
-    switch (e.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
-      case DioExceptionType.connectionError:
-        return AuthException(
-          message: 'Network error. Please check your connection.',
-          isNetworkError: true,
-        );
-      case DioExceptionType.badResponse:
-        final statusCode = e.response?.statusCode;
-        if (statusCode == 401 || statusCode == 403) {
-          return AuthException(
-            message: 'Authentication error. Please log in again.',
-            isAuthError: true,
-          );
-        }
-        return AuthException(
-          message: e.response?.data['error'] ?? 'Server error occurred.',
-          isServerError: true,
-        );
-      default:
-        return AuthException(
-          message: 'An unexpected error occurred.',
-          isServerError: true,
-        );
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
+      return AuthException('Connection timeout. Please check your internet connection.');
     }
+
+    if (e.response != null) {
+      final data = e.response!.data;
+      String message = 'An error occurred';
+      
+      if (data is Map<String, dynamic> && data.containsKey('error')) {
+        message = data['error'] as String;
+      }
+
+      return AuthException(message, statusCode: e.response!.statusCode);
+    }
+
+    return AuthException('An unexpected error occurred');
   }
 }
-
-final authServiceProvider = StateNotifierProvider<AuthService, UserModel?>((ref) {
-  final dio = Dio(BaseOptions(
-    baseUrl: 'http://localhost:3000',
-    contentType: 'application/json',
-  ));
-  
-  final api = AuthServiceApi(dio);
-  return AuthService(api, dio);
-});

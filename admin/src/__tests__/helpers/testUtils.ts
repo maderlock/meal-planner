@@ -1,3 +1,10 @@
+/**
+ * Test utilities for API testing
+ * 
+ * This file provides helper functions and mocks for testing API endpoints.
+ * It includes request/response mocking and common test data.
+ */
+
 import { prisma } from '@/lib/prisma'
 import { jest } from '@jest/globals'
 
@@ -55,6 +62,45 @@ export const mockWeeklyPlan = {
   mealPlans: [mockMealAssignment]
 }
 
+// Mock Prisma Client
+export const prismaMock = {
+  user: {
+    findUnique: jest.fn(),
+    findFirst: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  },
+  meal: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  },
+  weeklyPlan: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  },
+  mealAssignment: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  },
+  favoriteMeal: {
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+  },
+} as unknown as typeof prisma
+
 // Helper function to strip date fields for comparison
 export function stripDateFields<T extends Record<string, any>>(obj: T): T {
   const newObj = { ...obj }
@@ -66,6 +112,53 @@ export function stripDateFields<T extends Record<string, any>>(obj: T): T {
     }
   }
   return newObj
+}
+
+// Mock Next.js Response
+export class MockNextResponse {
+  constructor(
+    public body: any,
+    public init: ResponseInit = {}
+  ) {}
+
+  public headers: Headers
+
+  static json(data: any, init: ResponseInit = {}) {
+    return new MockNextResponse(
+      JSON.stringify(data),
+      {
+        ...init,
+        headers: {
+          'Content-Type': 'application/json',
+          ...init.headers,
+        },
+      }
+    )
+  }
+}
+
+// Mock Next.js Request
+export class MockNextRequest {
+  private url: string;
+  private config: RequestInit;
+  public headers: Headers;
+  public method: string;
+
+  constructor(url: string, config: RequestInit = {}) {
+    this.url = url;
+    this.config = config;
+    this.headers = new Headers(config.headers || {});
+    this.method = config.method || 'GET';
+  }
+
+  async json() {
+    if (!this.config.body) return undefined;
+    return JSON.parse(this.config.body as string);
+  }
+
+  get nextUrl() {
+    return new URL(this.url);
+  }
 }
 
 export const TEST_DATE = '2025-01-21T22:18:21Z'

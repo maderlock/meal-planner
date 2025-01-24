@@ -10,72 +10,35 @@ part 'meal_model.freezed.dart';
 part 'meal_model.g.dart';
 
 @freezed
-class Meal with _$Meal {
-  /// Unique identifier for the meal.
-  const factory Meal({
-    required String id,
-    /// Name of the meal.
-    required String name,
-    /// Brief description of the meal.
-    required String description,
-    /// List of ingredients required for the meal.
-    required List<String> ingredients,
-    /// Step-by-step instructions for preparing the meal.
-    required List<String> instructions,
-    /// URL of the meal's image.
-    required String imageUrl,
-    /// Whether the meal is favorited by the user.
-    @Default(false) bool isFavorite,
-    /// When the meal was created.
-    required DateTime createdAt,
-    /// When the meal was last updated.
-    required DateTime updatedAt,
-  }) = _Meal;
+class MealModel with _$MealModel {
+  const factory MealModel({
+    @JsonKey(name: 'id') required String id,
+    @JsonKey(name: 'name') required String name,
+    @JsonKey(name: 'description') String? description,
+    @JsonKey(name: 'imageUrl') String? imageUrl,
+    @JsonKey(name: 'instructions') String? instructions,
+    @JsonKey(name: 'ingredients') required List<String> ingredients,
+    @JsonKey(name: 'createdAt') required DateTime createdAt,
+    @JsonKey(name: 'updatedAt') required DateTime updatedAt,
+  }) = _MealModel;
 
-  /// Creates a meal from a JSON map.
-  factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);
+  factory MealModel.fromJson(Map<String, dynamic> json) =>
+      _$MealModelFromJson(json);
 }
 
-@freezed
-class MealAssignment with _$MealAssignment {
-  /// Unique identifier for the meal assignment.
-  const factory MealAssignment({
-    required String id,
-    /// ID of the weekly plan that the meal is assigned to.
-    required String weeklyPlanId,
-    /// ID of the assigned meal.
-    required String mealId,
-    /// Day of the week that the meal is assigned to.
-    required int dayOfWeek,
-    /// Type of meal (e.g. breakfast, lunch, dinner).
-    required String mealType,
-    /// The assigned meal.
-    required Meal meal,
-    /// When the meal was assigned.
-    required DateTime createdAt,
-    /// When the meal assignment was last updated.
-    required DateTime updatedAt,
-  }) = _MealAssignment;
-
-  /// Creates a meal assignment from a JSON map.
-  factory MealAssignment.fromJson(Map<String, dynamic> json) =>
-      _$MealAssignmentFromJson(json);
-}
-
+/// Represents a meal that has been marked as a favorite by a user.
+/// Only stores the relationship between user and meal, the full meal
+/// data is loaded separately when needed.
 @freezed
 class FavoriteMeal with _$FavoriteMeal {
-  /// ID of the user who favorited the meal.
   const factory FavoriteMeal({
-    required String userId,
-    /// ID of the favorited meal.
-    required String mealId,
-    /// The favorited meal.
-    required Meal meal,
-    /// When the meal was favorited.
-    required DateTime createdAt,
+    @JsonKey(name: 'id') required String id,
+    @JsonKey(name: 'userId') required String userId,
+    @JsonKey(name: 'mealId') required String mealId,
+    @JsonKey(name: 'createdAt') required DateTime createdAt,
+    @JsonKey(name: 'updatedAt') required DateTime updatedAt,
   }) = _FavoriteMeal;
 
-  /// Creates a favorite meal from a JSON map.
   factory FavoriteMeal.fromJson(Map<String, dynamic> json) =>
       _$FavoriteMealFromJson(json);
 }

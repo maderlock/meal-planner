@@ -29,15 +29,38 @@ void main() {
   );
 
   group('register', () {
+    final mockResponse = AuthResponse(
+      user: mockUser,
+      token: 'mock-token',
+    );
+
     test('should register user successfully', () async {
       when(() => mockApi.register({
         'email': 'test@example.com',
         'password': 'password123',
-      })).thenAnswer((_) async => mockUser);
+      })).thenAnswer((_) async => mockResponse);
 
       final user = await authService.register(
         'test@example.com',
         'password123',
+      );
+
+      expect(user.email, equals('test@example.com'));
+      expect(user.id, equals('test-uid'));
+      expect(authService.state, equals(user));
+    });
+
+    test('should register user with username successfully', () async {
+      when(() => mockApi.register({
+        'email': 'test@example.com',
+        'password': 'password123',
+        'username': 'testuser',
+      })).thenAnswer((_) async => mockResponse);
+
+      final user = await authService.register(
+        'test@example.com',
+        'password123',
+        username: 'testuser',
       );
 
       expect(user.email, equals('test@example.com'));
@@ -64,11 +87,16 @@ void main() {
   });
 
   group('login', () {
+    final mockResponse = AuthResponse(
+      user: mockUser,
+      token: 'mock-token',
+    );
+
     test('should login user successfully', () async {
       when(() => mockApi.login({
         'email': 'test@example.com',
         'password': 'password123',
-      })).thenAnswer((_) async => mockUser);
+      })).thenAnswer((_) async => mockResponse);
 
       final user = await authService.login(
         'test@example.com',

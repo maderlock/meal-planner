@@ -22,11 +22,13 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) {
 mixin _$UserModel {
   String get id => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
+  String? get username => throw _privateConstructorUsedError;
+  String? get firebaseUid => throw _privateConstructorUsedError;
   String? get displayName => throw _privateConstructorUsedError;
   String? get photoUrl => throw _privateConstructorUsedError;
   bool get emailVerified => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  DateTime get updatedAt => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this UserModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -46,11 +48,13 @@ abstract class $UserModelCopyWith<$Res> {
   $Res call(
       {String id,
       String email,
+      String? username,
+      String? firebaseUid,
       String? displayName,
       String? photoUrl,
       bool emailVerified,
-      DateTime createdAt,
-      DateTime updatedAt});
+      DateTime? createdAt,
+      DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -70,11 +74,13 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
   $Res call({
     Object? id = null,
     Object? email = null,
+    Object? username = freezed,
+    Object? firebaseUid = freezed,
     Object? displayName = freezed,
     Object? photoUrl = freezed,
     Object? emailVerified = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -85,6 +91,14 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String,
+      username: freezed == username
+          ? _value.username
+          : username // ignore: cast_nullable_to_non_nullable
+              as String?,
+      firebaseUid: freezed == firebaseUid
+          ? _value.firebaseUid
+          : firebaseUid // ignore: cast_nullable_to_non_nullable
+              as String?,
       displayName: freezed == displayName
           ? _value.displayName
           : displayName // ignore: cast_nullable_to_non_nullable
@@ -97,14 +111,14 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
           ? _value.emailVerified
           : emailVerified // ignore: cast_nullable_to_non_nullable
               as bool,
-      createdAt: null == createdAt
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      updatedAt: null == updatedAt
+              as DateTime?,
+      updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
     ) as $Val);
   }
 }
@@ -120,11 +134,13 @@ abstract class _$$UserModelImplCopyWith<$Res>
   $Res call(
       {String id,
       String email,
+      String? username,
+      String? firebaseUid,
       String? displayName,
       String? photoUrl,
       bool emailVerified,
-      DateTime createdAt,
-      DateTime updatedAt});
+      DateTime? createdAt,
+      DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -142,11 +158,13 @@ class __$$UserModelImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? email = null,
+    Object? username = freezed,
+    Object? firebaseUid = freezed,
     Object? displayName = freezed,
     Object? photoUrl = freezed,
     Object? emailVerified = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(_$UserModelImpl(
       id: null == id
@@ -157,6 +175,14 @@ class __$$UserModelImplCopyWithImpl<$Res>
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String,
+      username: freezed == username
+          ? _value.username
+          : username // ignore: cast_nullable_to_non_nullable
+              as String?,
+      firebaseUid: freezed == firebaseUid
+          ? _value.firebaseUid
+          : firebaseUid // ignore: cast_nullable_to_non_nullable
+              as String?,
       displayName: freezed == displayName
           ? _value.displayName
           : displayName // ignore: cast_nullable_to_non_nullable
@@ -169,14 +195,14 @@ class __$$UserModelImplCopyWithImpl<$Res>
           ? _value.emailVerified
           : emailVerified // ignore: cast_nullable_to_non_nullable
               as bool,
-      createdAt: null == createdAt
+      createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      updatedAt: null == updatedAt
+              as DateTime?,
+      updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
     ));
   }
 }
@@ -187,11 +213,13 @@ class _$UserModelImpl implements _UserModel {
   const _$UserModelImpl(
       {required this.id,
       required this.email,
+      this.username,
+      this.firebaseUid,
       this.displayName,
       this.photoUrl,
       this.emailVerified = false,
-      required this.createdAt,
-      required this.updatedAt});
+      this.createdAt = null,
+      this.updatedAt = null});
 
   factory _$UserModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserModelImplFromJson(json);
@@ -201,6 +229,10 @@ class _$UserModelImpl implements _UserModel {
   @override
   final String email;
   @override
+  final String? username;
+  @override
+  final String? firebaseUid;
+  @override
   final String? displayName;
   @override
   final String? photoUrl;
@@ -208,13 +240,15 @@ class _$UserModelImpl implements _UserModel {
   @JsonKey()
   final bool emailVerified;
   @override
-  final DateTime createdAt;
+  @JsonKey()
+  final DateTime? createdAt;
   @override
-  final DateTime updatedAt;
+  @JsonKey()
+  final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, displayName: $displayName, photoUrl: $photoUrl, emailVerified: $emailVerified, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserModel(id: $id, email: $email, username: $username, firebaseUid: $firebaseUid, displayName: $displayName, photoUrl: $photoUrl, emailVerified: $emailVerified, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -224,6 +258,10 @@ class _$UserModelImpl implements _UserModel {
             other is _$UserModelImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.email, email) || other.email == email) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
+            (identical(other.firebaseUid, firebaseUid) ||
+                other.firebaseUid == firebaseUid) &&
             (identical(other.displayName, displayName) ||
                 other.displayName == displayName) &&
             (identical(other.photoUrl, photoUrl) ||
@@ -238,8 +276,8 @@ class _$UserModelImpl implements _UserModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, email, displayName, photoUrl,
-      emailVerified, createdAt, updatedAt);
+  int get hashCode => Object.hash(runtimeType, id, email, username, firebaseUid,
+      displayName, photoUrl, emailVerified, createdAt, updatedAt);
 
   /// Create a copy of UserModel
   /// with the given fields replaced by the non-null parameter values.
@@ -261,11 +299,13 @@ abstract class _UserModel implements UserModel {
   const factory _UserModel(
       {required final String id,
       required final String email,
+      final String? username,
+      final String? firebaseUid,
       final String? displayName,
       final String? photoUrl,
       final bool emailVerified,
-      required final DateTime createdAt,
-      required final DateTime updatedAt}) = _$UserModelImpl;
+      final DateTime? createdAt,
+      final DateTime? updatedAt}) = _$UserModelImpl;
 
   factory _UserModel.fromJson(Map<String, dynamic> json) =
       _$UserModelImpl.fromJson;
@@ -275,15 +315,19 @@ abstract class _UserModel implements UserModel {
   @override
   String get email;
   @override
+  String? get username;
+  @override
+  String? get firebaseUid;
+  @override
   String? get displayName;
   @override
   String? get photoUrl;
   @override
   bool get emailVerified;
   @override
-  DateTime get createdAt;
+  DateTime? get createdAt;
   @override
-  DateTime get updatedAt;
+  DateTime? get updatedAt;
 
   /// Create a copy of UserModel
   /// with the given fields replaced by the non-null parameter values.

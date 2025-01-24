@@ -6,148 +6,97 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'meal_model.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'weekly_plan_model.freezed.dart';
 part 'weekly_plan_model.g.dart';
 
-@freezed
-class WeeklyPlan with _$WeeklyPlan {
-  const factory WeeklyPlan({
-    required String id,
-    required String userId,
-    required DateTime startDate,
-    required DateTime endDate,
-    required List<MealAssignment> assignments,
-    required DateTime createdAt,
-    required DateTime updatedAt,
-  }) = _WeeklyPlan;
-
-  factory WeeklyPlan.fromJson(Map<String, dynamic> json) =>
-      _$WeeklyPlanFromJson(json);
+enum MealType {
+  @JsonValue('breakfast')
+  breakfast,
+  @JsonValue('lunch')
+  lunch,
+  @JsonValue('dinner')
+  dinner,
 }
 
 @freezed
-class CreateWeeklyPlanRequest with _$CreateWeeklyPlanRequest {
-  const factory CreateWeeklyPlanRequest({
-    required String userId,
-    required DateTime startDate,
-    required DateTime endDate,
-  }) = _CreateWeeklyPlanRequest;
+class WeeklyPlanModel with _$WeeklyPlanModel {
+  const factory WeeklyPlanModel({
+    @JsonKey(name: 'id') required String id,
+    @JsonKey(name: 'userId') required String userId,
+    @JsonKey(name: 'startDate') required DateTime startDate,
+    @JsonKey(name: 'endDate') required DateTime endDate,
+    @JsonKey(name: 'name') String? name,
+    @JsonKey(name: 'assignments') required List<MealAssignment> assignments,
+    @JsonKey(name: 'createdAt') required DateTime createdAt,
+    @JsonKey(name: 'updatedAt') required DateTime updatedAt,
+  }) = _WeeklyPlanModel;
+
+  factory WeeklyPlanModel.fromJson(Map<String, dynamic> json) =>
+      _$WeeklyPlanModelFromJson(json);
+}
+
+@freezed
+class MealAssignment with _$MealAssignment {
+  const factory MealAssignment({
+    @JsonKey(name: 'id') required String id,
+    @JsonKey(name: 'mealId') required String mealId,
+    @JsonKey(name: 'meal') required MealModel meal,
+    @JsonKey(name: 'date') required DateTime date,
+    @JsonKey(name: 'type') required MealType type,
+    @JsonKey(name: 'notes') String? notes,
+  }) = _MealAssignment;
+
+  factory MealAssignment.fromJson(Map<String, dynamic> json) =>
+      _$MealAssignmentFromJson(json);
+}
+
+/// Request model for creating a new weekly plan.
+@JsonSerializable()
+class CreateWeeklyPlanRequest {
+  @JsonKey(name: 'startDate')
+  final DateTime startDate;
+  
+  @JsonKey(name: 'endDate')
+  final DateTime endDate;
+  
+  @JsonKey(name: 'name')
+  final String? name;
+
+  CreateWeeklyPlanRequest({
+    required this.startDate,
+    required this.endDate,
+    this.name,
+  });
 
   factory CreateWeeklyPlanRequest.fromJson(Map<String, dynamic> json) =>
       _$CreateWeeklyPlanRequestFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CreateWeeklyPlanRequestToJson(this);
 }
 
-@freezed
-class UpdateWeeklyPlanRequest with _$UpdateWeeklyPlanRequest {
-  const factory UpdateWeeklyPlanRequest({
-    required String id,
-    required DateTime startDate,
-    required DateTime endDate,
-  }) = _UpdateWeeklyPlanRequest;
+/// Request model for updating an existing weekly plan.
+/// All fields are optional since this is a PATCH operation.
+@JsonSerializable()
+class UpdateWeeklyPlanRequest {
+  @JsonKey(name: 'startDate')
+  final DateTime? startDate;
+  
+  @JsonKey(name: 'endDate')
+  final DateTime? endDate;
+  
+  @JsonKey(name: 'name')
+  final String? name;
+
+  UpdateWeeklyPlanRequest({
+    this.startDate,
+    this.endDate,
+    this.name,
+  });
 
   factory UpdateWeeklyPlanRequest.fromJson(Map<String, dynamic> json) =>
       _$UpdateWeeklyPlanRequestFromJson(json);
-}
 
-/// Model class representing a meal assignment in a weekly plan.
-@JsonSerializable()
-class MealAssignment {
-  /// Unique identifier for the meal assignment.
-  final String id;
-  
-  /// ID of the weekly plan this assignment belongs to.
-  final String weeklyPlanId;
-  
-  /// ID of the assigned meal.
-  final String mealId;
-  
-  /// Day of the week (0-6, where 0 is Sunday).
-  final int dayOfWeek;
-  
-  /// Type of meal (e.g., 'breakfast', 'lunch', 'dinner').
-  final String mealType;
-
-  /// Optional note for this meal assignment.
-  final String? note;
-  
-  /// When the assignment was created.
-  final DateTime createdAt;
-  
-  /// When the assignment was last updated.
-  final DateTime updatedAt;
-
-  /// Creates a new meal assignment.
-  const MealAssignment({
-    required this.id,
-    required this.weeklyPlanId,
-    required this.mealId,
-    required this.dayOfWeek,
-    required this.mealType,
-    this.note,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  /// Creates a copy of this assignment with the given fields replaced with the new values.
-  MealAssignment copyWith({
-    String? id,
-    String? weeklyPlanId,
-    String? mealId,
-    int? dayOfWeek,
-    String? mealType,
-    String? note,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return MealAssignment(
-      id: id ?? this.id,
-      weeklyPlanId: weeklyPlanId ?? this.weeklyPlanId,
-      mealId: mealId ?? this.mealId,
-      dayOfWeek: dayOfWeek ?? this.dayOfWeek,
-      mealType: mealType ?? this.mealType,
-      note: note ?? this.note,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
-
-  /// Creates a meal assignment from a JSON map.
-  factory MealAssignment.fromJson(Map<String, dynamic> json) => _$MealAssignmentFromJson(json);
-
-  /// Converts this meal assignment to a JSON map.
-  Map<String, dynamic> toJson() => _$MealAssignmentToJson(this);
-
-  @override
-  String toString() {
-    return 'MealAssignment(id: $id, mealId: $mealId, dayOfWeek: $dayOfWeek, mealType: $mealType)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is MealAssignment &&
-        other.id == id &&
-        other.weeklyPlanId == weeklyPlanId &&
-        other.mealId == mealId &&
-        other.dayOfWeek == dayOfWeek &&
-        other.mealType == mealType &&
-        other.note == note &&
-        other.createdAt == createdAt &&
-        other.updatedAt == updatedAt;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      id,
-      weeklyPlanId,
-      mealId,
-      dayOfWeek,
-      mealType,
-      note,
-      createdAt,
-      updatedAt,
-    );
-  }
+  Map<String, dynamic> toJson() => _$UpdateWeeklyPlanRequestToJson(this);
 }

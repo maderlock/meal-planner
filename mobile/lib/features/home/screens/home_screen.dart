@@ -9,7 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:meal_planner/core/router/app_router.dart';
 import 'package:meal_planner/features/meals/services/meal_service.dart';
 import 'package:meal_planner/features/auth/providers/auth_provider.dart';
-import 'package:meal_planner/features/meals/models/meal_model.dart';
+import 'package:meal_planner/features/meals/models/weekly_plan_model.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -17,8 +17,8 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mealsAsync = ref.watch(mealServiceProvider);
-    final user = ref.watch(currentUserProvider);
+    final weeklyPlanAsync = ref.watch(mealServiceProvider);
+    final userName = ref.watch(userDisplayNameProvider) ?? 'User';
 
     return Scaffold(
       appBar: AppBar(
@@ -27,7 +27,7 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await ref.read(authServiceProvider).signOut();
+              await ref.read(authStateProvider.notifier).logout();
             },
           ),
         ],
@@ -38,7 +38,7 @@ class HomeScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Welcome back, ${user?.displayName ?? 'User'}!',
+              'Welcome back, $userName!',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
@@ -50,8 +50,8 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: mealsAsync.when(
-              data: (meals) => _buildWeeklyPlanSummary(context, meals ?? []),
+            child: weeklyPlanAsync.when(
+              data: (weeklyPlans) => _buildWeeklyPlanSummary(context, weeklyPlans),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Text('Error: $error'),
@@ -63,55 +63,101 @@ class HomeScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(AppRoutes.weeklyPlan),
         label: const Text('Plan Meals'),
-        icon: const Icon(Icons.calendar_today),
+        icon: const Icon(Icons.add),
       ),
     );
   }
 
-  Widget _buildWeeklyPlanSummary(BuildContext context, List<MealModel> meals) {
-    final today = DateTime.now();
-    final weekDays = List.generate(7, (index) {
-      final date = today.add(Duration(days: index));
-      return date;
-    });
+  Widget _buildWeeklyPlanSummary(BuildContext context, List<WeeklyPlanModel> plans) {
+    if (plans.isEmpty) {
+      return const Center(
+        child: Text('No meal plans yet. Create one!'),
+      );
+    }
+
+    // Find the current week's plan
+    final now = DateTime.now();
+    final currentPlan = plans.firstWhere(
+      (plan) => plan.startDate.isBefore(now) && plan.endDate.isAfter(now),
+      orElse: () => plans.first,
+    );
+
+    // Group assignments by date
+    final assignmentsByDate = <DateTime, List<MealAssignment>>{};
+    for (final assignment in currentPlan.assignments) {
+      final date = DateTime(
+        assignment.date.year,
+        assignment.date.month,
+        assignment.date.day,
+      );
+      assignmentsByDate.putIfAbsent(date, () => []).add(assignment);
+    }
+
+    // Sort dates
+    final dates = assignmentsByDate.keys.toList()
+      ..sort((a, b) => a.compareTo(b));
+
+    if (dates.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'No meals planned for ${DateFormat('MMMM d').format(currentPlan.startDate)} - ${DateFormat('MMMM d').format(currentPlan.endDate)}',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () => context.push(AppRoutes.weeklyPlan),
+              child: const Text('Add Meals'),
+            ),
+          ],
+        ),
+      );
+    }
 
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: weekDays.length,
+      itemCount: dates.length,
       itemBuilder: (context, index) {
-        final date = weekDays[index];
-        final dayName = DateFormat('EEEE').format(date);
-        final isToday = date.day == today.day && 
-                       date.month == today.month && 
-                       date.year == today.year;
-
-        // Get the meals for this day (in a real app, this would come from the weekly plan)
-        final dayMeals = meals.take(index + 1).toList();
+        final date = dates[index];
+        final assignments = assignmentsByDate[date]!;
+        assignments.sort((a, b) => a.type.index.compareTo(b.type.index));
 
         return Card(
-          elevation: isToday ? 4 : 1,
-          margin: const EdgeInsets.only(bottom: 8.0),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: isToday ? Theme.of(context).primaryColor : Colors.grey[200],
-              child: Text(
-                dayName.substring(0, 3),
-                style: TextStyle(
-                  color: isToday ? Colors.white : Colors.black87,
+          margin: const EdgeInsets.only(bottom: 16.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  DateFormat('EEEE, MMMM d').format(date),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-              ),
+                const SizedBox(height: 8),
+                ...assignments.map((assignment) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 100,
+                        child: Text(
+                          assignment.type.name.toUpperCase(),
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          assignment.meal.name,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+              ],
             ),
-            title: Text(dayName),
-            subtitle: Text(
-              dayMeals.isEmpty 
-                ? 'No meals planned' 
-                : '${dayMeals.length} meal(s) planned',
-              style: TextStyle(
-                color: dayMeals.isEmpty ? Colors.grey : null,
-              ),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push(AppRoutes.weeklyPlan),
           ),
         );
       },

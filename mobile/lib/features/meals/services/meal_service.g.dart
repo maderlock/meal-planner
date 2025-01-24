@@ -6,7 +6,7 @@ part of 'meal_service.dart';
 // RetrofitGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations
+// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element
 
 class _MealServiceApi implements MealServiceApi {
   _MealServiceApi(
@@ -22,19 +22,19 @@ class _MealServiceApi implements MealServiceApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<List<Meal>> getMeals() async {
+  Future<List<MealModel>> getMeals() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<Meal>>(Options(
+    final _options = _setStreamType<List<MealModel>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/api/meals',
+          '/meals',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -44,10 +44,10 @@ class _MealServiceApi implements MealServiceApi {
           baseUrl,
         )));
     final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<Meal> _value;
+    late List<MealModel> _value;
     try {
       _value = _result.data!
-          .map((dynamic i) => Meal.fromJson(i as Map<String, dynamic>))
+          .map((dynamic i) => MealModel.fromJson(i as Map<String, dynamic>))
           .toList();
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
@@ -57,19 +57,19 @@ class _MealServiceApi implements MealServiceApi {
   }
 
   @override
-  Future<Meal> getMeal(String id) async {
+  Future<MealModel> getMeal(String id) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<Meal>(Options(
+    final _options = _setStreamType<MealModel>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/api/meals/${id}',
+          '/meals/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -79,9 +79,9 @@ class _MealServiceApi implements MealServiceApi {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late Meal _value;
+    late MealModel _value;
     try {
-      _value = Meal.fromJson(_result.data!);
+      _value = MealModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;
@@ -90,19 +90,19 @@ class _MealServiceApi implements MealServiceApi {
   }
 
   @override
-  Future<List<WeeklyPlan>> getWeeklyPlans() async {
+  Future<List<WeeklyPlanModel>> getWeeklyPlans() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<WeeklyPlan>>(Options(
+    final _options = _setStreamType<List<WeeklyPlanModel>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/api/weekly-plans',
+          '/weekly-plans',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -112,10 +112,11 @@ class _MealServiceApi implements MealServiceApi {
           baseUrl,
         )));
     final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<WeeklyPlan> _value;
+    late List<WeeklyPlanModel> _value;
     try {
       _value = _result.data!
-          .map((dynamic i) => WeeklyPlan.fromJson(i as Map<String, dynamic>))
+          .map((dynamic i) =>
+              WeeklyPlanModel.fromJson(i as Map<String, dynamic>))
           .toList();
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
@@ -125,19 +126,19 @@ class _MealServiceApi implements MealServiceApi {
   }
 
   @override
-  Future<WeeklyPlan> getWeeklyPlan(String id) async {
+  Future<WeeklyPlanModel> getWeeklyPlan(String id) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<WeeklyPlan>(Options(
+    final _options = _setStreamType<WeeklyPlanModel>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/api/weekly-plans/${id}',
+          '/weekly-plans/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -147,9 +148,9 @@ class _MealServiceApi implements MealServiceApi {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late WeeklyPlan _value;
+    late WeeklyPlanModel _value;
     try {
-      _value = WeeklyPlan.fromJson(_result.data!);
+      _value = WeeklyPlanModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;
@@ -158,19 +159,21 @@ class _MealServiceApi implements MealServiceApi {
   }
 
   @override
-  Future<WeeklyPlan> createWeeklyPlan(CreateWeeklyPlanRequest request) async {
+  Future<WeeklyPlanModel> createWeeklyPlan(
+      CreateWeeklyPlanRequest request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = request;
-    final _options = _setStreamType<WeeklyPlan>(Options(
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
+    final _options = _setStreamType<WeeklyPlanModel>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/api/weekly-plans',
+          '/weekly-plans',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -180,9 +183,9 @@ class _MealServiceApi implements MealServiceApi {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late WeeklyPlan _value;
+    late WeeklyPlanModel _value;
     try {
-      _value = WeeklyPlan.fromJson(_result.data!);
+      _value = WeeklyPlanModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;
@@ -191,22 +194,23 @@ class _MealServiceApi implements MealServiceApi {
   }
 
   @override
-  Future<WeeklyPlan> updateWeeklyPlan(
+  Future<WeeklyPlanModel> updateWeeklyPlan(
     String id,
     UpdateWeeklyPlanRequest request,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = request;
-    final _options = _setStreamType<WeeklyPlan>(Options(
-      method: 'PATCH',
+    final _data = <String, dynamic>{};
+    _data.addAll(request.toJson());
+    final _options = _setStreamType<WeeklyPlanModel>(Options(
+      method: 'PUT',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/api/weekly-plans/${id}',
+          '/weekly-plans/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -216,9 +220,9 @@ class _MealServiceApi implements MealServiceApi {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late WeeklyPlan _value;
+    late WeeklyPlanModel _value;
     try {
-      _value = WeeklyPlan.fromJson(_result.data!);
+      _value = WeeklyPlanModel.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;
@@ -227,8 +231,8 @@ class _MealServiceApi implements MealServiceApi {
   }
 
   @override
-  Future<dynamic> assignMeal(
-    String weeklyPlanId,
+  Future<void> assignMeal(
+    String id,
     Map<String, dynamic> assignment,
   ) async {
     final _extra = <String, dynamic>{};
@@ -236,14 +240,14 @@ class _MealServiceApi implements MealServiceApi {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(assignment);
-    final _options = _setStreamType<dynamic>(Options(
+    final _options = _setStreamType<void>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/api/weekly-plans/${weeklyPlanId}/assignments',
+          '/weekly-plans/${id}/assignments',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -252,14 +256,12 @@ class _MealServiceApi implements MealServiceApi {
           _dio.options.baseUrl,
           baseUrl,
         )));
-    final _result = await _dio.fetch(_options);
-    final _value = _result.data;
-    return _value;
+    await _dio.fetch<void>(_options);
   }
 
   @override
   Future<void> removeAssignment(
-    String weeklyPlanId,
+    String id,
     String assignmentId,
   ) async {
     final _extra = <String, dynamic>{};
@@ -273,7 +275,7 @@ class _MealServiceApi implements MealServiceApi {
     )
         .compose(
           _dio.options,
-          '/api/weekly-plans/${weeklyPlanId}/assignments/${assignmentId}',
+          '/weekly-plans/${id}/assignments/${assignmentId}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -286,19 +288,19 @@ class _MealServiceApi implements MealServiceApi {
   }
 
   @override
-  Future<List<FavoriteMeal>> getFavorites() async {
+  Future<List<MealModel>> getFavorites() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<List<FavoriteMeal>>(Options(
+    final _options = _setStreamType<List<MealModel>>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/api/favorites',
+          '/meals/favorites',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -308,10 +310,10 @@ class _MealServiceApi implements MealServiceApi {
           baseUrl,
         )));
     final _result = await _dio.fetch<List<dynamic>>(_options);
-    late List<FavoriteMeal> _value;
+    late List<MealModel> _value;
     try {
       _value = _result.data!
-          .map((dynamic i) => FavoriteMeal.fromJson(i as Map<String, dynamic>))
+          .map((dynamic i) => MealModel.fromJson(i as Map<String, dynamic>))
           .toList();
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
@@ -321,20 +323,20 @@ class _MealServiceApi implements MealServiceApi {
   }
 
   @override
-  Future<FavoriteMeal> addFavorite(Map<String, String> request) async {
+  Future<void> addFavorite(Map<String, String> request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(request);
-    final _options = _setStreamType<FavoriteMeal>(Options(
+    final _options = _setStreamType<void>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
     )
         .compose(
           _dio.options,
-          '/api/favorites',
+          '/meals/favorites',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -343,19 +345,11 @@ class _MealServiceApi implements MealServiceApi {
           _dio.options.baseUrl,
           baseUrl,
         )));
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late FavoriteMeal _value;
-    try {
-      _value = FavoriteMeal.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
+    await _dio.fetch<void>(_options);
   }
 
   @override
-  Future<void> removeFavorite(String mealId) async {
+  Future<void> removeFavorite(String id) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -367,7 +361,7 @@ class _MealServiceApi implements MealServiceApi {
     )
         .compose(
           _dio.options,
-          '/api/favorites/${mealId}',
+          '/meals/favorites/${id}',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -414,12 +408,12 @@ class _MealServiceApi implements MealServiceApi {
 // RiverpodGenerator
 // **************************************************************************
 
-String _$mealServiceHash() => r'a79a91a6fe7c56682866e610eaf9008d94556759';
+String _$mealServiceHash() => r'd0732b4e0d81e6e096f052bb2035d9a7e2b89662';
 
 /// See also [MealService].
 @ProviderFor(MealService)
-final mealServiceProvider =
-    AutoDisposeAsyncNotifierProvider<MealService, void>.internal(
+final mealServiceProvider = AutoDisposeAsyncNotifierProvider<MealService,
+    List<WeeklyPlanModel>>.internal(
   MealService.new,
   name: r'mealServiceProvider',
   debugGetCreateSourceHash:
@@ -428,6 +422,6 @@ final mealServiceProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$MealService = AutoDisposeAsyncNotifier<void>;
+typedef _$MealService = AutoDisposeAsyncNotifier<List<WeeklyPlanModel>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

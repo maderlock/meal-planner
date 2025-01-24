@@ -33,83 +33,70 @@ datasource db {
 
 // User model representing application users
 model User {
-  id              String    @id @default(cuid()) @db.Uuid
-  firebaseUid     String    @unique @map("firebase_uid")
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  firebaseUid     String?   @unique @map("firebase_uid")
   email           String    @unique
   username        String    @unique
-  name            String?
-  password        String
-  displayName     String?
-  photoUrl        String?
-  emailVerified   Boolean   @default(false)
-  resetToken      String?
-  resetTokenExpiry DateTime?
-  createdAt       DateTime  @default(now()) @db.Timestamptz
-  updatedAt       DateTime  @updatedAt @db.Timestamptz
-  favoriteMeals   FavoriteMeal[]
+  password        String    @default("")
+  displayName     String?   @map("display_name")
+  photoUrl        String?   @map("photo_url")
+  emailVerified   Boolean   @default(false) @map("email_verified")
+  resetToken      String?   @map("reset_token")
+  resetTokenExpiry DateTime? @map("reset_token_expiry")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
   weeklyPlans     WeeklyPlan[]
+  meals           Meal[]
 
   @@map("users")
 }
 
-// Meal model representing individual meals
+// Meal model representing individual meals/recipes
 model Meal {
-  id           String    @id @default(cuid()) @db.Uuid
-  name         String
-  description  String
-  ingredients  String[]
-  instructions String[]
-  imageUrl     String    @map("image_url")
-  createdAt    DateTime  @default(now()) @db.Timestamptz
-  updatedAt    DateTime  @updatedAt @db.Timestamptz
-  assignments  MealAssignment[]
-  favorites    FavoriteMeal[]
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name            String
+  description     String
+  userId          String    @map("user_id") @db.Uuid
+  imageUrl        String    @default("") @map("imageurl")
+  isFavorite      Boolean   @default(false) @map("is_favorite")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  user            User      @relation(fields: [userId], references: [id])
+  mealPlans       MealPlan[]
 
   @@map("meals")
 }
 
-// FavoriteMeal model representing user's favorite meals
-model FavoriteMeal {
-  userId    String   @map("user_id") @db.Uuid
-  user      User     @relation(fields: [userId], references: [id])
-  mealId    String   @map("meal_id") @db.Uuid
-  meal      Meal     @relation(fields: [mealId], references: [id])
-  createdAt DateTime @default(now()) @db.Timestamptz
-
-  @@id([userId, mealId])
-  @@index([userId])
-  @@index([mealId])
-  @@map("favorite_meals")
-}
-
-// WeeklyPlan model representing a user's meal plan for a week
+// WeeklyPlan model for organizing meals
 model WeeklyPlan {
-  id            String    @id @default(cuid()) @db.Uuid
-  userId        String    @map("user_id") @db.Uuid
-  user          User      @relation(fields: [userId], references: [id])
-  weekStartDate DateTime   @map("week_start_date") @db.Timestamptz
-  endDate       DateTime
-  createdAt     DateTime   @default(now()) @db.Timestamptz
-  updatedAt     DateTime   @updatedAt @db.Timestamptz
-  mealPlans     MealAssignment[]
-  
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  weekStartDate   DateTime  @map("week_start_date") @db.Date
+  endDate         DateTime  @map("end_date") @db.Timestamptz
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  user            User      @relation(fields: [userId], references: [id])
+  mealPlans       MealPlan[]
+
+  @@unique([userId, weekStartDate])
   @@index([userId])
   @@map("weekly_plans")
 }
 
-// MealAssignment model representing a meal assigned to a specific day and type
-model MealAssignment {
-  id           String     @id @default(cuid()) @db.Uuid
+// MealPlan model for linking meals to days
+model MealPlan {
+  id           String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   weeklyPlanId String     @map("weekly_plan_id") @db.Uuid
-  weeklyPlan   WeeklyPlan @relation(fields: [weeklyPlanId], references: [id])
   mealId       String     @map("meal_id") @db.Uuid
+  dayOfWeek    Int        @map("day_of_week") // 0-6 for Sunday-Saturday
+  mealType     String     @map("meal_type") // breakfast, lunch, dinner, snack
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz
+  weeklyPlan   WeeklyPlan @relation(fields: [weeklyPlanId], references: [id])
   meal         Meal       @relation(fields: [mealId], references: [id])
-  dayOfWeek    Int        @map("day_of_week")
-  mealType     String     // breakfast, lunch, dinner
-  createdAt    DateTime   @default(now()) @db.Timestamptz
-  updatedAt    DateTime   @updatedAt @db.Timestamptz
 
+  @@unique([weeklyPlanId, dayOfWeek])
   @@index([weeklyPlanId])
   @@index([mealId])
-  @@map("meal_assignments")
+  @@map("meal_plans")
 }

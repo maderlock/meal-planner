@@ -1,110 +1,130 @@
-import { NextResponse } from 'next/server'
+import { describe, expect, it, jest, beforeEach } from '@jest/globals'
 import { GET, POST } from '@/app/api/weekly-plans/route'
-import { mockUser, mockWeeklyPlan, mockMeal, mockMealAssignment, stripDateFields } from '../helpers/testUtils'
-import { prismaMock } from '../../../jest.setup'
+import { prisma } from '@/lib/prisma'
+import { JWTService } from '@/lib/jwt'
+import { createTestRequest } from '../helpers/test-utils'
+
+// Mock Prisma
+jest.mock('@/lib/prisma', () => ({
+  prisma: {
+    weeklyPlan: {
+      findFirst: jest.fn(),
+      create: jest.fn(),
+    },
+  },
+}))
 
 describe('Weekly Plans API', () => {
+  const mockJwtService: JWTService = {
+    sign: jest.fn().mockReturnValue('mock-token'),
+    verify: jest.fn().mockReturnValue({ userId: 'test-user-id' })
+  }
+
+  const mockPlan = {
+    id: '1',
+    userId: 'test-user-id',
+    weekStartDate: new Date('2024-01-01'),
+    meals: []
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   describe('GET /api/weekly-plans', () => {
-    it('should return weekly plan for a user', async () => {
-      const weekStartDate = new Date('2025-01-20T00:00:00Z')
-      prismaMock.weeklyPlan.findFirst.mockResolvedValue(mockWeeklyPlan)
+    it('should return 401 if no auth token provided', async () => {
+      const request = createTestRequest('GET', '/api/weekly-plans')
 
-      const request = new Request(
-        `http://localhost:3000/api/weekly-plans?userId=${mockUser.id}&weekStartDate=${weekStartDate.toISOString()}`
-      )
-      const response = await GET(request)
-      const data = await response.json()
+      const res = await GET(request, mockJwtService)
+      const data = await res.json()
 
-      expect(response.status).toBe(200)
-      expect(stripDateFields(data)).toEqual(stripDateFields(mockWeeklyPlan))
-      expect(prismaMock.weeklyPlan.findFirst).toHaveBeenCalledWith({
-        where: {
-          userId: mockUser.id,
-          weekStartDate
-        },
-        include: {
-          mealPlans: {
-            include: {
-              meal: true
-            }
-          }
-        }
-      })
+      expect(res.status).toBe(401)
+      expect(data.error).toBe('Unauthorized')
     })
 
-    it('should return 400 if no user ID is provided', async () => {
-      const request = new Request('http://localhost:3000/api/weekly-plans')
-      const response = await GET(request)
-      const data = await response.json()
+    it('should return 404 if no weekly plan found', async () => {
+      ;(prisma.weeklyPlan.findFirst as jest.Mock).mockResolvedValueOnce(null)
 
-      expect(response.status).toBe(400)
-      expect(data.error).toBe('User ID is required')
-    })
-
-    it('should return 404 if no weekly plan is found', async () => {
-      prismaMock.weeklyPlan.findFirst.mockResolvedValue(null)
-
-      const request = new Request(
-        `http://localhost:3000/api/weekly-plans?userId=${mockUser.id}&weekStartDate=2025-01-20T00:00:00Z`
+      const request = createTestRequest(
+        'GET',
+        '/api/weekly-plans',
+        {},
+        { 'Authorization': 'Bearer valid-token' }
       )
-      const response = await GET(request)
-      const data = await response.json()
 
-      expect(response.status).toBe(404)
+      const res = await GET(request, mockJwtService)
+      const data = await res.json()
+
+      expect(res.status).toBe(404)
       expect(data.error).toBe('Weekly plan not found')
+    })
+
+    it('should return weekly plan if found', async () => {
+      ;(prisma.weeklyPlan.findFirst as jest.Mock).mockResolvedValueOnce(mockPlan)
+
+      const request = createTestRequest(
+        'GET',
+        '/api/weekly-plans',
+        {},
+        { 'Authorization': 'Bearer valid-token' }
+      )
+
+      const res = await GET(request, mockJwtService)
+      const data = await res.json()
+
+      expect(res.status).toBe(200)
+      expect(data).toEqual(mockPlan)
     })
   })
 
   describe('POST /api/weekly-plans', () => {
-    it('should create a new weekly plan', async () => {
-      const weekStartDate = new Date('2025-01-20T00:00:00Z')
-      prismaMock.weeklyPlan.create.mockResolvedValue(mockWeeklyPlan)
+    it('should return 401 if no auth token provided', async () => {
+      const request = createTestRequest('POST', '/api/weekly-plans')
 
-      const request = new Request('http://localhost:3000/api/weekly-plans', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userId: mockUser.id,
-          weekStartDate: weekStartDate.toISOString()
-        })
-      })
+      const res = await POST(request, mockJwtService)
+      const data = await res.json()
 
-      const response = await POST(request)
-      const data = await response.json()
-
-      expect(response.status).toBe(201)
-      expect(stripDateFields(data)).toEqual(stripDateFields(mockWeeklyPlan))
-      expect(prismaMock.weeklyPlan.create).toHaveBeenCalledWith({
-        data: {
-          userId: mockUser.id,
-          weekStartDate
-        },
-        include: {
-          mealPlans: {
-            include: {
-              meal: true
-            }
-          }
-        }
-      })
+      expect(res.status).toBe(401)
+      expect(data.error).toBe('Unauthorized')
     })
 
-    it('should return 400 if request data is invalid', async () => {
-      const request = new Request('http://localhost:3000/api/weekly-plans', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
+    it('should return 400 if week start date is missing', async () => {
+      const request = createTestRequest(
+        'POST',
+        '/api/weekly-plans',
+        {},
+        { 'Authorization': 'Bearer valid-token' }
+      )
+
+      const res = await POST(request, mockJwtService)
+      const data = await res.json()
+
+      expect(res.status).toBe(400)
+      expect(data.error).toBe('Week start date is required')
+    })
+
+    it('should create weekly plan successfully', async () => {
+      ;(prisma.weeklyPlan.create as jest.Mock).mockResolvedValueOnce(mockPlan)
+
+      const request = createTestRequest(
+        'POST',
+        '/api/weekly-plans',
+        { weekStartDate: '2024-01-01' },
+        { 'Authorization': 'Bearer valid-token' }
+      )
+
+      const res = await POST(request, mockJwtService)
+      const data = await res.json()
+
+      expect(res.status).toBe(201)
+      expect(data).toEqual(mockPlan)
+      expect(prisma.weeklyPlan.create).toHaveBeenCalledWith({
+        data: {
+          userId: 'test-user-id',
+          weekStartDate: new Date('2024-01-01'),
+          meals: []
+        }
       })
-
-      const response = await POST(request)
-      const data = await response.json()
-
-      expect(response.status).toBe(400)
-      expect(data.error).toBe('Invalid request data')
     })
   })
 })
