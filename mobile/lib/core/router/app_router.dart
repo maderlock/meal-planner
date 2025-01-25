@@ -42,17 +42,16 @@ GoRouter router(RouterRef ref) {
     initialLocation: AppRoutes.home,
     debugLogDiagnostics: true,
     redirect: (context, state) {
-      // Handle authentication redirects
-      final isAuthRoute = state.uri.path == AppRoutes.auth;
-
-      if (!isAuthenticated && !isAuthRoute) {
-        return AppRoutes.auth;
-      }
-
-      if (isAuthenticated && isAuthRoute) {
+      final currentPath = state.uri.path;
+      
+      if (!isAuthenticated) {
+        // Not authenticated, redirect to auth unless already there
+        return currentPath == AppRoutes.auth ? null : AppRoutes.auth;
+      } else if (currentPath == AppRoutes.auth) {
+        // Authenticated but on auth screen, redirect to home
         return AppRoutes.home;
       }
-
+      
       return null;
     },
     routes: [
