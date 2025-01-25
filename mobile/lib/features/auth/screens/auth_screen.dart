@@ -136,6 +136,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.emailAddress,
+                    autocorrect: false,
+                    onFieldSubmitted: (_) => _submit(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
@@ -154,6 +156,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       border: OutlineInputBorder(),
                     ),
                     obscureText: true,
+                    onFieldSubmitted: (_) => _submit(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';
