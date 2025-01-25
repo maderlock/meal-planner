@@ -56,142 +56,54 @@ final dioProvider = Provider<Dio>((ref) {
     ),
   );
 
-  // Add logging interceptor
+  // Add auth interceptor
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
-        // Add auth token if available and not an auth endpoint
-        if (!options.path.contains('/auth/')) {
+        // Add auth token if available and not a login/register endpoint
+        final isPublicEndpoint = options.path == '/auth/login' || 
+                                options.path == '/auth/register' ||
+                                options.path == '/auth/reset-password';
+                                
+        if (!isPublicEndpoint) {
           final prefs = await SharedPreferences.getInstance();
           final token = prefs.getString('auth_token');
           developer.log('Checking token for request to ${options.path}', name: 'API');
           if (token != null) {
-            developer.log('Adding token to request', name: 'API');
+            developer.log('Adding token to request: $token', name: 'API');
             options.headers['Authorization'] = token;  // Token already includes 'Bearer' prefix
           } else {
             developer.log('No token found for request', name: 'API');
           }
         } else {
-          developer.log('Skipping token for auth endpoint ${options.path}', name: 'API');
+          developer.log('Skipping token for public endpoint ${options.path}', name: 'API');
         }
 
         // Log request details
-        developer.log('*** Request ***',
-            name: 'API Log');
-        developer.log('uri: ${options.uri}',
-            name: 'API Log');
-        developer.log('method: ${options.method}',
-            name: 'API Log');
-        developer.log('responseType: ${options.responseType}',
-            name: 'API Log');
-        developer.log('followRedirects: ${options.followRedirects}',
-            name: 'API Log');
-        developer.log('persistentConnection: ${options.persistentConnection}',
-            name: 'API Log');
-        developer.log('connectTimeout: ${options.connectTimeout}',
-            name: 'API Log');
-        developer.log('sendTimeout: ${options.sendTimeout}',
-            name: 'API Log');
-        developer.log('receiveTimeout: ${options.receiveTimeout}',
-            name: 'API Log');
-        developer.log('receiveDataWhenStatusError: ${options.receiveDataWhenStatusError}',
-            name: 'API Log');
-        developer.log('extra: ${options.extra}',
-            name: 'API Log');
-        developer.log('headers:',
-            name: 'API Log');
-        options.headers.forEach((key, value) {
-          developer.log(' $key: $value',
-              name: 'API Log');
-        });
-        if (options.data != null) {
-          developer.log('data:',
-              name: 'API Log');
-          developer.log('${options.data}',
-              name: 'API Log');
-        }
-        developer.log('',
-            name: 'API Log');
+        developer.log(
+          'Making request to ${options.path}\n'
+          'Method: ${options.method}\n'
+          'Headers: ${options.headers}',
+          name: 'API',
+        );
 
         return handler.next(options);
       },
-      onResponse: (response, handler) async {
-        // Log response details
-        developer.log('*** Response ***',
-            name: 'API Log');
-        developer.log('uri: ${response.requestOptions.uri}',
-            name: 'API Log');
-        developer.log('statusCode: ${response.statusCode}',
-            name: 'API Log');
-        developer.log('headers:',
-            name: 'API Log');
-        response.headers.forEach((name, values) {
-          developer.log(' $name: ${values.join(', ')}',
-              name: 'API Log');
-        });
-        developer.log('Response Text:',
-            name: 'API Log');
-        developer.log('${response.data}',
-            name: 'API Log');
-        developer.log('',
-            name: 'API Log');
-
+      onResponse: (response, handler) {
+        developer.log(
+          'Response from ${response.requestOptions.path}\n'
+          'Status: ${response.statusCode}',
+          name: 'API',
+        );
         return handler.next(response);
       },
-      onError: (error, handler) async {
-        // Log error details
-        developer.log('*** DioException ***:',
-            name: 'API Log');
-        developer.log('uri: ${error.requestOptions.uri}',
-            name: 'API Log');
-        developer.log('$error',
-            name: 'API Log');
-        developer.log('uri: ${error.requestOptions.uri}',
-            name: 'API Log');
-        if (error.response != null) {
-          developer.log('statusCode: ${error.response?.statusCode}',
-              name: 'API Log');
-          developer.log('headers:',
-              name: 'API Log');
-          error.response?.headers.forEach((name, values) {
-            developer.log(' $name: ${values.join(', ')}',
-                name: 'API Log');
-          });
-          developer.log('Response Text:',
-              name: 'API Log');
-          developer.log('${error.response?.data}',
-              name: 'API Log');
-        }
-        developer.log('',
-            name: 'API Log');
-
-        // Convert DioException to ApiException
-        if (error.response != null) {
-          final data = error.response!.data;
-          String message = 'An error occurred';
-          
-          if (data is Map<String, dynamic> && data.containsKey('error')) {
-            message = data['error'] as String;
-          }
-
-          // Handle unauthorized error
-          if (error.response?.statusCode == 401) {
-            await ref.read(authStateProvider.notifier).logout();
-          }
-
-          // Return a new error response with our custom error
-          return handler.reject(
-            DioException(
-              requestOptions: error.requestOptions,
-              error: ApiException(
-                message,
-                statusCode: error.response!.statusCode,
-              ),
-              response: error.response,
-              type: error.type,
-            ),
-          );
-        }
+      onError: (error, handler) {
+        developer.log(
+          'Error on ${error.requestOptions.path}\n'
+          'Status: ${error.response?.statusCode}\n'
+          'Message: ${error.message}',
+          name: 'API',
+        );
         return handler.next(error);
       },
     ),

@@ -1,51 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { JWTService, jwtService } from '@/lib/jwt';
+import { jwtService } from '@/lib/jwt';
 
-export async function GET(
-  request: NextRequest,
-  jwtSvc: JWTService = jwtService
-) {
+export async function GET(request: NextRequest) {
   try {
     // Get token from Authorization header
     const authHeader = request.headers.get('Authorization');
+    console.log('Auth header:', authHeader);
+    
     if (!authHeader?.startsWith('Bearer ')) {
+      console.log('Invalid auth header format');
       return NextResponse.json(
-        { error: 'Not authenticated' },
+        { error: 'Not authenticated - Invalid header format' },
         { status: 401 }
       );
     }
 
     const token = authHeader.split(' ')[1];
+    console.log('Extracted token:', token);
     
-    // Verify token
-    const decoded = jwtSvc.verify(token) as { userId: string };
-    
-    // Get user
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        id: true,
-        email: true,
-        displayName: true,
-        photoUrl: true,
-        emailVerified: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    try {
+      // Verify token
+      const decoded = jwtService.verify(token) as { userId: string };
+      console.log('Decoded token:', decoded);
+      
+      // Get user
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        select: {
+          id: true,
+          email: true,
+          displayName: true,
+          photoUrl: true,
+          emailVerified: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
 
-    if (!user) {
+      console.log('Found user:', user ? 'yes' : 'no');
+
+      if (!user) {
+        console.log('User not found for id:', decoded.userId);
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 401 }
+        );
+      }
+
+      return NextResponse.json(user, { status: 200 });
+    } catch (verifyError) {
+      console.error('Token verification failed:', verifyError);
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: 'Invalid token' },
         { status: 401 }
       );
     }
-
-    return NextResponse.json(user, { status: 200 });
   } catch (error) {
+    console.error('Unexpected error in /me endpoint:', error);
     return NextResponse.json(
-      { error: 'Not authenticated' },
+      { error: 'Not authenticated - Server error' },
       { status: 401 }
     );
   }

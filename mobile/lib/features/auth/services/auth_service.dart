@@ -83,13 +83,44 @@ abstract class AuthServiceApi {
 
   @POST('/auth/reset-password')
   Future<void> resetPassword(@Body() Map<String, String> request);
+
+  @GET('/auth/me')
+  Future<UserModel> me();
 }
 
 /// Service for handling authentication operations
 class AuthService extends StateNotifier<UserModel?> {
   final AuthServiceApi _api;
 
-  AuthService(this._api) : super(null);
+  AuthService(this._api) : super(null) {
+    developer.log('Initializing AuthService', name: 'Auth');
+    // Try to restore the auth state when service is created
+    _restoreAuthState();
+  }
+
+  Future<void> _restoreAuthState() async {
+    try {
+      developer.log('Starting auth state restoration', name: 'Auth');
+      final token = await getToken();
+      developer.log('Retrieved token: ${token != null ? 'Token exists' : 'No token found'}', name: 'Auth');
+      
+      if (token != null) {
+        // Token exists, try to fetch user info
+        developer.log('Attempting to fetch user info with token', name: 'Auth');
+        final user = await _api.me();
+        developer.log('Successfully fetched user info: ${user.email}', name: 'Auth');
+        state = user;
+        developer.log('Auth state restored successfully', name: 'Auth');
+      } else {
+        developer.log('No token found, skipping auth restoration', name: 'Auth');
+      }
+    } catch (e) {
+      // If token is invalid or user fetch fails, clear the token
+      developer.log('Failed to restore auth state: $e', name: 'Auth');
+      await _removeToken();
+      state = null;
+    }
+  }
 
   /// Register a new user
   Future<UserModel> register(String email, String password, {String? username}) async {
@@ -99,8 +130,10 @@ class AuthService extends StateNotifier<UserModel?> {
         password: password,
         username: username,
       ));
-      state = response.user;
+      developer.log('Registration successful, saving token', name: 'Auth');
       await _saveToken(response.token);
+      state = response.user;
+      developer.log('User state updated after registration', name: 'Auth');
       return response.user;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -117,6 +150,7 @@ class AuthService extends StateNotifier<UserModel?> {
       developer.log('Login successful, saving token', name: 'Auth');
       await _saveToken(response.token);
       state = response.user;
+      developer.log('User state updated after login', name: 'Auth');
       return response.user;
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -127,8 +161,9 @@ class AuthService extends StateNotifier<UserModel?> {
   Future<void> logout() async {
     try {
       await _api.logout();
-      state = null;
       await _removeToken();
+      state = null;
+      developer.log('Logout successful', name: 'Auth');
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -137,9 +172,7 @@ class AuthService extends StateNotifier<UserModel?> {
   /// Reset password for a user
   Future<void> resetPassword(String email) async {
     try {
-      await _api.resetPassword({
-        'email': email,
-      });
+      await _api.resetPassword({'email': email});
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -159,8 +192,9 @@ class AuthService extends StateNotifier<UserModel?> {
   /// Save the auth token
   Future<void> _saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_token', 'Bearer $token');
-    developer.log('Token saved successfully: $token', name: 'Auth');
+    final tokenWithPrefix = 'Bearer $token';
+    await prefs.setString('auth_token', tokenWithPrefix);
+    developer.log('Token saved successfully: $tokenWithPrefix', name: 'Auth');
   }
 
   /// Remove the auth token
@@ -201,17 +235,13 @@ class AuthService extends StateNotifier<UserModel?> {
       return AuthException('Connection timeout. Please check your internet connection.');
     }
 
-    if (e.response != null) {
-      final data = e.response!.data;
-      String message = 'An error occurred';
-      
-      if (data is Map<String, dynamic> && data.containsKey('error')) {
-        message = data['error'] as String;
-      }
-
-      return AuthException(message, statusCode: e.response!.statusCode);
+    final data = e.response?.data;
+    String message = 'An error occurred';
+    
+    if (data is Map<String, dynamic> && data.containsKey('error')) {
+      message = data['error'] as String;
     }
 
-    return AuthException('An unexpected error occurred');
+    return AuthException(message, statusCode: e.response?.statusCode);
   }
 }

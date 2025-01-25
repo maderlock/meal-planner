@@ -72,6 +72,8 @@ export async function POST(request: Request) {
 
     // Generate JWT token
     const token = jwtService.sign({ userId: user.id });
+    console.log('Generated token:', token);
+    console.log('Token payload:', { userId: user.id });
 
     // Return user data (excluding password) and token
     const { password: _, ...userWithoutPassword } = user;

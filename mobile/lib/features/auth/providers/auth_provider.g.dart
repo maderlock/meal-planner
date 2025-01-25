@@ -6,7 +6,7 @@ part of 'auth_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$isAuthenticatedHash() => r'605dace56d8bc69e87e227eabea27bdcb3f71b89';
+String _$isAuthenticatedHash() => r'f290f99cb8c31b2d16ed5a9e863765cee418fb7a';
 
 /// Provider for checking if a user is authenticated
 ///

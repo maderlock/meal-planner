@@ -37,7 +37,7 @@ class AppRoutes {
 @riverpod
 GoRouter router(RouterRef ref) {
   final isAuthenticated = ref.watch(isAuthenticatedProvider);
-
+  
   return GoRouter(
     initialLocation: AppRoutes.home,
     debugLogDiagnostics: true,
@@ -69,10 +69,5 @@ GoRouter router(RouterRef ref) {
         builder: (context, state) => const WeeklyPlanScreen(),
       ),
     ],
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Text('Error: ${state.error}'),
-      ),
-    ),
   );
 }

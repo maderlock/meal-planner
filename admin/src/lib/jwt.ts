@@ -6,16 +6,31 @@ export interface JWTService {
 }
 
 export class DefaultJWTService implements JWTService {
-  constructor(private secret: string) {}
+  constructor(private secret: string) {
+    console.log('JWT Service initialized with secret length:', secret.length);
+  }
   
   sign(payload: any): string {
-    return jwt.sign(payload, this.secret, { expiresIn: '7d' });
+    console.log('Signing JWT with payload:', payload);
+    const token = jwt.sign(payload, this.secret, { expiresIn: '7d' });
+    console.log('Generated JWT:', token);
+    return token;
   }
   
   verify(token: string): any {
-    return jwt.verify(token, this.secret);
+    try {
+      console.log('Verifying JWT:', token);
+      const decoded = jwt.verify(token, this.secret);
+      console.log('JWT verification successful:', decoded);
+      return decoded;
+    } catch (error) {
+      console.error('JWT verification failed:', error);
+      throw error;
+    }
   }
 }
 
 // Production instance
-export const jwtService = new DefaultJWTService(process.env.JWT_SECRET || 'default-secret');
+const secret = process.env.JWT_SECRET || 'default-secret';
+console.log('Using JWT secret:', secret.substring(0, 3) + '...');
+export const jwtService = new DefaultJWTService(secret);

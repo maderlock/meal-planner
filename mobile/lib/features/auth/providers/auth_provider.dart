@@ -68,7 +68,8 @@ class AuthState extends _$AuthState {
 /// Provider for checking if a user is authenticated
 @riverpod
 bool isAuthenticated(IsAuthenticatedRef ref) {
-  return ref.watch(authStateProvider.select((value) => value != null));
+  final user = ref.watch(authServiceProvider);
+  return user != null;
 }
 
 /// Provider for the user's display name
