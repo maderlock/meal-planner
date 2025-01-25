@@ -26,7 +26,7 @@ mixin _$WeeklyPlanModel {
   String get userId => throw _privateConstructorUsedError;
   @JsonKey(name: 'weekStartDate')
   DateTime get weekStartDate => throw _privateConstructorUsedError;
-  @JsonKey(name: 'meals')
+  @JsonKey(name: 'mealPlans')
   List<MealAssignment> get assignments => throw _privateConstructorUsedError;
   @JsonKey(name: 'createdAt')
   DateTime get createdAt => throw _privateConstructorUsedError;
@@ -53,7 +53,7 @@ abstract class $WeeklyPlanModelCopyWith<$Res> {
       {@JsonKey(name: 'id') String id,
       @JsonKey(name: 'userId') String userId,
       @JsonKey(name: 'weekStartDate') DateTime weekStartDate,
-      @JsonKey(name: 'meals') List<MealAssignment> assignments,
+      @JsonKey(name: 'mealPlans') List<MealAssignment> assignments,
       @JsonKey(name: 'createdAt') DateTime createdAt,
       @JsonKey(name: 'updatedAt') DateTime updatedAt});
 }
@@ -121,7 +121,7 @@ abstract class _$$WeeklyPlanModelImplCopyWith<$Res>
       {@JsonKey(name: 'id') String id,
       @JsonKey(name: 'userId') String userId,
       @JsonKey(name: 'weekStartDate') DateTime weekStartDate,
-      @JsonKey(name: 'meals') List<MealAssignment> assignments,
+      @JsonKey(name: 'mealPlans') List<MealAssignment> assignments,
       @JsonKey(name: 'createdAt') DateTime createdAt,
       @JsonKey(name: 'updatedAt') DateTime updatedAt});
 }
@@ -182,7 +182,8 @@ class _$WeeklyPlanModelImpl implements _WeeklyPlanModel {
       {@JsonKey(name: 'id') required this.id,
       @JsonKey(name: 'userId') required this.userId,
       @JsonKey(name: 'weekStartDate') required this.weekStartDate,
-      @JsonKey(name: 'meals') required final List<MealAssignment> assignments,
+      @JsonKey(name: 'mealPlans')
+      required final List<MealAssignment> assignments,
       @JsonKey(name: 'createdAt') required this.createdAt,
       @JsonKey(name: 'updatedAt') required this.updatedAt})
       : _assignments = assignments;
@@ -201,7 +202,7 @@ class _$WeeklyPlanModelImpl implements _WeeklyPlanModel {
   final DateTime weekStartDate;
   final List<MealAssignment> _assignments;
   @override
-  @JsonKey(name: 'meals')
+  @JsonKey(name: 'mealPlans')
   List<MealAssignment> get assignments {
     if (_assignments is EqualUnmodifiableListView) return _assignments;
     // ignore: implicit_dynamic_type
@@ -261,13 +262,14 @@ class _$WeeklyPlanModelImpl implements _WeeklyPlanModel {
 
 abstract class _WeeklyPlanModel implements WeeklyPlanModel {
   const factory _WeeklyPlanModel(
-      {@JsonKey(name: 'id') required final String id,
-      @JsonKey(name: 'userId') required final String userId,
-      @JsonKey(name: 'weekStartDate') required final DateTime weekStartDate,
-      @JsonKey(name: 'meals') required final List<MealAssignment> assignments,
-      @JsonKey(name: 'createdAt') required final DateTime createdAt,
-      @JsonKey(name: 'updatedAt')
-      required final DateTime updatedAt}) = _$WeeklyPlanModelImpl;
+          {@JsonKey(name: 'id') required final String id,
+          @JsonKey(name: 'userId') required final String userId,
+          @JsonKey(name: 'weekStartDate') required final DateTime weekStartDate,
+          @JsonKey(name: 'mealPlans')
+          required final List<MealAssignment> assignments,
+          @JsonKey(name: 'createdAt') required final DateTime createdAt,
+          @JsonKey(name: 'updatedAt') required final DateTime updatedAt}) =
+      _$WeeklyPlanModelImpl;
 
   factory _WeeklyPlanModel.fromJson(Map<String, dynamic> json) =
       _$WeeklyPlanModelImpl.fromJson;
@@ -282,7 +284,7 @@ abstract class _WeeklyPlanModel implements WeeklyPlanModel {
   @JsonKey(name: 'weekStartDate')
   DateTime get weekStartDate;
   @override
-  @JsonKey(name: 'meals')
+  @JsonKey(name: 'mealPlans')
   List<MealAssignment> get assignments;
   @override
   @JsonKey(name: 'createdAt')

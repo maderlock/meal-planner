@@ -48,7 +48,7 @@ _$WeeklyPlanModelImpl _$$WeeklyPlanModelImplFromJson(
       id: json['id'] as String,
       userId: json['userId'] as String,
       weekStartDate: DateTime.parse(json['weekStartDate'] as String),
-      assignments: (json['meals'] as List<dynamic>)
+      assignments: (json['mealPlans'] as List<dynamic>)
           .map((e) => MealAssignment.fromJson(e as Map<String, dynamic>))
           .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -61,7 +61,7 @@ Map<String, dynamic> _$$WeeklyPlanModelImplToJson(
       'id': instance.id,
       'userId': instance.userId,
       'weekStartDate': instance.weekStartDate.toIso8601String(),
-      'meals': instance.assignments,
+      'mealPlans': instance.assignments,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
     };

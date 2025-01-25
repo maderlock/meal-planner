@@ -26,7 +26,7 @@ class WeeklyPlanModel with _$WeeklyPlanModel {
     @JsonKey(name: 'id') required String id,
     @JsonKey(name: 'userId') required String userId,
     @JsonKey(name: 'weekStartDate') required DateTime weekStartDate,
-    @JsonKey(name: 'meals') required List<MealAssignment> assignments,
+    @JsonKey(name: 'mealPlans') required List<MealAssignment> assignments,
     @JsonKey(name: 'createdAt') required DateTime createdAt,
     @JsonKey(name: 'updatedAt') required DateTime updatedAt,
   }) = _WeeklyPlanModel;
