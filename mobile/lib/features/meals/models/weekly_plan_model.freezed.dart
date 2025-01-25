@@ -24,13 +24,9 @@ mixin _$WeeklyPlanModel {
   String get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'userId')
   String get userId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'startDate')
-  DateTime get startDate => throw _privateConstructorUsedError;
-  @JsonKey(name: 'endDate')
-  DateTime get endDate => throw _privateConstructorUsedError;
-  @JsonKey(name: 'name')
-  String? get name => throw _privateConstructorUsedError;
-  @JsonKey(name: 'assignments')
+  @JsonKey(name: 'weekStartDate')
+  DateTime get weekStartDate => throw _privateConstructorUsedError;
+  @JsonKey(name: 'meals')
   List<MealAssignment> get assignments => throw _privateConstructorUsedError;
   @JsonKey(name: 'createdAt')
   DateTime get createdAt => throw _privateConstructorUsedError;
@@ -56,10 +52,8 @@ abstract class $WeeklyPlanModelCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'id') String id,
       @JsonKey(name: 'userId') String userId,
-      @JsonKey(name: 'startDate') DateTime startDate,
-      @JsonKey(name: 'endDate') DateTime endDate,
-      @JsonKey(name: 'name') String? name,
-      @JsonKey(name: 'assignments') List<MealAssignment> assignments,
+      @JsonKey(name: 'weekStartDate') DateTime weekStartDate,
+      @JsonKey(name: 'meals') List<MealAssignment> assignments,
       @JsonKey(name: 'createdAt') DateTime createdAt,
       @JsonKey(name: 'updatedAt') DateTime updatedAt});
 }
@@ -81,9 +75,7 @@ class _$WeeklyPlanModelCopyWithImpl<$Res, $Val extends WeeklyPlanModel>
   $Res call({
     Object? id = null,
     Object? userId = null,
-    Object? startDate = null,
-    Object? endDate = null,
-    Object? name = freezed,
+    Object? weekStartDate = null,
     Object? assignments = null,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -97,18 +89,10 @@ class _$WeeklyPlanModelCopyWithImpl<$Res, $Val extends WeeklyPlanModel>
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      startDate: null == startDate
-          ? _value.startDate
-          : startDate // ignore: cast_nullable_to_non_nullable
+      weekStartDate: null == weekStartDate
+          ? _value.weekStartDate
+          : weekStartDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      endDate: null == endDate
-          ? _value.endDate
-          : endDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      name: freezed == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String?,
       assignments: null == assignments
           ? _value.assignments
           : assignments // ignore: cast_nullable_to_non_nullable
@@ -136,10 +120,8 @@ abstract class _$$WeeklyPlanModelImplCopyWith<$Res>
   $Res call(
       {@JsonKey(name: 'id') String id,
       @JsonKey(name: 'userId') String userId,
-      @JsonKey(name: 'startDate') DateTime startDate,
-      @JsonKey(name: 'endDate') DateTime endDate,
-      @JsonKey(name: 'name') String? name,
-      @JsonKey(name: 'assignments') List<MealAssignment> assignments,
+      @JsonKey(name: 'weekStartDate') DateTime weekStartDate,
+      @JsonKey(name: 'meals') List<MealAssignment> assignments,
       @JsonKey(name: 'createdAt') DateTime createdAt,
       @JsonKey(name: 'updatedAt') DateTime updatedAt});
 }
@@ -159,9 +141,7 @@ class __$$WeeklyPlanModelImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? userId = null,
-    Object? startDate = null,
-    Object? endDate = null,
-    Object? name = freezed,
+    Object? weekStartDate = null,
     Object? assignments = null,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -175,18 +155,10 @@ class __$$WeeklyPlanModelImplCopyWithImpl<$Res>
           ? _value.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
-      startDate: null == startDate
-          ? _value.startDate
-          : startDate // ignore: cast_nullable_to_non_nullable
+      weekStartDate: null == weekStartDate
+          ? _value.weekStartDate
+          : weekStartDate // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      endDate: null == endDate
-          ? _value.endDate
-          : endDate // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      name: freezed == name
-          ? _value.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String?,
       assignments: null == assignments
           ? _value._assignments
           : assignments // ignore: cast_nullable_to_non_nullable
@@ -209,11 +181,8 @@ class _$WeeklyPlanModelImpl implements _WeeklyPlanModel {
   const _$WeeklyPlanModelImpl(
       {@JsonKey(name: 'id') required this.id,
       @JsonKey(name: 'userId') required this.userId,
-      @JsonKey(name: 'startDate') required this.startDate,
-      @JsonKey(name: 'endDate') required this.endDate,
-      @JsonKey(name: 'name') this.name,
-      @JsonKey(name: 'assignments')
-      required final List<MealAssignment> assignments,
+      @JsonKey(name: 'weekStartDate') required this.weekStartDate,
+      @JsonKey(name: 'meals') required final List<MealAssignment> assignments,
       @JsonKey(name: 'createdAt') required this.createdAt,
       @JsonKey(name: 'updatedAt') required this.updatedAt})
       : _assignments = assignments;
@@ -228,17 +197,11 @@ class _$WeeklyPlanModelImpl implements _WeeklyPlanModel {
   @JsonKey(name: 'userId')
   final String userId;
   @override
-  @JsonKey(name: 'startDate')
-  final DateTime startDate;
-  @override
-  @JsonKey(name: 'endDate')
-  final DateTime endDate;
-  @override
-  @JsonKey(name: 'name')
-  final String? name;
+  @JsonKey(name: 'weekStartDate')
+  final DateTime weekStartDate;
   final List<MealAssignment> _assignments;
   @override
-  @JsonKey(name: 'assignments')
+  @JsonKey(name: 'meals')
   List<MealAssignment> get assignments {
     if (_assignments is EqualUnmodifiableListView) return _assignments;
     // ignore: implicit_dynamic_type
@@ -254,7 +217,7 @@ class _$WeeklyPlanModelImpl implements _WeeklyPlanModel {
 
   @override
   String toString() {
-    return 'WeeklyPlanModel(id: $id, userId: $userId, startDate: $startDate, endDate: $endDate, name: $name, assignments: $assignments, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'WeeklyPlanModel(id: $id, userId: $userId, weekStartDate: $weekStartDate, assignments: $assignments, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -264,10 +227,8 @@ class _$WeeklyPlanModelImpl implements _WeeklyPlanModel {
             other is _$WeeklyPlanModelImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.userId, userId) || other.userId == userId) &&
-            (identical(other.startDate, startDate) ||
-                other.startDate == startDate) &&
-            (identical(other.endDate, endDate) || other.endDate == endDate) &&
-            (identical(other.name, name) || other.name == name) &&
+            (identical(other.weekStartDate, weekStartDate) ||
+                other.weekStartDate == weekStartDate) &&
             const DeepCollectionEquality()
                 .equals(other._assignments, _assignments) &&
             (identical(other.createdAt, createdAt) ||
@@ -278,16 +239,8 @@ class _$WeeklyPlanModelImpl implements _WeeklyPlanModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      userId,
-      startDate,
-      endDate,
-      name,
-      const DeepCollectionEquality().hash(_assignments),
-      createdAt,
-      updatedAt);
+  int get hashCode => Object.hash(runtimeType, id, userId, weekStartDate,
+      const DeepCollectionEquality().hash(_assignments), createdAt, updatedAt);
 
   /// Create a copy of WeeklyPlanModel
   /// with the given fields replaced by the non-null parameter values.
@@ -308,16 +261,13 @@ class _$WeeklyPlanModelImpl implements _WeeklyPlanModel {
 
 abstract class _WeeklyPlanModel implements WeeklyPlanModel {
   const factory _WeeklyPlanModel(
-          {@JsonKey(name: 'id') required final String id,
-          @JsonKey(name: 'userId') required final String userId,
-          @JsonKey(name: 'startDate') required final DateTime startDate,
-          @JsonKey(name: 'endDate') required final DateTime endDate,
-          @JsonKey(name: 'name') final String? name,
-          @JsonKey(name: 'assignments')
-          required final List<MealAssignment> assignments,
-          @JsonKey(name: 'createdAt') required final DateTime createdAt,
-          @JsonKey(name: 'updatedAt') required final DateTime updatedAt}) =
-      _$WeeklyPlanModelImpl;
+      {@JsonKey(name: 'id') required final String id,
+      @JsonKey(name: 'userId') required final String userId,
+      @JsonKey(name: 'weekStartDate') required final DateTime weekStartDate,
+      @JsonKey(name: 'meals') required final List<MealAssignment> assignments,
+      @JsonKey(name: 'createdAt') required final DateTime createdAt,
+      @JsonKey(name: 'updatedAt')
+      required final DateTime updatedAt}) = _$WeeklyPlanModelImpl;
 
   factory _WeeklyPlanModel.fromJson(Map<String, dynamic> json) =
       _$WeeklyPlanModelImpl.fromJson;
@@ -329,16 +279,10 @@ abstract class _WeeklyPlanModel implements WeeklyPlanModel {
   @JsonKey(name: 'userId')
   String get userId;
   @override
-  @JsonKey(name: 'startDate')
-  DateTime get startDate;
+  @JsonKey(name: 'weekStartDate')
+  DateTime get weekStartDate;
   @override
-  @JsonKey(name: 'endDate')
-  DateTime get endDate;
-  @override
-  @JsonKey(name: 'name')
-  String? get name;
-  @override
-  @JsonKey(name: 'assignments')
+  @JsonKey(name: 'meals')
   List<MealAssignment> get assignments;
   @override
   @JsonKey(name: 'createdAt')
@@ -367,9 +311,9 @@ mixin _$MealAssignment {
   String get mealId => throw _privateConstructorUsedError;
   @JsonKey(name: 'meal')
   MealModel get meal => throw _privateConstructorUsedError;
-  @JsonKey(name: 'date')
-  DateTime get date => throw _privateConstructorUsedError;
-  @JsonKey(name: 'type')
+  @JsonKey(name: 'day')
+  String get day => throw _privateConstructorUsedError;
+  @JsonKey(name: 'mealType')
   MealType get type => throw _privateConstructorUsedError;
   @JsonKey(name: 'notes')
   String? get notes => throw _privateConstructorUsedError;
@@ -394,8 +338,8 @@ abstract class $MealAssignmentCopyWith<$Res> {
       {@JsonKey(name: 'id') String id,
       @JsonKey(name: 'mealId') String mealId,
       @JsonKey(name: 'meal') MealModel meal,
-      @JsonKey(name: 'date') DateTime date,
-      @JsonKey(name: 'type') MealType type,
+      @JsonKey(name: 'day') String day,
+      @JsonKey(name: 'mealType') MealType type,
       @JsonKey(name: 'notes') String? notes});
 
   $MealModelCopyWith<$Res> get meal;
@@ -419,7 +363,7 @@ class _$MealAssignmentCopyWithImpl<$Res, $Val extends MealAssignment>
     Object? id = null,
     Object? mealId = null,
     Object? meal = null,
-    Object? date = null,
+    Object? day = null,
     Object? type = null,
     Object? notes = freezed,
   }) {
@@ -436,10 +380,10 @@ class _$MealAssignmentCopyWithImpl<$Res, $Val extends MealAssignment>
           ? _value.meal
           : meal // ignore: cast_nullable_to_non_nullable
               as MealModel,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+      day: null == day
+          ? _value.day
+          : day // ignore: cast_nullable_to_non_nullable
+              as String,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
@@ -474,8 +418,8 @@ abstract class _$$MealAssignmentImplCopyWith<$Res>
       {@JsonKey(name: 'id') String id,
       @JsonKey(name: 'mealId') String mealId,
       @JsonKey(name: 'meal') MealModel meal,
-      @JsonKey(name: 'date') DateTime date,
-      @JsonKey(name: 'type') MealType type,
+      @JsonKey(name: 'day') String day,
+      @JsonKey(name: 'mealType') MealType type,
       @JsonKey(name: 'notes') String? notes});
 
   @override
@@ -498,7 +442,7 @@ class __$$MealAssignmentImplCopyWithImpl<$Res>
     Object? id = null,
     Object? mealId = null,
     Object? meal = null,
-    Object? date = null,
+    Object? day = null,
     Object? type = null,
     Object? notes = freezed,
   }) {
@@ -515,10 +459,10 @@ class __$$MealAssignmentImplCopyWithImpl<$Res>
           ? _value.meal
           : meal // ignore: cast_nullable_to_non_nullable
               as MealModel,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+      day: null == day
+          ? _value.day
+          : day // ignore: cast_nullable_to_non_nullable
+              as String,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
@@ -538,8 +482,8 @@ class _$MealAssignmentImpl implements _MealAssignment {
       {@JsonKey(name: 'id') required this.id,
       @JsonKey(name: 'mealId') required this.mealId,
       @JsonKey(name: 'meal') required this.meal,
-      @JsonKey(name: 'date') required this.date,
-      @JsonKey(name: 'type') required this.type,
+      @JsonKey(name: 'day') required this.day,
+      @JsonKey(name: 'mealType') required this.type,
       @JsonKey(name: 'notes') this.notes});
 
   factory _$MealAssignmentImpl.fromJson(Map<String, dynamic> json) =>
@@ -555,10 +499,10 @@ class _$MealAssignmentImpl implements _MealAssignment {
   @JsonKey(name: 'meal')
   final MealModel meal;
   @override
-  @JsonKey(name: 'date')
-  final DateTime date;
+  @JsonKey(name: 'day')
+  final String day;
   @override
-  @JsonKey(name: 'type')
+  @JsonKey(name: 'mealType')
   final MealType type;
   @override
   @JsonKey(name: 'notes')
@@ -566,7 +510,7 @@ class _$MealAssignmentImpl implements _MealAssignment {
 
   @override
   String toString() {
-    return 'MealAssignment(id: $id, mealId: $mealId, meal: $meal, date: $date, type: $type, notes: $notes)';
+    return 'MealAssignment(id: $id, mealId: $mealId, meal: $meal, day: $day, type: $type, notes: $notes)';
   }
 
   @override
@@ -577,7 +521,7 @@ class _$MealAssignmentImpl implements _MealAssignment {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.mealId, mealId) || other.mealId == mealId) &&
             (identical(other.meal, meal) || other.meal == meal) &&
-            (identical(other.date, date) || other.date == date) &&
+            (identical(other.day, day) || other.day == day) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.notes, notes) || other.notes == notes));
   }
@@ -585,7 +529,7 @@ class _$MealAssignmentImpl implements _MealAssignment {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, mealId, meal, date, type, notes);
+      Object.hash(runtimeType, id, mealId, meal, day, type, notes);
 
   /// Create a copy of MealAssignment
   /// with the given fields replaced by the non-null parameter values.
@@ -609,8 +553,8 @@ abstract class _MealAssignment implements MealAssignment {
       {@JsonKey(name: 'id') required final String id,
       @JsonKey(name: 'mealId') required final String mealId,
       @JsonKey(name: 'meal') required final MealModel meal,
-      @JsonKey(name: 'date') required final DateTime date,
-      @JsonKey(name: 'type') required final MealType type,
+      @JsonKey(name: 'day') required final String day,
+      @JsonKey(name: 'mealType') required final MealType type,
       @JsonKey(name: 'notes') final String? notes}) = _$MealAssignmentImpl;
 
   factory _MealAssignment.fromJson(Map<String, dynamic> json) =
@@ -626,10 +570,10 @@ abstract class _MealAssignment implements MealAssignment {
   @JsonKey(name: 'meal')
   MealModel get meal;
   @override
-  @JsonKey(name: 'date')
-  DateTime get date;
+  @JsonKey(name: 'day')
+  String get day;
   @override
-  @JsonKey(name: 'type')
+  @JsonKey(name: 'mealType')
   MealType get type;
   @override
   @JsonKey(name: 'notes')

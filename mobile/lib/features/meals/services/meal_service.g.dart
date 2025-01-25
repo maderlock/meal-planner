@@ -3,6 +3,22 @@
 part of 'meal_service.dart';
 
 // **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+CreateWeeklyPlanRequest _$CreateWeeklyPlanRequestFromJson(
+        Map<String, dynamic> json) =>
+    CreateWeeklyPlanRequest(
+      json['weekStartDate'] as String,
+    );
+
+Map<String, dynamic> _$CreateWeeklyPlanRequestToJson(
+        CreateWeeklyPlanRequest instance) =>
+    <String, dynamic>{
+      'weekStartDate': instance.weekStartDate,
+    };
+
+// **************************************************************************
 // RetrofitGenerator
 // **************************************************************************
 
@@ -139,6 +155,39 @@ class _MealServiceApi implements MealServiceApi {
         .compose(
           _dio.options,
           '/weekly-plans/${id}',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late WeeklyPlanModel _value;
+    try {
+      _value = WeeklyPlanModel.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<WeeklyPlanModel> getWeeklyPlanByDate(String weekStartDate) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'weekStartDate': weekStartDate};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<WeeklyPlanModel>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/weekly-plans',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -408,7 +457,7 @@ class _MealServiceApi implements MealServiceApi {
 // RiverpodGenerator
 // **************************************************************************
 
-String _$mealServiceHash() => r'd0732b4e0d81e6e096f052bb2035d9a7e2b89662';
+String _$mealServiceHash() => r'4a75b815019cb6ac28c105b964763366268f85d1';
 
 /// See also [MealService].
 @ProviderFor(MealService)

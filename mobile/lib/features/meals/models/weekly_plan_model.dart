@@ -25,10 +25,8 @@ class WeeklyPlanModel with _$WeeklyPlanModel {
   const factory WeeklyPlanModel({
     @JsonKey(name: 'id') required String id,
     @JsonKey(name: 'userId') required String userId,
-    @JsonKey(name: 'startDate') required DateTime startDate,
-    @JsonKey(name: 'endDate') required DateTime endDate,
-    @JsonKey(name: 'name') String? name,
-    @JsonKey(name: 'assignments') required List<MealAssignment> assignments,
+    @JsonKey(name: 'weekStartDate') required DateTime weekStartDate,
+    @JsonKey(name: 'meals') required List<MealAssignment> assignments,
     @JsonKey(name: 'createdAt') required DateTime createdAt,
     @JsonKey(name: 'updatedAt') required DateTime updatedAt,
   }) = _WeeklyPlanModel;
@@ -43,8 +41,8 @@ class MealAssignment with _$MealAssignment {
     @JsonKey(name: 'id') required String id,
     @JsonKey(name: 'mealId') required String mealId,
     @JsonKey(name: 'meal') required MealModel meal,
-    @JsonKey(name: 'date') required DateTime date,
-    @JsonKey(name: 'type') required MealType type,
+    @JsonKey(name: 'day') required String day,
+    @JsonKey(name: 'mealType') required MealType type,
     @JsonKey(name: 'notes') String? notes,
   }) = _MealAssignment;
 

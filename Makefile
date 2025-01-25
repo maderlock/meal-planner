@@ -23,6 +23,15 @@ install:
 	@echo "Installing dependencies..."
 	@./scripts/install_macos.sh
 
+# Recreate database schema
+recreate-db-schema:
+	@echo "Recreating database schema..."
+	@cd admin && rm -rf prisma/migrations
+	@cd admin && npx prisma db push --force-reset
+	@cd admin && npx prisma migrate dev --name init
+	@cd admin && npx prisma migrate deploy
+	@cd admin && npx migrate status && npx prisma generate
+
 # Run the API server
 run-api:
 	@echo "Starting API server..."
@@ -67,6 +76,11 @@ run-mobile-android-clean:
 		./gradlew clean && \
 		cd .. && \
 		flutter run -d android
+	
+# Run the mobile app (iOS simulator by default)
+build-mobile:
+	@echo "Building mobile app..."
+	@cd mobile && dart run build_runner build --delete-conflicting-outputs
 
 # Run the web app
 run-web:
@@ -76,7 +90,7 @@ run-web:
 # Run all tests
 test:
 	@echo "Running API tests..."
-	@cd api && npm test
+	@cd admin && npm test
 	@echo "Running mobile tests..."
 	@cd mobile && flutter test
 	@echo "Running web tests..."

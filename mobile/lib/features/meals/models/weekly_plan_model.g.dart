@@ -47,10 +47,8 @@ _$WeeklyPlanModelImpl _$$WeeklyPlanModelImplFromJson(
     _$WeeklyPlanModelImpl(
       id: json['id'] as String,
       userId: json['userId'] as String,
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: DateTime.parse(json['endDate'] as String),
-      name: json['name'] as String?,
-      assignments: (json['assignments'] as List<dynamic>)
+      weekStartDate: DateTime.parse(json['weekStartDate'] as String),
+      assignments: (json['meals'] as List<dynamic>)
           .map((e) => MealAssignment.fromJson(e as Map<String, dynamic>))
           .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -62,10 +60,8 @@ Map<String, dynamic> _$$WeeklyPlanModelImplToJson(
     <String, dynamic>{
       'id': instance.id,
       'userId': instance.userId,
-      'startDate': instance.startDate.toIso8601String(),
-      'endDate': instance.endDate.toIso8601String(),
-      'name': instance.name,
-      'assignments': instance.assignments,
+      'weekStartDate': instance.weekStartDate.toIso8601String(),
+      'meals': instance.assignments,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
     };
@@ -75,8 +71,8 @@ _$MealAssignmentImpl _$$MealAssignmentImplFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       mealId: json['mealId'] as String,
       meal: MealModel.fromJson(json['meal'] as Map<String, dynamic>),
-      date: DateTime.parse(json['date'] as String),
-      type: $enumDecode(_$MealTypeEnumMap, json['type']),
+      day: json['day'] as String,
+      type: $enumDecode(_$MealTypeEnumMap, json['mealType']),
       notes: json['notes'] as String?,
     );
 
@@ -86,8 +82,8 @@ Map<String, dynamic> _$$MealAssignmentImplToJson(
       'id': instance.id,
       'mealId': instance.mealId,
       'meal': instance.meal,
-      'date': instance.date.toIso8601String(),
-      'type': _$MealTypeEnumMap[instance.type]!,
+      'day': instance.day,
+      'mealType': _$MealTypeEnumMap[instance.type]!,
       'notes': instance.notes,
     };
 

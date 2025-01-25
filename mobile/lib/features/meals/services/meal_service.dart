@@ -37,6 +37,24 @@ class MealService extends _$MealService {
     return state.value ?? [];
   }
 
+  /// Gets or creates a weekly plan for the specified week.
+  /// If a plan doesn't exist, it will be created automatically.
+  Future<WeeklyPlanModel> getOrCreateWeeklyPlan(DateTime weekStartDate) async {
+    try {
+      // First try to get the existing plan
+      final response = await _api.getWeeklyPlanByDate(weekStartDate.toIso8601String());
+      return response;
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode == 404) {
+        // Plan doesn't exist, create a new one
+        final endDate = weekStartDate.add(const Duration(days: 6));
+        final request = CreateWeeklyPlanRequest.fromDate(weekStartDate);
+        return await _api.createWeeklyPlan(request);
+      }
+      rethrow;
+    }
+  }
+
   Future<WeeklyPlanModel> getWeeklyPlan(String id) async {
     final response = await _api.getWeeklyPlan(id);
     return response;
@@ -107,6 +125,11 @@ abstract class MealServiceApi {
   @GET('/weekly-plans/{id}')
   Future<WeeklyPlanModel> getWeeklyPlan(@Path('id') String id);
 
+  @GET('/weekly-plans')
+  Future<WeeklyPlanModel> getWeeklyPlanByDate(
+    @Query('weekStartDate') String weekStartDate,
+  );
+
   @POST('/weekly-plans')
   Future<WeeklyPlanModel> createWeeklyPlan(@Body() CreateWeeklyPlanRequest request);
 
@@ -137,3 +160,22 @@ abstract class MealServiceApi {
   @DELETE('/meals/favorites/{id}')
   Future<void> removeFavorite(@Path('id') String id);
 }
+
+/// Request model for creating a new weekly plan.
+@JsonSerializable()
+class CreateWeeklyPlanRequest {
+  @JsonKey(name: 'weekStartDate')
+  final String weekStartDate;
+
+  CreateWeeklyPlanRequest(this.weekStartDate);
+
+  CreateWeeklyPlanRequest.fromDate(DateTime startDate)
+      : weekStartDate = startDate.toIso8601String();
+
+  factory CreateWeeklyPlanRequest.fromJson(Map<String, dynamic> json) =>
+      _$CreateWeeklyPlanRequestFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CreateWeeklyPlanRequestToJson(this);
+}
+
+/// Request model for updating an existing weekly plan.

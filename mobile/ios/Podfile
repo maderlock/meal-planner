@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '13.0'
+platform :ios, '12.0'
 
 # Set the encoding to UTF-8
 Encoding.default_external = Encoding::UTF_8
@@ -36,6 +36,8 @@ target 'Runner' do
   use_modular_headers!
 
   # Let CocoaPods handle the GoogleSignIn dependency through the Flutter plugin
+  pod 'abseil', '~> 1.20220623.0'
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
   # Override gRPC-Core pod
@@ -72,7 +74,7 @@ post_install do |installer|
     
     target.build_configurations.each do |config|
       # Ensure proper deployment target for pods
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
       
       # Enable non-modular includes in framework modules
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'

@@ -9,6 +9,7 @@ import '../models/meal_model.dart';
 import '../models/weekly_plan_model.dart';
 import '../services/meal_service.dart';
 import '../../../core/network/api_client.dart';
+import 'package:intl/intl.dart';
 
 class WeeklyPlanScreen extends ConsumerStatefulWidget {
   const WeeklyPlanScreen({super.key});
@@ -21,21 +22,28 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
   WeeklyPlanModel? _currentPlan;
   List<MealModel>? _availableMeals;
   bool _isLoading = true;
+  DateTime _selectedWeek = DateTime.now();
 
   @override
   void initState() {
     super.initState();
+    // Adjust to start of week (Monday)
+    _selectedWeek = _selectedWeek.subtract(
+      Duration(days: _selectedWeek.weekday - 1)
+    );
     _loadData();
   }
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      final plans = await ref.read(mealServiceProvider.notifier).getWeeklyPlans();
+      // Get or create plan for the selected week
+      final plan = await ref.read(mealServiceProvider.notifier)
+        .getOrCreateWeeklyPlan(_selectedWeek);
       final meals = await ref.read(mealServiceProvider.notifier).getMeals();
       
       setState(() {
-        _currentPlan = plans.isNotEmpty ? plans.first : null;
+        _currentPlan = plan;
         _availableMeals = meals;
         _isLoading = false;
       });
@@ -53,7 +61,6 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
               ? SnackBarAction(
                   label: 'Login',
                   onPressed: () {
-                    // Navigate to login screen
                     Navigator.of(context).pushReplacementNamed('/login');
                   },
                 )
@@ -62,6 +69,13 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
         );
       }
     }
+  }
+
+  void _changeWeek(int weekOffset) {
+    setState(() {
+      _selectedWeek = _selectedWeek.add(Duration(days: weekOffset * 7));
+    });
+    _loadData();
   }
 
   Future<void> _assignMeal(DateTime date) async {
@@ -91,7 +105,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
           _currentPlan!.id,
           {
             'mealId': selectedMeal.id,
-            'date': date.toIso8601String(),
+            'day': _getDayName(date),
             'type': selectedType.name,
           },
         );
@@ -112,6 +126,20 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     }
   }
 
+  String _getDayName(DateTime date) {
+    final days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+    // Adjust for weekday where 1 is Monday (dart uses 1 for Monday already)
+    return days[date.weekday - 1];
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -127,7 +155,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('No weekly plan found'),
+              const Text('Failed to load weekly plan'),
               ElevatedButton(
                 onPressed: _loadData,
                 child: const Text('Retry'),
@@ -138,7 +166,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
       );
     }
 
-    final startDate = _currentPlan!.startDate;
+    final startDate = _currentPlan!.weekStartDate;
     final dates = List.generate(7, (index) => 
       startDate.add(Duration(days: index)),
     );
@@ -146,18 +174,25 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _currentPlan!.name ?? 
-          'Week of ${startDate.month}/${startDate.day}',
+          'Week of ${DateFormat('MMMM d').format(startDate)}',
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.chevron_left),
+          onPressed: () => _changeWeek(-1),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: () => _changeWeek(1),
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: dates.length,
         itemBuilder: (context, index) {
           final date = dates[index];
           final assignments = _currentPlan!.assignments
-            .where((a) => a.date.year == date.year && 
-                         a.date.month == date.month && 
-                         a.date.day == date.day)
+            .where((a) => a.day == _getDayName(date))
             .toList()
             ..sort((a, b) => a.type.index.compareTo(b.type.index));
 
@@ -166,20 +201,26 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ListTile(
-                  title: Text(
-                    '${date.month}/${date.day}',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () => _assignMeal(date),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        DateFormat('EEEE, MMMM d').format(date),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () => _assignMeal(date),
+                      ),
+                    ],
                   ),
                 ),
                 if (assignments.isEmpty)
                   const Padding(
                     padding: EdgeInsets.all(16),
-                    child: Text('No meals planned'),
+                    child: Text('No meals assigned'),
                   )
                 else
                   ...assignments.map((assignment) => ListTile(

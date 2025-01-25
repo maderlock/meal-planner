@@ -1,9 +1,8 @@
 /**
- * Weekly Meal Plans API Route
+ * Weekly Plans API
  * 
- * Manages the creation, retrieval, and modification of weekly meal plans.
- * This is a core feature of the meal planning system that allows users
- * to organize their meals for the week.
+ * Handles weekly meal planning functionality.
+ * Supports CRUD operations for weekly plans.
  * 
  * Endpoints:
  * - GET: Retrieves user's weekly plans
@@ -17,12 +16,8 @@
  * - User-specific plan isolation
  * 
  * Used By:
- * - Mobile app weekly planning feature
- * - Admin dashboard for plan management
- * 
- * Related Files:
- * - [id]/assignments/route.ts: Manages meal assignments
- * - weekly_plan_model.dart: Mobile app model
+ * - WeeklyPlansPage: Admin dashboard weekly planning interface
+ * - meal_planner.dart: Mobile app weekly plan view
  * - meal_service.dart: Mobile app service integration
  */
 
@@ -34,7 +29,14 @@ import { z } from 'zod'
 
 // Schema for weekly plan creation
 const weeklyPlanSchema = z.object({
-  weekStartDate: z.string().transform(str => new Date(str))
+  weekStartDate: z.coerce.date(),
+})
+
+const mealAssignmentSchema = z.object({
+  mealId: z.string().uuid(),
+  day: z.string(),
+  type: z.enum(["breakfast", "lunch", "dinner"]),
+  notes: z.string().optional(),
 })
 
 export async function GET(request: NextRequest) {
@@ -56,42 +58,58 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const weekStartDate = searchParams.get('weekStartDate')
 
-    let query: any = {
-      where: { userId }
-    }
-
-    let date = new Date()
     if (weekStartDate) {
-      date = new Date(weekStartDate)
-    } else {
-      // Set to Monday of current week
-      date.setDate(date.getDate() - date.getDay() + 1)
+      // Get plan for specific week
+      const parsedDate = new Date(weekStartDate);
+      if (isNaN(parsedDate.getTime())) {
+        return NextResponse.json(
+          { error: "Invalid weekStartDate" },
+          { status: 400 }
+        );
+      }
+
+      const weeklyPlan = await prisma.weeklyPlan.findFirst({
+        where: {
+          userId,
+          weekStartDate: parsedDate,
+        },
+        include: {
+          mealPlans: {
+            include: {
+              meal: true
+            }
+          }
+        }
+      });
+
+      if (!weeklyPlan) {
+        return NextResponse.json(
+          { error: "Weekly plan not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(weeklyPlan);
     }
-    date.setHours(0, 0, 0, 0)
 
-    query.where.weekStartDate = date
-
-    let weeklyPlan = await prisma.weeklyPlan.findFirst({
-      ...query,
+    // Get all plans
+    const weeklyPlans = await prisma.weeklyPlan.findMany({
+      where: {
+        userId
+      },
       include: {
         mealPlans: {
           include: {
             meal: true
           }
         }
-      }
-    })
+      },
+      orderBy: {
+        weekStartDate: "desc",
+      },
+    });
 
-    console.log(`Found weekly plan for user ${userId}`);
-    
-    if (!weeklyPlan) {
-      return NextResponse.json(
-        { error: 'Weekly plan not found' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(weeklyPlan)
+    return NextResponse.json(weeklyPlans);
   } catch (error) {
     console.error('Error fetching weekly plan:', error)
     return NextResponse.json(
@@ -106,6 +124,78 @@ export async function POST(request: NextRequest) {
     // Verify authentication
     const userId = await verifyAuth(request)
     if (!userId) {
+      console.log('POST /api/weekly-plans: No session found');
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    console.log('POST /api/weekly-plans: Session user:', userId);
+
+    try {
+      const body = await request.json();
+      console.log('POST /api/weekly-plans: Request body:', body);
+      
+      const { weekStartDate } = weeklyPlanSchema.parse(body);
+      console.log('POST /api/weekly-plans: Parsed weekStartDate:', weekStartDate);
+
+      // Check if plan already exists for this week
+      const existingPlan = await prisma.weeklyPlan.findFirst({
+        where: {
+          userId,
+          weekStartDate,
+        },
+      });
+
+      console.log('POST /api/weekly-plans: Existing plan check:', existingPlan);
+
+      if (existingPlan) {
+        return NextResponse.json(
+          { error: "Plan already exists for this week" },
+          { status: 409 }
+        );
+      }
+
+      // Create new plan
+      const weeklyPlan = await prisma.weeklyPlan.create({
+        data: {
+          userId,
+          weekStartDate,
+        },
+        include: {
+          mealPlans: {
+            include: {
+              meal: true
+            }
+          }
+        },
+      });
+
+      console.log('POST /api/weekly-plans: Created plan:', weeklyPlan);
+
+      return NextResponse.json(weeklyPlan);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error('POST /api/weekly-plans: Validation error:', error.errors);
+        return NextResponse.json({ error: error.errors }, { status: 400 });
+      }
+      console.error('POST /api/weekly-plans: Database error:', error);
+      return NextResponse.json(
+        { error: "Failed to create weekly plan", details: error instanceof Error ? error.message : String(error) },
+        { status: 500 }
+      );
+    }
+  } catch (error) {
+    console.error('POST /api/weekly-plans: Unexpected error:', error);
+    return NextResponse.json(
+      { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const userId = await verifyAuth(request)
+    if (!userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -113,28 +203,103 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const result = weeklyPlanSchema.safeParse(body)
+    const { id } = body;
 
-    if (!result.success) {
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
+
+    // Verify plan exists and belongs to user
+    const existingPlan = await prisma.weeklyPlan.findFirst({
+      where: {
+        id,
+        userId
+      },
+    });
+
+    if (!existingPlan) {
       return NextResponse.json(
-        { error: 'Week start date is required' },
-        { status: 400 }
+        { error: "Weekly plan not found" },
+        { status: 404 }
+      );
+    }
+
+    // Update plan
+    const weeklyPlan = await prisma.weeklyPlan.update({
+      where: { id },
+      data: {
+        weekStartDate: body.weekStartDate || undefined,
+      },
+      include: {
+        mealPlans: {
+          include: {
+            meal: true
+          }
+        }
+      },
+    });
+
+    return NextResponse.json(weeklyPlan)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 });
+    }
+    return NextResponse.json(
+      { error: "Failed to update weekly plan" },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const userId = await verifyAuth(request)
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
       )
     }
 
-    const weeklyPlan = await prisma.weeklyPlan.create({
-      data: {
-        userId,
-        weekStartDate: result.data.weekStartDate,
-        meals: []
-      }
-    })
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
 
-    return NextResponse.json(weeklyPlan, { status: 201 })
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
+
+    try {
+      // Verify plan exists and belongs to user
+      const existingPlan = await prisma.weeklyPlan.findFirst({
+        where: {
+          id,
+          userId
+        },
+      });
+
+      if (!existingPlan) {
+        return NextResponse.json(
+          { error: "Weekly plan not found" },
+          { status: 404 }
+        );
+      }
+
+      // Delete plan
+      await prisma.weeklyPlan.delete({
+        where: { id },
+      });
+
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Failed to delete weekly plan" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error('Error creating weekly plan:', error)
+    console.error('Error deleting weekly plan:', error)
     return NextResponse.json(
-      { error: 'Failed to create weekly plan' },
+      { error: 'Failed to delete weekly plan' },
       { status: 500 }
     )
   }

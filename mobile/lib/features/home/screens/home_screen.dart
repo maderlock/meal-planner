@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:meal_planner/core/router/app_router.dart';
-import 'package:meal_planner/features/meals/services/meal_service.dart';
+import 'package:meal_planner/features/meals/providers/current_week_plan_provider.dart';
 import 'package:meal_planner/features/auth/providers/auth_provider.dart';
 import 'package:meal_planner/features/meals/models/weekly_plan_model.dart';
 import 'package:intl/intl.dart';
@@ -17,7 +17,7 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final weeklyPlanAsync = ref.watch(mealServiceProvider);
+    final currentPlanAsync = ref.watch(currentWeekPlanProvider);
     final userName = ref.watch(userDisplayNameProvider) ?? 'User';
 
     return Scaffold(
@@ -50,8 +50,8 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: weeklyPlanAsync.when(
-              data: (weeklyPlans) => _buildWeeklyPlanSummary(context, weeklyPlans),
+            child: currentPlanAsync.when(
+              data: (plan) => _buildWeeklyPlanSummary(context, plan),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Text('Error: $error'),
@@ -68,42 +68,24 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildWeeklyPlanSummary(BuildContext context, List<WeeklyPlanModel> plans) {
-    if (plans.isEmpty) {
-      return const Center(
-        child: Text('No meal plans yet. Create one!'),
-      );
+  Widget _buildWeeklyPlanSummary(BuildContext context, WeeklyPlanModel plan) {
+    // Group assignments by day
+    final assignmentsByDay = <String, List<MealAssignment>>{};
+    for (final assignment in plan.assignments) {
+      assignmentsByDay.putIfAbsent(assignment.day, () => []).add(assignment);
     }
 
-    // Find the current week's plan
-    final now = DateTime.now();
-    final currentPlan = plans.firstWhere(
-      (plan) => plan.startDate.isBefore(now) && plan.endDate.isAfter(now),
-      orElse: () => plans.first,
-    );
+    // Sort days
+    final days = assignmentsByDay.keys.toList()
+      ..sort((a, b) => _dayToNumber(a).compareTo(_dayToNumber(b)));
 
-    // Group assignments by date
-    final assignmentsByDate = <DateTime, List<MealAssignment>>{};
-    for (final assignment in currentPlan.assignments) {
-      final date = DateTime(
-        assignment.date.year,
-        assignment.date.month,
-        assignment.date.day,
-      );
-      assignmentsByDate.putIfAbsent(date, () => []).add(assignment);
-    }
-
-    // Sort dates
-    final dates = assignmentsByDate.keys.toList()
-      ..sort((a, b) => a.compareTo(b));
-
-    if (dates.isEmpty) {
+    if (days.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'No meals planned for ${DateFormat('MMMM d').format(currentPlan.startDate)} - ${DateFormat('MMMM d').format(currentPlan.endDate)}',
+              'No meals planned for week of ${DateFormat('MMMM d').format(plan.weekStartDate)}',
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
@@ -118,10 +100,10 @@ class HomeScreen extends ConsumerWidget {
 
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: dates.length,
+      itemCount: days.length,
       itemBuilder: (context, index) {
-        final date = dates[index];
-        final assignments = assignmentsByDate[date]!;
+        final day = days[index];
+        final assignments = assignmentsByDay[day]!;
         assignments.sort((a, b) => a.type.index.compareTo(b.type.index));
 
         return Card(
@@ -132,7 +114,7 @@ class HomeScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  DateFormat('EEEE, MMMM d').format(date),
+                  day,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
@@ -162,5 +144,18 @@ class HomeScreen extends ConsumerWidget {
         );
       },
     );
+  }
+
+  int _dayToNumber(String day) {
+    const days = {
+      'Monday': 1,
+      'Tuesday': 2,
+      'Wednesday': 3,
+      'Thursday': 4,
+      'Friday': 5,
+      'Saturday': 6,
+      'Sunday': 7,
+    };
+    return days[day] ?? 0;
   }
 }
