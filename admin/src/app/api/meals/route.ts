@@ -28,8 +28,9 @@
  * - favorites/route.ts: Favorite meals management
  */
 
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyAuth } from '@/lib/auth'
 import { z } from 'zod'
 
 // Schema for meal creation
@@ -50,39 +51,26 @@ const updateMealSchema = z.object({
   imageUrl: z.string().optional()
 })
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
     const favoritesOnly = searchParams.get('favoritesOnly') === 'true'
 
+    // Get userId from JWT token
+    const userId = await verifyAuth(request);
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     let meals = await prisma.meal.findMany({
+      where: {
+        userId,
+        ...(favoritesOnly ? { isFavorite: true } : {}),
+      },
       orderBy: {
         name: 'asc'
       }
-    })
-
-    if (userId) {
-      const favorites = await prisma.favoriteMeal.findMany({
-        where: {
-          userId
-        },
-        select: {
-          mealId: true
-        }
-      })
-
-      const favoriteMealIds = new Set(favorites.map(f => f.mealId))
-      
-      meals = meals.map(meal => ({
-        ...meal,
-        isFavorite: favoriteMealIds.has(meal.id)
-      }))
-
-      if (favoritesOnly) {
-        meals = meals.filter(meal => meal.isFavorite)
-      }
-    }
+    });
 
     return NextResponse.json(meals, {
       status: 200
@@ -95,7 +83,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const validatedData = createMealSchema.parse(body)
@@ -120,7 +108,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')

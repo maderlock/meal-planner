@@ -36,6 +36,8 @@ mixin _$MealModel {
   DateTime get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updatedAt')
   DateTime get updatedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'isFavorite')
+  bool get isFavorite => throw _privateConstructorUsedError;
 
   /// Serializes this MealModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -60,7 +62,8 @@ abstract class $MealModelCopyWith<$Res> {
       @JsonKey(name: 'instructions') String? instructions,
       @JsonKey(name: 'ingredients') List<String> ingredients,
       @JsonKey(name: 'createdAt') DateTime createdAt,
-      @JsonKey(name: 'updatedAt') DateTime updatedAt});
+      @JsonKey(name: 'updatedAt') DateTime updatedAt,
+      @JsonKey(name: 'isFavorite') bool isFavorite});
 }
 
 /// @nodoc
@@ -86,6 +89,7 @@ class _$MealModelCopyWithImpl<$Res, $Val extends MealModel>
     Object? ingredients = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? isFavorite = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -120,6 +124,10 @@ class _$MealModelCopyWithImpl<$Res, $Val extends MealModel>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      isFavorite: null == isFavorite
+          ? _value.isFavorite
+          : isFavorite // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -140,7 +148,8 @@ abstract class _$$MealModelImplCopyWith<$Res>
       @JsonKey(name: 'instructions') String? instructions,
       @JsonKey(name: 'ingredients') List<String> ingredients,
       @JsonKey(name: 'createdAt') DateTime createdAt,
-      @JsonKey(name: 'updatedAt') DateTime updatedAt});
+      @JsonKey(name: 'updatedAt') DateTime updatedAt,
+      @JsonKey(name: 'isFavorite') bool isFavorite});
 }
 
 /// @nodoc
@@ -164,6 +173,7 @@ class __$$MealModelImplCopyWithImpl<$Res>
     Object? ingredients = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? isFavorite = null,
   }) {
     return _then(_$MealModelImpl(
       id: null == id
@@ -198,6 +208,10 @@ class __$$MealModelImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      isFavorite: null == isFavorite
+          ? _value.isFavorite
+          : isFavorite // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -213,7 +227,8 @@ class _$MealModelImpl implements _MealModel {
       @JsonKey(name: 'instructions') this.instructions,
       @JsonKey(name: 'ingredients') required final List<String> ingredients,
       @JsonKey(name: 'createdAt') required this.createdAt,
-      @JsonKey(name: 'updatedAt') required this.updatedAt})
+      @JsonKey(name: 'updatedAt') required this.updatedAt,
+      @JsonKey(name: 'isFavorite') this.isFavorite = false})
       : _ingredients = ingredients;
 
   factory _$MealModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -249,10 +264,13 @@ class _$MealModelImpl implements _MealModel {
   @override
   @JsonKey(name: 'updatedAt')
   final DateTime updatedAt;
+  @override
+  @JsonKey(name: 'isFavorite')
+  final bool isFavorite;
 
   @override
   String toString() {
-    return 'MealModel(id: $id, name: $name, description: $description, imageUrl: $imageUrl, instructions: $instructions, ingredients: $ingredients, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'MealModel(id: $id, name: $name, description: $description, imageUrl: $imageUrl, instructions: $instructions, ingredients: $ingredients, createdAt: $createdAt, updatedAt: $updatedAt, isFavorite: $isFavorite)';
   }
 
   @override
@@ -273,7 +291,9 @@ class _$MealModelImpl implements _MealModel {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.isFavorite, isFavorite) ||
+                other.isFavorite == isFavorite));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -287,7 +307,8 @@ class _$MealModelImpl implements _MealModel {
       instructions,
       const DeepCollectionEquality().hash(_ingredients),
       createdAt,
-      updatedAt);
+      updatedAt,
+      isFavorite);
 
   /// Create a copy of MealModel
   /// with the given fields replaced by the non-null parameter values.
@@ -307,15 +328,15 @@ class _$MealModelImpl implements _MealModel {
 
 abstract class _MealModel implements MealModel {
   const factory _MealModel(
-          {@JsonKey(name: 'id') required final String id,
-          @JsonKey(name: 'name') required final String name,
-          @JsonKey(name: 'description') final String? description,
-          @JsonKey(name: 'imageUrl') final String? imageUrl,
-          @JsonKey(name: 'instructions') final String? instructions,
-          @JsonKey(name: 'ingredients') required final List<String> ingredients,
-          @JsonKey(name: 'createdAt') required final DateTime createdAt,
-          @JsonKey(name: 'updatedAt') required final DateTime updatedAt}) =
-      _$MealModelImpl;
+      {@JsonKey(name: 'id') required final String id,
+      @JsonKey(name: 'name') required final String name,
+      @JsonKey(name: 'description') final String? description,
+      @JsonKey(name: 'imageUrl') final String? imageUrl,
+      @JsonKey(name: 'instructions') final String? instructions,
+      @JsonKey(name: 'ingredients') required final List<String> ingredients,
+      @JsonKey(name: 'createdAt') required final DateTime createdAt,
+      @JsonKey(name: 'updatedAt') required final DateTime updatedAt,
+      @JsonKey(name: 'isFavorite') final bool isFavorite}) = _$MealModelImpl;
 
   factory _MealModel.fromJson(Map<String, dynamic> json) =
       _$MealModelImpl.fromJson;
@@ -344,6 +365,9 @@ abstract class _MealModel implements MealModel {
   @override
   @JsonKey(name: 'updatedAt')
   DateTime get updatedAt;
+  @override
+  @JsonKey(name: 'isFavorite')
+  bool get isFavorite;
 
   /// Create a copy of MealModel
   /// with the given fields replaced by the non-null parameter values.

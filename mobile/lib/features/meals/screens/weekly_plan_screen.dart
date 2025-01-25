@@ -9,6 +9,7 @@ import '../models/meal_model.dart';
 import '../models/weekly_plan_model.dart';
 import '../services/meal_service.dart';
 import '../../../core/network/api_client.dart';
+import '../widgets/meal_selection_dialog.dart';
 import 'package:intl/intl.dart';
 
 class WeeklyPlanScreen extends ConsumerStatefulWidget {
@@ -94,9 +95,10 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
 
     if (selectedType == null) return;
 
+    final meals = _availableMeals ?? [];
     final MealModel? selectedMeal = await showDialog<MealModel>(
       context: context,
-      builder: (context) => MealSelectionDialog(meals: _availableMeals!),
+      builder: (context) => MealSelectionDialog(meals: meals),
     );
 
     if (selectedMeal != null && mounted) {
@@ -261,26 +263,6 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
           );
         },
       ),
-    );
-  }
-}
-
-class MealSelectionDialog extends StatelessWidget {
-  final List<MealModel> meals;
-
-  const MealSelectionDialog({
-    super.key,
-    required this.meals,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SimpleDialog(
-      title: const Text('Select a Meal'),
-      children: meals.map((meal) => SimpleDialogOption(
-        onPressed: () => Navigator.pop(context, meal),
-        child: Text(meal.name),
-      )).toList(),
     );
   }
 }

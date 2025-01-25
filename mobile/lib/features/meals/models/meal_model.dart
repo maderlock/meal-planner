@@ -20,6 +20,7 @@ class MealModel with _$MealModel {
     @JsonKey(name: 'ingredients') required List<String> ingredients,
     @JsonKey(name: 'createdAt') required DateTime createdAt,
     @JsonKey(name: 'updatedAt') required DateTime updatedAt,
+    @JsonKey(name: 'isFavorite') @Default(false) bool isFavorite,
   }) = _MealModel;
 
   factory MealModel.fromJson(Map<String, dynamic> json) =>

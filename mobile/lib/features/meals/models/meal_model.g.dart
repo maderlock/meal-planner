@@ -18,6 +18,7 @@ _$MealModelImpl _$$MealModelImplFromJson(Map<String, dynamic> json) =>
           .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      isFavorite: json['isFavorite'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$MealModelImplToJson(_$MealModelImpl instance) =>
@@ -30,6 +31,7 @@ Map<String, dynamic> _$$MealModelImplToJson(_$MealModelImpl instance) =>
       'ingredients': instance.ingredients,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
+      'isFavorite': instance.isFavorite,
     };
 
 _$FavoriteMealImpl _$$FavoriteMealImplFromJson(Map<String, dynamic> json) =>
