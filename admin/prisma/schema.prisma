@@ -33,10 +33,10 @@ datasource db {
 
 // User model representing application users
 model User {
-  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id              String    @id @default(uuid()) @db.Uuid
   firebaseUid     String?   @unique @map("firebase_uid")
   email           String    @unique
-  username        String    @unique
+  username        String?   @unique
   password        String    @default("")
   displayName     String?   @map("display_name")
   photoUrl        String?   @map("photo_url")
@@ -53,7 +53,7 @@ model User {
 
 // Meal model representing individual meals/recipes
 model Meal {
-  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id              String    @id @default(uuid()) @db.Uuid
   name            String
   description     String
   userId          String    @map("user_id") @db.Uuid
@@ -69,7 +69,7 @@ model Meal {
 
 // WeeklyPlan model for organizing meals
 model WeeklyPlan {
-  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id              String    @id @default(uuid()) @db.Uuid
   userId          String    @map("user_id") @db.Uuid
   weekStartDate   DateTime  @map("week_start_date") @db.Timestamptz
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
@@ -84,7 +84,7 @@ model WeeklyPlan {
 
 // MealPlan model for assigning meals to days in a weekly plan
 model MealPlan {
-  id           String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id           String     @id @default(uuid()) @db.Uuid
   weeklyPlanId String     @map("weekly_plan_id") @db.Uuid
   mealId       String     @map("meal_id") @db.Uuid
   dayOfWeek    Int        @map("day_of_week") // 0-6 for Sunday-Saturday

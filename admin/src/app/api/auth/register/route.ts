@@ -2,18 +2,15 @@ import { Request, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-import { jwtService, JWTService } from '@/lib/jwt';
+import { jwtService } from '@/lib/jwt';
 
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-  username: z.string().optional(),
+  username: z.string().nullable().optional(),
 });
 
-export async function POST(
-  request: Request,
-  jwtSvc: JWTService = jwtService
-) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const validatedData = registerSchema.parse(body);
@@ -31,9 +28,7 @@ export async function POST(
     }
 
     // Generate username from email if not provided
-    if (!validatedData.username) {
-      validatedData.username = validatedData.email.split('@')[0];
-    }
+    const username = validatedData.username || null;
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
@@ -43,9 +38,9 @@ export async function POST(
     const user = await prisma.user.create({
       data: {
         email: validatedData.email,
-        username: validatedData.username,
+        username: username,
         password: hashedPassword,
-        displayName: validatedData.username,
+        displayName: username,
         firebaseUid: null,
       },
       select: {
@@ -58,7 +53,7 @@ export async function POST(
     });
 
     // Generate JWT token
-    const token = jwtSvc.sign({ userId: user.id });
+    const token = jwtService.sign({ userId: user.id });
 
     // Return user data (excluding password) and token
     return NextResponse.json(

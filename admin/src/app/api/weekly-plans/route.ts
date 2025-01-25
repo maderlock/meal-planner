@@ -137,6 +137,20 @@ export async function POST(request: NextRequest) {
       const { weekStartDate } = weeklyPlanSchema.parse(body);
       console.log('POST /api/weekly-plans: Parsed weekStartDate:', weekStartDate);
 
+      // Verify user exists
+      console.log('POST /api/weekly-plans: Looking up user with ID:', userId);
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+
+      if (!user) {
+        console.log('POST /api/weekly-plans: User not found:', userId);
+        return NextResponse.json(
+          { error: "User not found" },
+          { status: 404 }
+        );
+      }
+
       // Check if plan already exists for this week
       const existingPlan = await prisma.weeklyPlan.findFirst({
         where: {
