@@ -177,10 +177,14 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
           'Week of ${DateFormat('MMMM d').format(startDate)}',
         ),
         leading: IconButton(
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () => _changeWeek(-1),
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: () => _changeWeek(-1),
+          ),
           IconButton(
             icon: const Icon(Icons.chevron_right),
             onPressed: () => _changeWeek(1),
