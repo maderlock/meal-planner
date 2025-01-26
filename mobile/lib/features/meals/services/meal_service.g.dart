@@ -9,7 +9,7 @@ part of 'meal_service.dart';
 CreateWeeklyPlanRequest _$CreateWeeklyPlanRequestFromJson(
         Map<String, dynamic> json) =>
     CreateWeeklyPlanRequest(
-      json['weekStartDate'] as String,
+      weekStartDate: json['weekStartDate'] as String,
     );
 
 Map<String, dynamic> _$CreateWeeklyPlanRequestToJson(
@@ -187,7 +187,7 @@ class _MealServiceApi implements MealServiceApi {
     )
         .compose(
           _dio.options,
-          '/weekly-plans',
+          '/weekly-plans/by-date',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -422,6 +422,69 @@ class _MealServiceApi implements MealServiceApi {
     await _dio.fetch<void>(_options);
   }
 
+  @override
+  Future<List<RecipeSuggestion>> suggestRecipes(
+      Map<String, String> request) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(request);
+    final _options = _setStreamType<List<RecipeSuggestion>>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/meals/suggest',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<RecipeSuggestion> _value;
+    try {
+      _value = _result.data!
+          .map((dynamic i) =>
+              RecipeSuggestion.fromJson(i as Map<String, dynamic>))
+          .toList();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<void> saveSuggestedRecipe(RecipeSuggestion suggestion) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = suggestion;
+    final _options = _setStreamType<void>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/meals/save-suggestion',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    await _dio.fetch<void>(_options);
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||
@@ -457,20 +520,20 @@ class _MealServiceApi implements MealServiceApi {
 // RiverpodGenerator
 // **************************************************************************
 
-String _$mealServiceHash() => r'4a75b815019cb6ac28c105b964763366268f85d1';
+String _$weeklyPlansHash() => r'63e4c34296ec6a2c0cd4ac0e4e0f6d7f0018c37c';
 
-/// See also [MealService].
-@ProviderFor(MealService)
-final mealServiceProvider = AutoDisposeAsyncNotifierProvider<MealService,
+/// See also [WeeklyPlans].
+@ProviderFor(WeeklyPlans)
+final weeklyPlansProvider = AutoDisposeAsyncNotifierProvider<WeeklyPlans,
     List<WeeklyPlanModel>>.internal(
-  MealService.new,
-  name: r'mealServiceProvider',
+  WeeklyPlans.new,
+  name: r'weeklyPlansProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$mealServiceHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$weeklyPlansHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$MealService = AutoDisposeAsyncNotifier<List<WeeklyPlanModel>>;
+typedef _$WeeklyPlans = AutoDisposeAsyncNotifier<List<WeeklyPlanModel>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

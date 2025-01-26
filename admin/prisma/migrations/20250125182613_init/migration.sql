@@ -20,12 +20,16 @@ CREATE TABLE "users" (
 CREATE TABLE "meals" (
     "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
+    "description" TEXT,
     "user_id" UUID NOT NULL,
     "imageurl" TEXT NOT NULL DEFAULT '',
     "is_favorite" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL,
+    "ingredients" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "instructions" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "cooking_time" TEXT,
+    "source_url" TEXT,
 
     CONSTRAINT "meals_pkey" PRIMARY KEY ("id")
 );

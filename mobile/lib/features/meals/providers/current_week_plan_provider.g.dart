@@ -6,16 +6,15 @@ part of 'current_week_plan_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$currentWeekPlanHash() => r'679995f2d796ad76a477f3b5562ca094c4468989';
+String _$currentWeekPlanHash() => r'96b63c86da86763e654aea157c250c2fbe695387';
 
-/// Provider for the current week's plan.
-/// Creates a new plan if one doesn't exist.
+/// Provider that manages the current week's meal plan
 ///
-/// Copied from [currentWeekPlan].
-@ProviderFor(currentWeekPlan)
+/// Copied from [CurrentWeekPlan].
+@ProviderFor(CurrentWeekPlan)
 final currentWeekPlanProvider =
-    AutoDisposeFutureProvider<WeeklyPlanModel>.internal(
-  currentWeekPlan,
+    AutoDisposeAsyncNotifierProvider<CurrentWeekPlan, WeeklyPlanModel>.internal(
+  CurrentWeekPlan.new,
   name: r'currentWeekPlanProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
@@ -24,8 +23,6 @@ final currentWeekPlanProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CurrentWeekPlanRef = AutoDisposeFutureProviderRef<WeeklyPlanModel>;
+typedef _$CurrentWeekPlan = AutoDisposeAsyncNotifier<WeeklyPlanModel>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

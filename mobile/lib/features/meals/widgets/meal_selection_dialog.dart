@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/meal_model.dart';
-import '../services/meal_service.dart';
+import '../services/meal_service.dart' as service;
+import '../providers/meal_provider.dart';
 
 /// A reusable dialog for selecting meals from a list.
 /// Shows favorites first with a star icon, and includes a button to add new meals.
@@ -15,7 +16,8 @@ class MealSelectionDialog extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<MealSelectionDialog> createState() => _MealSelectionDialogState();
+  ConsumerState<MealSelectionDialog> createState() =>
+      _MealSelectionDialogState();
 }
 
 class _MealSelectionDialogState extends ConsumerState<MealSelectionDialog> {
@@ -39,17 +41,18 @@ class _MealSelectionDialogState extends ConsumerState<MealSelectionDialog> {
   Future<void> _loadMeals() async {
     try {
       setState(() => _isLoading = true);
-      final meals = await ref.read(mealServiceProvider.notifier).getMeals();
+      final meals = await ref.read(mealServiceProvider).getMeals();
       setState(() {
         _meals = meals;
         _isLoading = false;
-        _errorMessage = null;
       });
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Failed to load meals';
-      });
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to load meals')),
+        );
+      }
     }
   }
 

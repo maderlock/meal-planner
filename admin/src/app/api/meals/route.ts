@@ -39,7 +39,9 @@ const createMealSchema = z.object({
   description: z.string().optional(),
   ingredients: z.array(z.string()).optional().default([]),
   instructions: z.array(z.string()).optional().default([]),
-  imageUrl: z.string().optional()
+  imageUrl: z.string().optional(),
+  cookingTime: z.number().optional(),
+  sourceUrl: z.string().optional()
 })
 
 // Schema for meal update
@@ -48,7 +50,9 @@ const updateMealSchema = z.object({
   description: z.string().optional(),
   ingredients: z.array(z.string()).optional(),
   instructions: z.array(z.string()).optional(),
-  imageUrl: z.string().optional()
+  imageUrl: z.string().optional(),
+  cookingTime: z.number().optional(),
+  sourceUrl: z.string().optional()
 })
 
 export async function GET(request: NextRequest) {
@@ -66,6 +70,19 @@ export async function GET(request: NextRequest) {
       where: {
         userId,
         ...(favoritesOnly ? { isFavorite: true } : {}),
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        imageUrl: true,
+        isFavorite: true,
+        createdAt: true,
+        updatedAt: true,
+        ingredients: true,
+        instructions: true,
+        cookingTime: true,
+        sourceUrl: true,
       },
       orderBy: {
         name: 'asc'

@@ -53,16 +53,20 @@ model User {
 
 // Meal model representing individual meals/recipes
 model Meal {
-  id              String    @id @default(uuid()) @db.Uuid
-  name            String
-  description     String
-  userId          String    @map("user_id") @db.Uuid
-  imageUrl        String    @default("") @map("imageurl")
-  isFavorite      Boolean   @default(false) @map("is_favorite")
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-  user            User      @relation(fields: [userId], references: [id])
-  mealPlans       MealPlan[]
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  userId      String    @map("user_id") @db.Uuid
+  imageUrl    String    @default("") @map("imageurl")
+  isFavorite  Boolean   @default(false) @map("is_favorite")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  user        User      @relation(fields: [userId], references: [id])
+  mealPlans   MealPlan[]
+  ingredients String[]  @default([]) @map("ingredients")
+  instructions String[] @default([]) @map("instructions")
+  cookingTime String?   @map("cooking_time")
+  sourceUrl   String?   @map("source_url")
 
   @@map("meals")
 }

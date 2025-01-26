@@ -31,7 +31,7 @@ class ApiClient {
     _dio = Dio(
       BaseOptions(
         /// Base URL for API requests.
-        baseUrl: AppConfig().apiBaseUrl,
+        baseUrl: AppConfig.instance.baseUrl,
         /// Connection timeout for API requests.
         connectTimeout: const Duration(seconds: 5),
         /// Receive timeout for API requests.

@@ -5,11 +5,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/meal_model.dart';
-import '../models/weekly_plan_model.dart';
-import '../services/meal_service.dart';
-import '../../../core/network/api_client.dart';
-import '../widgets/meal_selection_dialog.dart';
+import 'package:meal_planner/core/exceptions/api_exception.dart';
+import 'package:meal_planner/features/meals/models/meal_model.dart';
+import 'package:meal_planner/features/meals/models/weekly_plan_model.dart';
+import 'package:meal_planner/features/meals/providers/meal_provider.dart';
+import 'package:meal_planner/features/meals/widgets/meal_chooser.dart';
+import 'package:meal_planner/features/meals/widgets/meal_selection_dialog.dart';
 import 'package:intl/intl.dart';
 
 class WeeklyPlanScreen extends ConsumerStatefulWidget {
@@ -39,33 +40,29 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
     setState(() => _isLoading = true);
     try {
       // Get or create plan for the selected week
-      final plan = await ref.read(mealServiceProvider.notifier)
-        .getOrCreateWeeklyPlan(_selectedWeek);
-      final meals = await ref.read(mealServiceProvider.notifier).getMeals();
+      final plan = await ref.read(mealServiceProvider).getOrCreateWeeklyPlan(_selectedWeek);
+      final meals = await ref.read(mealServiceProvider).getMeals();
       
       setState(() {
         _currentPlan = plan;
         _availableMeals = meals;
         _isLoading = false;
       });
+    } on ApiException catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              e is ApiException 
-                ? e.toUserMessage()
-                : 'Failed to load weekly plan. Please try again.',
+              'Failed to load weekly plan. Please try again.',
             ),
-            action: e is ApiException && e.statusCode == 401 
-              ? SnackBarAction(
-                  label: 'Login',
-                  onPressed: () {
-                    Navigator.of(context).pushReplacementNamed('/login');
-                  },
-                )
-              : null,
           ),
         );
       }
@@ -103,7 +100,7 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
 
     if (selectedMeal != null && mounted) {
       try {
-        await ref.read(mealServiceProvider.notifier).assignMeal(
+        await ref.read(mealServiceProvider).assignMeal(
           _currentPlan!.id,
           {
             'mealId': selectedMeal.id,
@@ -112,14 +109,18 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
           },
         );
         await _loadData(); // Refresh data
+      } on ApiException catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.message)),
+          );
+        }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                e is ApiException 
-                  ? e.toUserMessage()
-                  : 'Failed to assign meal. Please try again.',
+                'Failed to assign meal. Please try again.',
               ),
             ),
           );
@@ -239,17 +240,20 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
                       icon: const Icon(Icons.delete),
                       onPressed: () async {
                         try {
-                          await ref.read(mealServiceProvider.notifier)
-                            .removeAssignment(_currentPlan!.id, assignment.id);
+                          await ref.read(mealServiceProvider).removeAssignment(_currentPlan!.id, assignment.id);
                           await _loadData();
+                        } on ApiException catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.message)),
+                            );
+                          }
                         } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  e is ApiException 
-                                    ? e.toUserMessage()
-                                    : 'Failed to remove meal. Please try again.',
+                                  'Failed to remove meal. Please try again.',
                                 ),
                               ),
                             );
@@ -262,6 +266,24 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
             ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => Dialog(
+              child: MealChooser(
+                onMealAdded: () {
+                  // Refresh meals list
+                  ref.refresh(mealsProvider);
+                  // Close dialog
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
