@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meal_planner/features/meals/models/recipe_suggestion.dart';
-import 'package:meal_planner/features/meals/providers/meal_provider.dart';
-import 'package:meal_planner/core/widgets/loading_overlay.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../../core/widgets/loading_overlay.dart';
+import '../models/recipe_suggestion.dart';
+import '../providers/meal_provider.dart';
 
 class RecipeSuggestionDialog extends ConsumerStatefulWidget {
   const RecipeSuggestionDialog({super.key});
 
   @override
-  ConsumerState<RecipeSuggestionDialog> createState() => _RecipeSuggestionDialogState();
+  ConsumerState<RecipeSuggestionDialog> createState() =>
+      _RecipeSuggestionDialogState();
 }
 
-class _RecipeSuggestionDialogState extends ConsumerState<RecipeSuggestionDialog> {
+class _RecipeSuggestionDialogState
+    extends ConsumerState<RecipeSuggestionDialog> {
   final _descriptionController = TextEditingController();
   List<RecipeSuggestion>? _suggestions;
   bool _loading = false;
@@ -33,7 +36,8 @@ class _RecipeSuggestionDialogState extends ConsumerState<RecipeSuggestionDialog>
     });
 
     try {
-      final suggestions = await ref.read(mealServiceProvider)
+      final suggestions = await ref
+          .read(mealServiceProvider)
           .suggestRecipes(_descriptionController.text);
       setState(() {
         _suggestions = suggestions;
@@ -54,7 +58,7 @@ class _RecipeSuggestionDialogState extends ConsumerState<RecipeSuggestionDialog>
       await ref.read(mealServiceProvider).saveSuggestedRecipe(suggestion);
       // Refresh meals list
       ref.refresh(mealsProvider);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Added ${suggestion.name} to your meals')),
@@ -81,111 +85,121 @@ class _RecipeSuggestionDialogState extends ConsumerState<RecipeSuggestionDialog>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Get Recipe Suggestions',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _descriptionController,
-                  decoration: const InputDecoration(
-                    hintText: 'Describe the type of meal you want...',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _loading ? null : _getSuggestions,
-                  child: const Text('Get Suggestions'),
-                ),
-                if (_error != null) ...[
-                  const SizedBox(height: 8),
+  Widget build(BuildContext context) => Stack(
+        children: [
+          Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                   Text(
-                    _error!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    'Get Recipe Suggestions',
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                ],
-                if (_suggestions != null) ...[
                   const SizedBox(height: 16),
-                  Flexible(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: _suggestions!.length,
-                      itemBuilder: (context, index) {
-                        final suggestion = _suggestions![index];
-                        return Card(
-                          child: ExpansionTile(
-                            title: Text(suggestion.name),
-                            subtitle: Text(
-                              suggestion.description,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Cooking Time: ${suggestion.cookingTime}'),
-                                    const SizedBox(height: 8),
-                                    const Text(
-                                      'Ingredients:',
-                                      style: TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                    ...suggestion.ingredients.map((i) => Text('• $i')),
-                                    const SizedBox(height: 8),
-                                    const Text(
-                                      'Instructions:',
-                                      style: TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                    ...suggestion.instructions
-                                        .asMap()
-                                        .entries
-                                        .map((e) => Text('${e.key + 1}. ${e.value}')),
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        TextButton(
-                                          onPressed: () => _openRecipeUrl(suggestion.url),
-                                          child: const Text('View Original Recipe'),
-                                        ),
-                                        ElevatedButton(
-                                          onPressed: _loading
-                                              ? null
-                                              : () => _saveSuggestion(suggestion),
-                                          child: const Text('Add to My Meals'),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                  TextField(
+                    controller: _descriptionController,
+                    decoration: const InputDecoration(
+                      hintText: 'Describe the type of meal you want...',
+                      border: OutlineInputBorder(),
                     ),
+                    maxLines: 3,
                   ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loading ? null : _getSuggestions,
+                    child: const Text('Get Suggestions'),
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _error!,
+                      style:
+                          TextStyle(color: Theme.of(context).colorScheme.error),
+                    ),
+                  ],
+                  if (_suggestions != null) ...[
+                    const SizedBox(height: 16),
+                    Flexible(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: _suggestions!.length,
+                        itemBuilder: (context, index) {
+                          final suggestion = _suggestions![index];
+                          return Card(
+                            child: ExpansionTile(
+                              title: Text(suggestion.name),
+                              subtitle: Text(
+                                suggestion.description,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                          'Cooking Time: ${suggestion.cookingTime}'),
+                                      const SizedBox(height: 8),
+                                      const Text(
+                                        'Ingredients:',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      ...suggestion.ingredients
+                                          .map((i) => Text('• $i')),
+                                      const SizedBox(height: 8),
+                                      const Text(
+                                        'Instructions:',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      ...suggestion.instructions
+                                          .asMap()
+                                          .entries
+                                          .map((e) =>
+                                              Text('${e.key + 1}. ${e.value}')),
+                                      const SizedBox(height: 16),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                _openRecipeUrl(suggestion.url),
+                                            child: const Text(
+                                                'View Original Recipe'),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: _loading
+                                                ? null
+                                                : () =>
+                                                    _saveSuggestion(suggestion),
+                                            child:
+                                                const Text('Add to My Meals'),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
-        ),
-        if (_loading) const LoadingOverlay(),
-      ],
-    );
-  }
+          if (_loading) const LoadingOverlay(),
+        ],
+      );
 }

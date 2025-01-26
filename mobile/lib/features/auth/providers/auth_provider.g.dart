@@ -6,7 +6,7 @@ part of 'auth_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$isAuthenticatedHash() => r'f290f99cb8c31b2d16ed5a9e863765cee418fb7a';
+String _$isAuthenticatedHash() => r'43824f6e04a454e8f49a718d72832871743985a1';
 
 /// Provider for checking if a user is authenticated
 ///
@@ -25,7 +25,7 @@ final isAuthenticatedProvider = AutoDisposeProvider<bool>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef IsAuthenticatedRef = AutoDisposeProviderRef<bool>;
-String _$userDisplayNameHash() => r'1a9da2639ae1624eeeebde11c43dc28ee7a43b98';
+String _$userDisplayNameHash() => r'2cbd9846d56955bead3f33c5c3ca9d51e42fc8d9';
 
 /// Provider for the user's display name
 ///
@@ -44,7 +44,7 @@ final userDisplayNameProvider = AutoDisposeProvider<String?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef UserDisplayNameRef = AutoDisposeProviderRef<String?>;
-String _$userEmailHash() => r'36af09a54e347e5564db624742ef38d64b4822c6';
+String _$userEmailHash() => r'0a27a1651ee99062f4b5dfa0e1894107599bc3f3';
 
 /// Provider for the user's email
 ///
@@ -62,7 +62,7 @@ final userEmailProvider = AutoDisposeProvider<String?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef UserEmailRef = AutoDisposeProviderRef<String?>;
-String _$userPhotoUrlHash() => r'23eb5b612af639fc01d9623fb7b36076fe0a200b';
+String _$userPhotoUrlHash() => r'94e60456f4e38ffbdf213761058ac30fe7498c29';
 
 /// Provider for the user's photo URL
 ///
