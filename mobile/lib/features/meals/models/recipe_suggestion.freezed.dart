@@ -21,11 +21,11 @@ RecipeSuggestion _$RecipeSuggestionFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$RecipeSuggestion {
   String get name => throw _privateConstructorUsedError;
-  String get description => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
   List<String> get ingredients => throw _privateConstructorUsedError;
   List<String> get instructions => throw _privateConstructorUsedError;
-  String get cookingTime => throw _privateConstructorUsedError;
-  String get url => throw _privateConstructorUsedError;
+  int? get cookingTime => throw _privateConstructorUsedError;
+  String? get sourceUrl => throw _privateConstructorUsedError;
 
   /// Serializes this RecipeSuggestion to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -45,11 +45,11 @@ abstract class $RecipeSuggestionCopyWith<$Res> {
   @useResult
   $Res call(
       {String name,
-      String description,
+      String? description,
       List<String> ingredients,
       List<String> instructions,
-      String cookingTime,
-      String url});
+      int? cookingTime,
+      String? sourceUrl});
 }
 
 /// @nodoc
@@ -68,21 +68,21 @@ class _$RecipeSuggestionCopyWithImpl<$Res, $Val extends RecipeSuggestion>
   @override
   $Res call({
     Object? name = null,
-    Object? description = null,
+    Object? description = freezed,
     Object? ingredients = null,
     Object? instructions = null,
-    Object? cookingTime = null,
-    Object? url = null,
+    Object? cookingTime = freezed,
+    Object? sourceUrl = freezed,
   }) {
     return _then(_value.copyWith(
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
+      description: freezed == description
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       ingredients: null == ingredients
           ? _value.ingredients
           : ingredients // ignore: cast_nullable_to_non_nullable
@@ -91,14 +91,14 @@ class _$RecipeSuggestionCopyWithImpl<$Res, $Val extends RecipeSuggestion>
           ? _value.instructions
           : instructions // ignore: cast_nullable_to_non_nullable
               as List<String>,
-      cookingTime: null == cookingTime
+      cookingTime: freezed == cookingTime
           ? _value.cookingTime
           : cookingTime // ignore: cast_nullable_to_non_nullable
-              as String,
-      url: null == url
-          ? _value.url
-          : url // ignore: cast_nullable_to_non_nullable
-              as String,
+              as int?,
+      sourceUrl: freezed == sourceUrl
+          ? _value.sourceUrl
+          : sourceUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -113,11 +113,11 @@ abstract class _$$RecipeSuggestionImplCopyWith<$Res>
   @useResult
   $Res call(
       {String name,
-      String description,
+      String? description,
       List<String> ingredients,
       List<String> instructions,
-      String cookingTime,
-      String url});
+      int? cookingTime,
+      String? sourceUrl});
 }
 
 /// @nodoc
@@ -134,21 +134,21 @@ class __$$RecipeSuggestionImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? name = null,
-    Object? description = null,
+    Object? description = freezed,
     Object? ingredients = null,
     Object? instructions = null,
-    Object? cookingTime = null,
-    Object? url = null,
+    Object? cookingTime = freezed,
+    Object? sourceUrl = freezed,
   }) {
     return _then(_$RecipeSuggestionImpl(
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      description: null == description
+      description: freezed == description
           ? _value.description
           : description // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       ingredients: null == ingredients
           ? _value._ingredients
           : ingredients // ignore: cast_nullable_to_non_nullable
@@ -157,14 +157,14 @@ class __$$RecipeSuggestionImplCopyWithImpl<$Res>
           ? _value._instructions
           : instructions // ignore: cast_nullable_to_non_nullable
               as List<String>,
-      cookingTime: null == cookingTime
+      cookingTime: freezed == cookingTime
           ? _value.cookingTime
           : cookingTime // ignore: cast_nullable_to_non_nullable
-              as String,
-      url: null == url
-          ? _value.url
-          : url // ignore: cast_nullable_to_non_nullable
-              as String,
+              as int?,
+      sourceUrl: freezed == sourceUrl
+          ? _value.sourceUrl
+          : sourceUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -176,11 +176,11 @@ class _$RecipeSuggestionImpl
     implements _RecipeSuggestion {
   const _$RecipeSuggestionImpl(
       {required this.name,
-      required this.description,
+      this.description,
       required final List<String> ingredients,
       required final List<String> instructions,
-      required this.cookingTime,
-      required this.url})
+      this.cookingTime,
+      this.sourceUrl})
       : _ingredients = ingredients,
         _instructions = instructions;
 
@@ -190,7 +190,7 @@ class _$RecipeSuggestionImpl
   @override
   final String name;
   @override
-  final String description;
+  final String? description;
   final List<String> _ingredients;
   @override
   List<String> get ingredients {
@@ -208,13 +208,13 @@ class _$RecipeSuggestionImpl
   }
 
   @override
-  final String cookingTime;
+  final int? cookingTime;
   @override
-  final String url;
+  final String? sourceUrl;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'RecipeSuggestion(name: $name, description: $description, ingredients: $ingredients, instructions: $instructions, cookingTime: $cookingTime, url: $url)';
+    return 'RecipeSuggestion(name: $name, description: $description, ingredients: $ingredients, instructions: $instructions, cookingTime: $cookingTime, sourceUrl: $sourceUrl)';
   }
 
   @override
@@ -227,7 +227,7 @@ class _$RecipeSuggestionImpl
       ..add(DiagnosticsProperty('ingredients', ingredients))
       ..add(DiagnosticsProperty('instructions', instructions))
       ..add(DiagnosticsProperty('cookingTime', cookingTime))
-      ..add(DiagnosticsProperty('url', url));
+      ..add(DiagnosticsProperty('sourceUrl', sourceUrl));
   }
 
   @override
@@ -244,7 +244,8 @@ class _$RecipeSuggestionImpl
                 .equals(other._instructions, _instructions) &&
             (identical(other.cookingTime, cookingTime) ||
                 other.cookingTime == cookingTime) &&
-            (identical(other.url, url) || other.url == url));
+            (identical(other.sourceUrl, sourceUrl) ||
+                other.sourceUrl == sourceUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -256,7 +257,7 @@ class _$RecipeSuggestionImpl
       const DeepCollectionEquality().hash(_ingredients),
       const DeepCollectionEquality().hash(_instructions),
       cookingTime,
-      url);
+      sourceUrl);
 
   /// Create a copy of RecipeSuggestion
   /// with the given fields replaced by the non-null parameter values.
@@ -278,11 +279,11 @@ class _$RecipeSuggestionImpl
 abstract class _RecipeSuggestion implements RecipeSuggestion {
   const factory _RecipeSuggestion(
       {required final String name,
-      required final String description,
+      final String? description,
       required final List<String> ingredients,
       required final List<String> instructions,
-      required final String cookingTime,
-      required final String url}) = _$RecipeSuggestionImpl;
+      final int? cookingTime,
+      final String? sourceUrl}) = _$RecipeSuggestionImpl;
 
   factory _RecipeSuggestion.fromJson(Map<String, dynamic> json) =
       _$RecipeSuggestionImpl.fromJson;
@@ -290,15 +291,15 @@ abstract class _RecipeSuggestion implements RecipeSuggestion {
   @override
   String get name;
   @override
-  String get description;
+  String? get description;
   @override
   List<String> get ingredients;
   @override
   List<String> get instructions;
   @override
-  String get cookingTime;
+  int? get cookingTime;
   @override
-  String get url;
+  String? get sourceUrl;
 
   /// Create a copy of RecipeSuggestion
   /// with the given fields replaced by the non-null parameter values.

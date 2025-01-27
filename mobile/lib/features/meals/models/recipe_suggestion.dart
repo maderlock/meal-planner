@@ -8,11 +8,11 @@ part 'recipe_suggestion.g.dart';
 class RecipeSuggestion with _$RecipeSuggestion {
   const factory RecipeSuggestion({
     required String name,
-    required String description,
+    String? description,
     required List<String> ingredients,
     required List<String> instructions,
-    required String cookingTime,
-    required String url,
+    int? cookingTime,
+    String? sourceUrl,
   }) = _RecipeSuggestion;
 
   factory RecipeSuggestion.fromJson(Map<String, dynamic> json) =>

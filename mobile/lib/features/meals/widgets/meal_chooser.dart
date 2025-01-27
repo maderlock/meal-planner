@@ -78,7 +78,8 @@ class _MealChooserState extends ConsumerState<MealChooser> {
     }
   }
 
-  Future<void> _openRecipeUrl(String url) async {
+  Future<void> _openRecipeUrl(String? url) async {
+    if (url == null) return;
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
@@ -120,7 +121,7 @@ class _MealChooserState extends ConsumerState<MealChooser> {
                         TextStyle(color: Theme.of(context).colorScheme.error),
                   ),
                 ],
-                if (_suggestions != null) ...[
+                ...[
                   const SizedBox(height: 16),
                   Flexible(
                     child: ListView.builder(
@@ -132,7 +133,7 @@ class _MealChooserState extends ConsumerState<MealChooser> {
                           child: ExpansionTile(
                             title: Text(suggestion.name),
                             subtitle: Text(
-                              suggestion.description,
+                              suggestion.description ?? '',
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -142,9 +143,11 @@ class _MealChooserState extends ConsumerState<MealChooser> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                        'Cooking Time: ${suggestion.cookingTime}'),
-                                    const SizedBox(height: 8),
+                                    if (suggestion.cookingTime != null) ...[
+                                      Text(
+                                          'Cooking Time: ${suggestion.cookingTime} minutes'),
+                                      const SizedBox(height: 8),
+                                    ],
                                     const Text(
                                       'Ingredients:',
                                       style: TextStyle(
@@ -168,12 +171,12 @@ class _MealChooserState extends ConsumerState<MealChooser> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              _openRecipeUrl(suggestion.url),
-                                          child: const Text(
-                                              'View Original Recipe'),
-                                        ),
+                                        if (suggestion.sourceUrl != null)
+                                          TextButton(
+                                            onPressed: () => _openRecipeUrl(
+                                                suggestion.sourceUrl),
+                                            child: const Text('View Recipe'),
+                                          ),
                                         ElevatedButton(
                                           onPressed: _loading
                                               ? null

@@ -10,15 +10,15 @@ _$RecipeSuggestionImpl _$$RecipeSuggestionImplFromJson(
         Map<String, dynamic> json) =>
     _$RecipeSuggestionImpl(
       name: json['name'] as String,
-      description: json['description'] as String,
+      description: json['description'] as String?,
       ingredients: (json['ingredients'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
       instructions: (json['instructions'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
-      cookingTime: json['cookingTime'] as String,
-      url: json['url'] as String,
+      cookingTime: (json['cookingTime'] as num?)?.toInt(),
+      sourceUrl: json['sourceUrl'] as String?,
     );
 
 Map<String, dynamic> _$$RecipeSuggestionImplToJson(
@@ -29,5 +29,5 @@ Map<String, dynamic> _$$RecipeSuggestionImplToJson(
       'ingredients': instance.ingredients,
       'instructions': instance.instructions,
       'cookingTime': instance.cookingTime,
-      'url': instance.url,
+      'sourceUrl': instance.sourceUrl,
     };

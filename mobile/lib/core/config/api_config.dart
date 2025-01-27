@@ -26,6 +26,6 @@ class ApiConfig {
   static String get favoritesEndpoint => '$apiUrl/favorites';
 
   /// Timeout duration for API requests (in milliseconds)
-  static const int connectionTimeout = 30000;
-  static const int receiveTimeout = 30000;
+  static const int connectionTimeout = 30000;  // 30 seconds for connection
+  static const int receiveTimeout = 240000;    // 240 seconds for receiving data
 }

@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -36,16 +38,26 @@ class _RecipeSuggestionDialogState
     });
 
     try {
+      developer.log('Getting recipe suggestions',
+          name: 'RecipeSuggestionDialog');
       final suggestions = await ref
           .read(mealServiceProvider)
           .suggestRecipes(_descriptionController.text);
+      developer.log('Got suggestions: $suggestions',
+          name: 'RecipeSuggestionDialog');
       setState(() {
         _suggestions = suggestions;
         _loading = false;
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      developer.log(
+        'Error getting suggestions',
+        name: 'RecipeSuggestionDialog',
+        error: e,
+        stackTrace: stackTrace,
+      );
       setState(() {
-        _error = 'Failed to get suggestions. Please try again.';
+        _error = 'Failed to get suggestions: ${e.toString()}';
         _loading = false;
       });
     }
@@ -57,7 +69,8 @@ class _RecipeSuggestionDialogState
     try {
       await ref.read(mealServiceProvider).saveSuggestedRecipe(suggestion);
       // Refresh meals list
-      ref.refresh(mealsProvider);
+      final response = ref.refresh(mealsProvider);
+      //TODO: What can we use this state for?
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -132,7 +145,7 @@ class _RecipeSuggestionDialogState
                             child: ExpansionTile(
                               title: Text(suggestion.name),
                               subtitle: Text(
-                                suggestion.description,
+                                suggestion.description ?? '',
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -169,12 +182,17 @@ class _RecipeSuggestionDialogState
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                _openRecipeUrl(suggestion.url),
-                                            child: const Text(
-                                                'View Original Recipe'),
-                                          ),
+                                          if (suggestion.sourceUrl != null)
+                                            TextButton(
+                                              onPressed: () =>
+                                                  suggestion.sourceUrl != null
+                                                      ? _openRecipeUrl(
+                                                          suggestion
+                                                                  .sourceUrl ??
+                                                              '')
+                                                      : null,
+                                              child: const Text('View Recipe'),
+                                            ),
                                           ElevatedButton(
                                             onPressed: _loading
                                                 ? null

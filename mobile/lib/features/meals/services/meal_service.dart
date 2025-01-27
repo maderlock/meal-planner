@@ -9,16 +9,19 @@
 /// - Uses Riverpod for state management
 /// - Uses Dio and Retrofit for API calls
 
+import 'dart:developer' as developer;
+
+import 'package:dio/dio.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:retrofit/retrofit.dart';
 //import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:meal_planner/features/meals/models/meal_model.dart';
-import 'package:meal_planner/features/meals/models/weekly_plan_model.dart';
-import 'package:dio/dio.dart';
-import 'package:retrofit/retrofit.dart';
-import 'package:json_annotation/json_annotation.dart';
-import '../../../core/network/api_client.dart';
+
 import '../../../core/config/app_config.dart';
+import '../../../core/network/api_client.dart';
+import '../models/meal_model.dart';
 import '../models/recipe_suggestion.dart';
+import '../models/weekly_plan_model.dart';
 
 part 'meal_service.g.dart';
 
@@ -94,8 +97,22 @@ class MealService {
   }
 
   Future<List<RecipeSuggestion>> suggestRecipes(String description) async {
-    final response = await _api.suggestRecipes({'description': description});
-    return response;
+    try {
+      developer.log('Requesting recipe suggestions for: $description',
+          name: 'MealService');
+      final response = await _api.suggestRecipes({'description': description});
+      developer.log('Got recipe suggestions response: $response',
+          name: 'MealService');
+      return response;
+    } catch (e, stackTrace) {
+      developer.log(
+        'Error getting recipe suggestions',
+        name: 'MealService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
   }
 
   Future<void> saveSuggestedRecipe(RecipeSuggestion suggestion) async {

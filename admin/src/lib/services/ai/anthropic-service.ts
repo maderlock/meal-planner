@@ -7,22 +7,35 @@ const RecipeSchema = z.object({
   description: z.string().optional(),
   ingredients: z.array(z.string()),
   instructions: z.array(z.string()),
-  cookingTime: z.number().optional(),
+  cookingTime: z.union([z.string(), z.number()]).transform((val) => {
+    if (typeof val === 'string') {
+      const parsed = parseInt(val, 10);
+      return isNaN(parsed) ? undefined : parsed;
+    }
+    return val;
+  }).optional(),
   sourceUrl: z.string().optional(),
 });
 
 const SuggestionsResponseSchema = z.object({
-  recipes: z.array(RecipeSchema),
+  recipes: z.array(RecipeSchema).length(5),
 });
 
 const SYSTEM_PROMPT = `You are a helpful cooking assistant. When given a meal description, suggest 5 recipes that match the criteria.
 Return the response as a JSON object with a "recipes" array. Each recipe should have:
-- name: string (required)
-- description: string (optional)
-- ingredients: string[] (required)
-- instructions: string[] (required)
-- cookingTime: number in minutes (optional)
-- sourceUrl: string (optional)`;
+- name: string (required) - Name of the recipe
+- description: string (optional) - Brief description under 200 characters
+- ingredients: string[] (required) - List of ingredients as individual items
+- instructions: string[] (required) - Clear, numbered steps
+- cookingTime: number (optional) - Time in minutes
+- sourceUrl: string (optional) - URL to source recipe, must be a real recipe website
+
+Rules:
+1. Always return exactly 5 recipes
+2. If providing a sourceUrl, ensure it's a real recipe website
+3. Break instructions into clear, numbered steps
+4. List ingredients as individual items
+5. Ensure all text is properly escaped for JSON`;
 
 export class AnthropicService implements AIService {
   private anthropic: Anthropic;
