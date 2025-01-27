@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import OpenAI from 'openai';
 import { prisma } from '@/lib/prisma';
-import { verifyAuth } from '@/lib/auth'
+import { verifyAuth } from '@/lib/auth';
+import { AIServiceFactory } from '@/lib/services/ai/service-factory';
+import { AIServiceError, AIServiceTemporaryError } from '@/lib/services/ai/types';
 
 // Schema for recipe suggestions
 const RecipeSchema = z.object({
@@ -18,8 +19,8 @@ const SuggestionsResponseSchema = z.array(RecipeSchema).length(5);
 
 type Recipe = z.infer<typeof RecipeSchema>;
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+const requestSchema = z.object({
+  description: z.string().min(1).max(500)
 });
 
 const SYSTEM_PROMPT = `You are a helpful cooking assistant. When given a meal description, suggest 5 recipes that match the criteria.
@@ -52,23 +53,11 @@ export async function POST(request: NextRequest) {
 
     // Get and validate description from request
     const body = await request.json();
-    const description = z.string().min(1).max(500).parse(body.description);
+    const { description } = requestSchema.parse(body);
 
-    // Generate suggestions using OpenAI
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `Suggest recipes for: ${description}` }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-    });
-
-    // Parse and validate the response
-    const suggestions = SuggestionsResponseSchema.parse(
-      JSON.parse(completion.choices[0].message.content || '[]')
-    );
+    // Get suggestions using AI service
+    const aiService = AIServiceFactory.getService();
+    const suggestions = await aiService.suggestRecipes(description);
 
     return NextResponse.json(suggestions);
   } catch (error) {
@@ -81,33 +70,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Handle OpenAI API errors
-    if (error instanceof OpenAI.APIError) {
-      const { status, code, message } = error;
-      
-      // Log detailed error information
-      console.error(`OpenAI API Error:
-        Status: ${status}
-        Code: ${code}
-        Message: ${message}
-      `);
-
-      // Handle rate limiting and quota errors
-      if (status === 429 || code === 'insufficient_quota') {
-        return NextResponse.json(
-          { error: 'Service temporarily unavailable. Please try again later.' },
-          { status: 503 }
-        );
-      }
-
-      // Handle other API errors
+    if (error instanceof AIServiceTemporaryError) {
       return NextResponse.json(
-        { error: 'Recipe suggestion service is currently unavailable' },
-        { status: 500 }
+        { error: error.message },
+        { status: error.statusCode }
       );
     }
 
-    // Handle all other errors
+    if (error instanceof AIServiceError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to suggest recipes' },
       { status: 500 }
