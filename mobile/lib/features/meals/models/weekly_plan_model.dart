@@ -45,8 +45,10 @@ class MealAssignment with _$MealAssignment {
     @JsonKey(name: 'mealId') required String mealId,
     @JsonKey(name: 'meal') required MealModel meal,
     @JsonKey(name: 'day') required String day,
-    @JsonKey(name: 'mealType') required MealType type,
+    @JsonKey(name: 'type') required MealType type,
     @JsonKey(name: 'notes') String? notes,
+    @JsonKey(name: 'createdAt') required DateTime createdAt,
+    @JsonKey(name: 'updatedAt') required DateTime updatedAt,
   }) = _MealAssignment;
 
   factory MealAssignment.fromJson(Map<String, dynamic> json) =>

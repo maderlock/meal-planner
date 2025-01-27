@@ -315,10 +315,14 @@ mixin _$MealAssignment {
   MealModel get meal => throw _privateConstructorUsedError;
   @JsonKey(name: 'day')
   String get day => throw _privateConstructorUsedError;
-  @JsonKey(name: 'mealType')
+  @JsonKey(name: 'type')
   MealType get type => throw _privateConstructorUsedError;
   @JsonKey(name: 'notes')
   String? get notes => throw _privateConstructorUsedError;
+  @JsonKey(name: 'createdAt')
+  DateTime get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'updatedAt')
+  DateTime get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this MealAssignment to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -341,8 +345,10 @@ abstract class $MealAssignmentCopyWith<$Res> {
       @JsonKey(name: 'mealId') String mealId,
       @JsonKey(name: 'meal') MealModel meal,
       @JsonKey(name: 'day') String day,
-      @JsonKey(name: 'mealType') MealType type,
-      @JsonKey(name: 'notes') String? notes});
+      @JsonKey(name: 'type') MealType type,
+      @JsonKey(name: 'notes') String? notes,
+      @JsonKey(name: 'createdAt') DateTime createdAt,
+      @JsonKey(name: 'updatedAt') DateTime updatedAt});
 
   $MealModelCopyWith<$Res> get meal;
 }
@@ -368,6 +374,8 @@ class _$MealAssignmentCopyWithImpl<$Res, $Val extends MealAssignment>
     Object? day = null,
     Object? type = null,
     Object? notes = freezed,
+    Object? createdAt = null,
+    Object? updatedAt = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -394,6 +402,14 @@ class _$MealAssignmentCopyWithImpl<$Res, $Val extends MealAssignment>
           ? _value.notes
           : notes // ignore: cast_nullable_to_non_nullable
               as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
     ) as $Val);
   }
 
@@ -421,8 +437,10 @@ abstract class _$$MealAssignmentImplCopyWith<$Res>
       @JsonKey(name: 'mealId') String mealId,
       @JsonKey(name: 'meal') MealModel meal,
       @JsonKey(name: 'day') String day,
-      @JsonKey(name: 'mealType') MealType type,
-      @JsonKey(name: 'notes') String? notes});
+      @JsonKey(name: 'type') MealType type,
+      @JsonKey(name: 'notes') String? notes,
+      @JsonKey(name: 'createdAt') DateTime createdAt,
+      @JsonKey(name: 'updatedAt') DateTime updatedAt});
 
   @override
   $MealModelCopyWith<$Res> get meal;
@@ -447,6 +465,8 @@ class __$$MealAssignmentImplCopyWithImpl<$Res>
     Object? day = null,
     Object? type = null,
     Object? notes = freezed,
+    Object? createdAt = null,
+    Object? updatedAt = null,
   }) {
     return _then(_$MealAssignmentImpl(
       id: null == id
@@ -473,6 +493,14 @@ class __$$MealAssignmentImplCopyWithImpl<$Res>
           ? _value.notes
           : notes // ignore: cast_nullable_to_non_nullable
               as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
     ));
   }
 }
@@ -485,8 +513,10 @@ class _$MealAssignmentImpl implements _MealAssignment {
       @JsonKey(name: 'mealId') required this.mealId,
       @JsonKey(name: 'meal') required this.meal,
       @JsonKey(name: 'day') required this.day,
-      @JsonKey(name: 'mealType') required this.type,
-      @JsonKey(name: 'notes') this.notes});
+      @JsonKey(name: 'type') required this.type,
+      @JsonKey(name: 'notes') this.notes,
+      @JsonKey(name: 'createdAt') required this.createdAt,
+      @JsonKey(name: 'updatedAt') required this.updatedAt});
 
   factory _$MealAssignmentImpl.fromJson(Map<String, dynamic> json) =>
       _$$MealAssignmentImplFromJson(json);
@@ -504,15 +534,21 @@ class _$MealAssignmentImpl implements _MealAssignment {
   @JsonKey(name: 'day')
   final String day;
   @override
-  @JsonKey(name: 'mealType')
+  @JsonKey(name: 'type')
   final MealType type;
   @override
   @JsonKey(name: 'notes')
   final String? notes;
+  @override
+  @JsonKey(name: 'createdAt')
+  final DateTime createdAt;
+  @override
+  @JsonKey(name: 'updatedAt')
+  final DateTime updatedAt;
 
   @override
   String toString() {
-    return 'MealAssignment(id: $id, mealId: $mealId, meal: $meal, day: $day, type: $type, notes: $notes)';
+    return 'MealAssignment(id: $id, mealId: $mealId, meal: $meal, day: $day, type: $type, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -525,13 +561,17 @@ class _$MealAssignmentImpl implements _MealAssignment {
             (identical(other.meal, meal) || other.meal == meal) &&
             (identical(other.day, day) || other.day == day) &&
             (identical(other.type, type) || other.type == type) &&
-            (identical(other.notes, notes) || other.notes == notes));
+            (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, mealId, meal, day, type, notes);
+  int get hashCode => Object.hash(
+      runtimeType, id, mealId, meal, day, type, notes, createdAt, updatedAt);
 
   /// Create a copy of MealAssignment
   /// with the given fields replaced by the non-null parameter values.
@@ -552,12 +592,15 @@ class _$MealAssignmentImpl implements _MealAssignment {
 
 abstract class _MealAssignment implements MealAssignment {
   const factory _MealAssignment(
-      {@JsonKey(name: 'id') required final String id,
-      @JsonKey(name: 'mealId') required final String mealId,
-      @JsonKey(name: 'meal') required final MealModel meal,
-      @JsonKey(name: 'day') required final String day,
-      @JsonKey(name: 'mealType') required final MealType type,
-      @JsonKey(name: 'notes') final String? notes}) = _$MealAssignmentImpl;
+          {@JsonKey(name: 'id') required final String id,
+          @JsonKey(name: 'mealId') required final String mealId,
+          @JsonKey(name: 'meal') required final MealModel meal,
+          @JsonKey(name: 'day') required final String day,
+          @JsonKey(name: 'type') required final MealType type,
+          @JsonKey(name: 'notes') final String? notes,
+          @JsonKey(name: 'createdAt') required final DateTime createdAt,
+          @JsonKey(name: 'updatedAt') required final DateTime updatedAt}) =
+      _$MealAssignmentImpl;
 
   factory _MealAssignment.fromJson(Map<String, dynamic> json) =
       _$MealAssignmentImpl.fromJson;
@@ -575,11 +618,17 @@ abstract class _MealAssignment implements MealAssignment {
   @JsonKey(name: 'day')
   String get day;
   @override
-  @JsonKey(name: 'mealType')
+  @JsonKey(name: 'type')
   MealType get type;
   @override
   @JsonKey(name: 'notes')
   String? get notes;
+  @override
+  @JsonKey(name: 'createdAt')
+  DateTime get createdAt;
+  @override
+  @JsonKey(name: 'updatedAt')
+  DateTime get updatedAt;
 
   /// Create a copy of MealAssignment
   /// with the given fields replaced by the non-null parameter values.

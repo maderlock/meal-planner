@@ -72,8 +72,10 @@ _$MealAssignmentImpl _$$MealAssignmentImplFromJson(Map<String, dynamic> json) =>
       mealId: json['mealId'] as String,
       meal: MealModel.fromJson(json['meal'] as Map<String, dynamic>),
       day: json['day'] as String,
-      type: $enumDecode(_$MealTypeEnumMap, json['mealType']),
+      type: $enumDecode(_$MealTypeEnumMap, json['type']),
       notes: json['notes'] as String?,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
 
 Map<String, dynamic> _$$MealAssignmentImplToJson(
@@ -83,8 +85,10 @@ Map<String, dynamic> _$$MealAssignmentImplToJson(
       'mealId': instance.mealId,
       'meal': instance.meal,
       'day': instance.day,
-      'mealType': _$MealTypeEnumMap[instance.type]!,
+      'type': _$MealTypeEnumMap[instance.type]!,
       'notes': instance.notes,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'updatedAt': instance.updatedAt.toIso8601String(),
     };
 
 const _$MealTypeEnumMap = {

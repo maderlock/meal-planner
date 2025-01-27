@@ -12,13 +12,21 @@ const mealAssignmentSchema = z.object({
 
 export async function POST(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const body = await request.json()
     const validatedData = mealAssignmentSchema.parse(body)
 
-    const weeklyPlanId = context.params.id
+    // Ensure params.id exists and is a string
+    if (!params?.id || typeof params.id !== 'string') {
+      return NextResponse.json(
+        { error: 'Invalid weekly plan ID' },
+        { status: 400 }
+      )
+    }
+
+    const weeklyPlanId = params.id
 
     const assignment = await prisma.mealPlan.upsert({
       where: {
@@ -42,7 +50,15 @@ export async function POST(
       }
     })
 
-    return NextResponse.json(assignment, { status: 201 })
+    // Map numeric day to day name for mobile app
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const formattedAssignment = {
+      ...assignment,
+      day: dayNames[assignment.dayOfWeek],
+      type: assignment.mealType,
+    };
+
+    return NextResponse.json(formattedAssignment, { status: 201 })
   } catch (error) {
     console.error('Error creating meal assignment:', error)
     if (error instanceof z.ZodError) {
@@ -57,11 +73,19 @@ export async function POST(
 
 export async function DELETE(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const { searchParams } = new URL(request.url)
     const assignmentId = searchParams.get('assignmentId')
+
+    // Ensure params.id exists and is a string
+    if (!params?.id || typeof params.id !== 'string') {
+      return NextResponse.json(
+        { error: 'Invalid weekly plan ID' },
+        { status: 400 }
+      )
+    }
 
     if (!assignmentId) {
       return NextResponse.json(
@@ -73,11 +97,11 @@ export async function DELETE(
     await prisma.mealPlan.delete({
       where: {
         id: assignmentId,
-        weeklyPlanId: context.params.id
+        weeklyPlanId: params.id
       }
     })
 
-    return new Response(null, { status: 204 })
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting meal assignment:', error)
     return NextResponse.json(

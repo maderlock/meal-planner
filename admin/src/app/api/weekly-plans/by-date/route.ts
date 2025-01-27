@@ -71,7 +71,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(weeklyPlan);
+    // Map numeric days to day names for the mobile app
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const formattedPlan = {
+      ...weeklyPlan,
+      mealPlans: weeklyPlan.mealPlans.map(plan => ({
+        ...plan,
+        day: dayNames[plan.dayOfWeek],
+        type: plan.mealType,
+      }))
+    };
+
+    return NextResponse.json(formattedPlan);
   } catch (error) {
     console.error('Error fetching weekly plan:', error);
     return NextResponse.json(
