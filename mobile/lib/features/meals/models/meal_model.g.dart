@@ -12,7 +12,9 @@ _$MealModelImpl _$$MealModelImplFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       description: json['description'] as String?,
       imageUrl: json['imageUrl'] as String?,
-      instructions: json['instructions'] as String?,
+      instructions: (json['instructions'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       ingredients: (json['ingredients'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),

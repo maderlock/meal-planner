@@ -42,6 +42,12 @@ class ApiException implements Exception {
   }
 }
 
+extension DateTimeExtension on DateTime {
+  bool isValidWeekStart() {
+    return weekday == 1 && hour == 0 && minute == 0 && second == 0;
+  }
+}
+
 /// ApiClient class for making HTTP requests
 class ApiClient {
   final Dio _dio;
@@ -63,12 +69,36 @@ class ApiClient {
           final prefs = await SharedPreferences.getInstance();
           final token = prefs.getString('auth_token');
           developer.log('Request to ${options.path}', name: 'ApiClient');
+          
           if (token != null) {
             developer.log('Adding token to request', name: 'ApiClient');
             options.headers['Authorization'] = token;  // Remove 'Bearer ' prefix since it's included in the token
           } else {
             developer.log('No auth token found', name: 'ApiClient');
           }
+
+          // Validate weekStartDate in query parameters if present
+          if (options.queryParameters.containsKey('weekStartDate')) {
+            final date = DateTime.parse(options.queryParameters['weekStartDate'] as String);
+            if (!date.isValidWeekStart()) {
+              throw ApiException(
+                'Invalid weekStartDate. Must be a Monday at 00:00:00',
+                statusCode: 400,
+              );
+            }
+          }
+
+          // Validate weekStartDate in request body if present
+          if (options.data is Map && (options.data as Map).containsKey('weekStartDate')) {
+            final date = DateTime.parse((options.data as Map)['weekStartDate'] as String);
+            if (!date.isValidWeekStart()) {
+              throw ApiException(
+                'Invalid weekStartDate. Must be a Monday at 00:00:00',
+                statusCode: 400,
+              );
+            }
+          }
+          
           developer.log('Request headers: ${options.headers}', name: 'ApiClient');
           return handler.next(options);
         },
@@ -86,7 +116,14 @@ class ApiClient {
     try {
       return await _dio.get(path,
           queryParameters: queryParameters, options: options);
+    } on DioException catch (e) {
+      developer.log('GET error: $e', name: 'ApiClient');
+      throw ApiException(
+        e.response?.statusMessage ?? e.message ?? 'Unknown error',
+        statusCode: e.response?.statusCode,
+      );
     } catch (e) {
+      developer.log('GET error: $e', name: 'ApiClient');
       throw ApiException('Failed to perform GET request: ${e.toString()}');
     }
   }
@@ -97,6 +134,12 @@ class ApiClient {
       final response = await _dio.post(path, data: data, options: options);
       developer.log('POST response: ${response.data}', name: 'ApiClient');
       return response;
+    } on DioException catch (e) {
+      developer.log('POST error: $e', name: 'ApiClient');
+      throw ApiException(
+        e.response?.statusMessage ?? e.message ?? 'Unknown error',
+        statusCode: e.response?.statusCode,
+      );
     } catch (e) {
       developer.log('POST error: $e', name: 'ApiClient');
       throw ApiException('Failed to perform POST request: ${e.toString()}');
@@ -106,7 +149,14 @@ class ApiClient {
   Future<Response> put(String path, {dynamic data}) async {
     try {
       return await _dio.put(path, data: data);
+    } on DioException catch (e) {
+      developer.log('PUT error: $e', name: 'ApiClient');
+      throw ApiException(
+        e.response?.statusMessage ?? e.message ?? 'Unknown error',
+        statusCode: e.response?.statusCode,
+      );
     } catch (e) {
+      developer.log('PUT error: $e', name: 'ApiClient');
       throw ApiException('Failed to perform PUT request: ${e.toString()}');
     }
   }
@@ -114,7 +164,14 @@ class ApiClient {
   Future<Response> delete(String path) async {
     try {
       return await _dio.delete(path);
+    } on DioException catch (e) {
+      developer.log('DELETE error: $e', name: 'ApiClient');
+      throw ApiException(
+        e.response?.statusMessage ?? e.message ?? 'Unknown error',
+        statusCode: e.response?.statusCode,
+      );
     } catch (e) {
+      developer.log('DELETE error: $e', name: 'ApiClient');
       throw ApiException('Failed to perform DELETE request: ${e.toString()}');
     }
   }

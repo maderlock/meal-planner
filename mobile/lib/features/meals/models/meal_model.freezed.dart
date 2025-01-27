@@ -29,7 +29,7 @@ mixin _$MealModel {
   @JsonKey(name: 'imageUrl')
   String? get imageUrl => throw _privateConstructorUsedError;
   @JsonKey(name: 'instructions')
-  String? get instructions => throw _privateConstructorUsedError;
+  List<String>? get instructions => throw _privateConstructorUsedError;
   @JsonKey(name: 'ingredients')
   List<String> get ingredients => throw _privateConstructorUsedError;
   @JsonKey(name: 'createdAt')
@@ -59,7 +59,7 @@ abstract class $MealModelCopyWith<$Res> {
       @JsonKey(name: 'name') String name,
       @JsonKey(name: 'description') String? description,
       @JsonKey(name: 'imageUrl') String? imageUrl,
-      @JsonKey(name: 'instructions') String? instructions,
+      @JsonKey(name: 'instructions') List<String>? instructions,
       @JsonKey(name: 'ingredients') List<String> ingredients,
       @JsonKey(name: 'createdAt') DateTime createdAt,
       @JsonKey(name: 'updatedAt') DateTime updatedAt,
@@ -111,7 +111,7 @@ class _$MealModelCopyWithImpl<$Res, $Val extends MealModel>
       instructions: freezed == instructions
           ? _value.instructions
           : instructions // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as List<String>?,
       ingredients: null == ingredients
           ? _value.ingredients
           : ingredients // ignore: cast_nullable_to_non_nullable
@@ -145,7 +145,7 @@ abstract class _$$MealModelImplCopyWith<$Res>
       @JsonKey(name: 'name') String name,
       @JsonKey(name: 'description') String? description,
       @JsonKey(name: 'imageUrl') String? imageUrl,
-      @JsonKey(name: 'instructions') String? instructions,
+      @JsonKey(name: 'instructions') List<String>? instructions,
       @JsonKey(name: 'ingredients') List<String> ingredients,
       @JsonKey(name: 'createdAt') DateTime createdAt,
       @JsonKey(name: 'updatedAt') DateTime updatedAt,
@@ -193,9 +193,9 @@ class __$$MealModelImplCopyWithImpl<$Res>
           : imageUrl // ignore: cast_nullable_to_non_nullable
               as String?,
       instructions: freezed == instructions
-          ? _value.instructions
+          ? _value._instructions
           : instructions // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as List<String>?,
       ingredients: null == ingredients
           ? _value._ingredients
           : ingredients // ignore: cast_nullable_to_non_nullable
@@ -224,12 +224,13 @@ class _$MealModelImpl implements _MealModel {
       @JsonKey(name: 'name') required this.name,
       @JsonKey(name: 'description') this.description,
       @JsonKey(name: 'imageUrl') this.imageUrl,
-      @JsonKey(name: 'instructions') this.instructions,
+      @JsonKey(name: 'instructions') final List<String>? instructions,
       @JsonKey(name: 'ingredients') required final List<String> ingredients,
       @JsonKey(name: 'createdAt') required this.createdAt,
       @JsonKey(name: 'updatedAt') required this.updatedAt,
       @JsonKey(name: 'isFavorite') this.isFavorite = false})
-      : _ingredients = ingredients;
+      : _instructions = instructions,
+        _ingredients = ingredients;
 
   factory _$MealModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$MealModelImplFromJson(json);
@@ -246,9 +247,17 @@ class _$MealModelImpl implements _MealModel {
   @override
   @JsonKey(name: 'imageUrl')
   final String? imageUrl;
+  final List<String>? _instructions;
   @override
   @JsonKey(name: 'instructions')
-  final String? instructions;
+  List<String>? get instructions {
+    final value = _instructions;
+    if (value == null) return null;
+    if (_instructions is EqualUnmodifiableListView) return _instructions;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
   final List<String> _ingredients;
   @override
   @JsonKey(name: 'ingredients')
@@ -284,8 +293,8 @@ class _$MealModelImpl implements _MealModel {
                 other.description == description) &&
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
-            (identical(other.instructions, instructions) ||
-                other.instructions == instructions) &&
+            const DeepCollectionEquality()
+                .equals(other._instructions, _instructions) &&
             const DeepCollectionEquality()
                 .equals(other._ingredients, _ingredients) &&
             (identical(other.createdAt, createdAt) ||
@@ -304,7 +313,7 @@ class _$MealModelImpl implements _MealModel {
       name,
       description,
       imageUrl,
-      instructions,
+      const DeepCollectionEquality().hash(_instructions),
       const DeepCollectionEquality().hash(_ingredients),
       createdAt,
       updatedAt,
@@ -332,7 +341,7 @@ abstract class _MealModel implements MealModel {
       @JsonKey(name: 'name') required final String name,
       @JsonKey(name: 'description') final String? description,
       @JsonKey(name: 'imageUrl') final String? imageUrl,
-      @JsonKey(name: 'instructions') final String? instructions,
+      @JsonKey(name: 'instructions') final List<String>? instructions,
       @JsonKey(name: 'ingredients') required final List<String> ingredients,
       @JsonKey(name: 'createdAt') required final DateTime createdAt,
       @JsonKey(name: 'updatedAt') required final DateTime updatedAt,
@@ -355,7 +364,7 @@ abstract class _MealModel implements MealModel {
   String? get imageUrl;
   @override
   @JsonKey(name: 'instructions')
-  String? get instructions;
+  List<String>? get instructions;
   @override
   @JsonKey(name: 'ingredients')
   List<String> get ingredients;

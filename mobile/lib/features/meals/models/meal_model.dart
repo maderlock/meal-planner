@@ -16,7 +16,7 @@ class MealModel with _$MealModel {
     @JsonKey(name: 'name') required String name,
     @JsonKey(name: 'description') String? description,
     @JsonKey(name: 'imageUrl') String? imageUrl,
-    @JsonKey(name: 'instructions') String? instructions,
+    @JsonKey(name: 'instructions') List<String>? instructions,
     @JsonKey(name: 'ingredients') required List<String> ingredients,
     @JsonKey(name: 'createdAt') required DateTime createdAt,
     @JsonKey(name: 'updatedAt') required DateTime updatedAt,

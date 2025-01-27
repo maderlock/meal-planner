@@ -1,12 +1,13 @@
 /// Model class representing a weekly meal plan.
-/// 
+///
 /// This file defines the structure for weekly meal plans and meal assignments.
 /// A weekly plan contains a list of meal assignments, where each assignment
 /// connects a meal to a specific day and meal type (e.g., breakfast, lunch, dinner).
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../../../core/utils/date_utils.dart';
 import 'meal_model.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 part 'weekly_plan_model.freezed.dart';
 part 'weekly_plan_model.g.dart';
@@ -22,6 +23,8 @@ enum MealType {
 
 @freezed
 class WeeklyPlanModel with _$WeeklyPlanModel {
+  /// Creates a new weekly plan model.
+  /// The [weekStartDate] must be a Monday at 00:00:00.
   const factory WeeklyPlanModel({
     @JsonKey(name: 'id') required String id,
     @JsonKey(name: 'userId') required String userId,
@@ -53,23 +56,39 @@ class MealAssignment with _$MealAssignment {
 /// Request model for creating a new weekly plan.
 @JsonSerializable()
 class CreateWeeklyPlanRequest {
-  @JsonKey(name: 'startDate')
-  final DateTime startDate;
-  
-  @JsonKey(name: 'endDate')
-  final DateTime endDate;
-  
-  @JsonKey(name: 'name')
-  final String? name;
-
   CreateWeeklyPlanRequest({
     required this.startDate,
     required this.endDate,
     this.name,
   });
 
+  /// Creates a request for a weekly plan starting from the given date.
+  /// The date will be adjusted to the start of its week (Monday at 00:00:00).
+  factory CreateWeeklyPlanRequest.fromDate(DateTime date) {
+    final weekStart = date.startOfWeek;
+    final weekEnd = DateTime(
+      weekStart.year,
+      weekStart.month,
+      weekStart.day + 6, // Sunday
+    );
+
+    return CreateWeeklyPlanRequest(
+      startDate: weekStart,
+      endDate: weekEnd,
+    );
+  }
+
   factory CreateWeeklyPlanRequest.fromJson(Map<String, dynamic> json) =>
       _$CreateWeeklyPlanRequestFromJson(json);
+
+  @JsonKey(name: 'startDate')
+  final DateTime startDate;
+
+  @JsonKey(name: 'endDate')
+  final DateTime endDate;
+
+  @JsonKey(name: 'name')
+  final String? name;
 
   Map<String, dynamic> toJson() => _$CreateWeeklyPlanRequestToJson(this);
 }
@@ -78,15 +97,6 @@ class CreateWeeklyPlanRequest {
 /// All fields are optional since this is a PATCH operation.
 @JsonSerializable()
 class UpdateWeeklyPlanRequest {
-  @JsonKey(name: 'startDate')
-  final DateTime? startDate;
-  
-  @JsonKey(name: 'endDate')
-  final DateTime? endDate;
-  
-  @JsonKey(name: 'name')
-  final String? name;
-
   UpdateWeeklyPlanRequest({
     this.startDate,
     this.endDate,
@@ -95,6 +105,14 @@ class UpdateWeeklyPlanRequest {
 
   factory UpdateWeeklyPlanRequest.fromJson(Map<String, dynamic> json) =>
       _$UpdateWeeklyPlanRequestFromJson(json);
+  @JsonKey(name: 'startDate')
+  final DateTime? startDate;
+
+  @JsonKey(name: 'endDate')
+  final DateTime? endDate;
+
+  @JsonKey(name: 'name')
+  final String? name;
 
   Map<String, dynamic> toJson() => _$UpdateWeeklyPlanRequestToJson(this);
 }

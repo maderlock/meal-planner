@@ -6,11 +6,11 @@ import { verifyAuth } from '@/lib/auth';
 // Schema for saving a suggested recipe
 const SaveSuggestionSchema = z.object({
   name: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
   ingredients: z.array(z.string()),
   instructions: z.array(z.string()),
-  cookingTime: z.string(),
-  url: z.string().url(),
+  cookingTime: z.number().nullable().transform(val => val?.toString() ?? null),
+  sourceUrl: z.string().url().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -30,11 +30,11 @@ export async function POST(request: NextRequest) {
       data: {
         userId: userId,
         name: recipe.name,
-        description: recipe.description,
+        description: recipe.description ?? null,
         ingredients: recipe.ingredients,
         instructions: recipe.instructions,
         cookingTime: recipe.cookingTime,
-        sourceUrl: recipe.url,
+        sourceUrl: recipe.sourceUrl ?? null,
       },
     });
 

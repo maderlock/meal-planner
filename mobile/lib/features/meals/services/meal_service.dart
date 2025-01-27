@@ -19,6 +19,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/utils/date_utils.dart';
 import '../models/meal_model.dart';
 import '../models/recipe_suggestion.dart';
 import '../models/weekly_plan_model.dart';
@@ -26,56 +27,64 @@ import '../models/weekly_plan_model.dart';
 part 'meal_service.g.dart';
 
 class MealService {
+  MealService(this._api);
   final MealServiceApi _api;
 
-  MealService(this._api);
+  Future<List<WeeklyPlanModel>> getWeeklyPlans() async => _api.getWeeklyPlans();
 
-  Future<List<WeeklyPlanModel>> getWeeklyPlans() async {
-    return _api.getWeeklyPlans();
-  }
+  Future<WeeklyPlanModel> getWeeklyPlan(String id) async =>
+      _api.getWeeklyPlan(id);
 
-  Future<WeeklyPlanModel> getWeeklyPlan(String id) async {
-    return _api.getWeeklyPlan(id);
-  }
-
+  /// Gets or creates a weekly plan for the specified week.
+  /// If a plan doesn't exist, it will be created automatically.
   Future<WeeklyPlanModel> getOrCreateWeeklyPlan(DateTime weekStartDate) async {
     try {
-      return await _api.getWeeklyPlanByDate(weekStartDate.toIso8601String());
+      // First try to get the existing plan
+      developer.log(
+          'MealService: Attempting to get plan for ${weekStartDate.toIso8601String()}',
+          name: 'MealService');
+      final response =
+          await _api.getWeeklyPlanByDate(weekStartDate.toIso8601String());
+      developer.log('MealService: Successfully retrieved plan: ${response.id}',
+          name: 'MealService');
+      return response;
     } catch (e) {
-      // If no plan exists, create a new one
-      final request = CreateWeeklyPlanRequest(
-        weekStartDate: weekStartDate.toIso8601String(),
-      );
-      return _api.createWeeklyPlan(request);
+      developer.log('MealService: Error getting plan: $e',
+          name: 'MealService', error: e);
+      if (e is DioException && e.response?.statusCode == 404) {
+        // Plan doesn't exist, create a new one
+        developer.log('MealService: Plan not found, creating new plan',
+            name: 'MealService');
+        final request = CreateWeeklyPlanRequest.fromDate(weekStartDate);
+        final newPlan = await _api.createWeeklyPlan(request);
+        developer.log(
+            'MealService: Successfully created new plan: ${newPlan.id}',
+            name: 'MealService');
+        return newPlan;
+      }
+      rethrow;
     }
   }
 
-  Future<List<MealModel>> getMeals() async {
-    return _api.getMeals();
-  }
+  Future<List<MealModel>> getMeals() async => _api.getMeals();
 
-  Future<MealModel> getMeal(String id) async {
-    return _api.getMeal(id);
-  }
+  Future<MealModel> getMeal(String id) async => _api.getMeal(id);
 
   Future<WeeklyPlanModel> createWeeklyPlan(
-      CreateWeeklyPlanRequest request) async {
-    return _api.createWeeklyPlan(request);
-  }
+          CreateWeeklyPlanRequest request) async =>
+      _api.createWeeklyPlan(request);
 
   Future<WeeklyPlanModel> updateWeeklyPlan(
     String id,
     UpdateWeeklyPlanRequest request,
-  ) async {
-    return _api.updateWeeklyPlan(id, request);
-  }
+  ) async =>
+      _api.updateWeeklyPlan(id, request);
 
   Future<void> assignMeal(
     String weeklyPlanId,
     Map<String, dynamic> assignment,
-  ) async {
-    return _api.assignMeal(weeklyPlanId, assignment);
-  }
+  ) async =>
+      _api.assignMeal(weeklyPlanId, assignment);
 
   Future<void> removeAssignment(
     String weeklyPlanId,
@@ -84,9 +93,7 @@ class MealService {
     await _api.removeAssignment(weeklyPlanId, assignmentId);
   }
 
-  Future<List<MealModel>> getFavorites() async {
-    return _api.getFavorites();
-  }
+  Future<List<MealModel>> getFavorites() async => _api.getFavorites();
 
   Future<void> addFavorite(String mealId) async {
     await _api.addFavorite({'mealId': mealId});
@@ -201,16 +208,15 @@ abstract class MealServiceApi {
 /// Request model for creating a new weekly plan.
 @JsonSerializable()
 class CreateWeeklyPlanRequest {
-  @JsonKey(name: 'weekStartDate')
-  final String weekStartDate;
-
   CreateWeeklyPlanRequest({required this.weekStartDate});
 
   CreateWeeklyPlanRequest.fromDate(DateTime startDate)
-      : weekStartDate = startDate.toIso8601String();
+      : weekStartDate = startDate.startOfWeek.toIso8601String();
 
   factory CreateWeeklyPlanRequest.fromJson(Map<String, dynamic> json) =>
       _$CreateWeeklyPlanRequestFromJson(json);
+  @JsonKey(name: 'weekStartDate')
+  final String weekStartDate;
 
   Map<String, dynamic> toJson() => _$CreateWeeklyPlanRequestToJson(this);
 }

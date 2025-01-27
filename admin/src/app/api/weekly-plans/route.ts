@@ -26,10 +26,14 @@ import { prisma } from '@/lib/prisma'
 import { verifyAuth } from '@/lib/auth'
 import { jwtService } from '@/lib/jwt'
 import { z } from 'zod'
+import { isValidWeekStart, getWeekStart, toMidnightIsoString } from '@/lib/date-utils'
 
 // Schema for weekly plan creation
 const weeklyPlanSchema = z.object({
-  weekStartDate: z.coerce.date(),
+  weekStartDate: z.coerce.date().refine(
+    (date) => isValidWeekStart(date),
+    { message: "weekStartDate must be a Monday at 00:00:00" }
+  ),
 })
 
 const mealAssignmentSchema = z.object({
@@ -49,10 +53,22 @@ export async function GET(request: NextRequest) {
     
     if (!userId) {
       console.log('Unauthorized - no valid userId');
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get query parameters
+    const url = new URL(request.url);
+    const weekStartDateParam = url.searchParams.get('weekStartDate');
+    
+    // If weekStartDate is provided, validate it
+    if (weekStartDateParam) {
+      const date = new Date(weekStartDateParam);
+      if (!isValidWeekStart(date)) {
+        return NextResponse.json(
+          { error: "weekStartDate must be a Monday at 00:00:00" },
+          { status: 400 }
+        );
+      }
     }
 
     const { searchParams } = new URL(request.url)
@@ -134,8 +150,17 @@ export async function POST(request: NextRequest) {
       const body = await request.json();
       console.log('POST /api/weekly-plans: Request body:', body);
       
+      // Parse and validate weekStartDate
       const { weekStartDate } = weeklyPlanSchema.parse(body);
       console.log('POST /api/weekly-plans: Parsed weekStartDate:', weekStartDate);
+
+      // Additional validation to ensure it's a Monday at midnight
+      if (!isValidWeekStart(weekStartDate)) {
+        return NextResponse.json(
+          { error: "weekStartDate must be a Monday at 00:00:00" },
+          { status: 400 }
+        );
+      }
 
       // Verify user exists
       console.log('POST /api/weekly-plans: Looking up user with ID:', userId);
@@ -168,11 +193,11 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Create new plan
+      // Create new plan with validated date
       const weeklyPlan = await prisma.weeklyPlan.create({
         data: {
           userId,
-          weekStartDate,
+          weekStartDate: toMidnightIsoString(weekStartDate),
         },
         include: {
           mealPlans: {

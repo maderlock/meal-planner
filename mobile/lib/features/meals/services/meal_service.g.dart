@@ -465,7 +465,8 @@ class _MealServiceApi implements MealServiceApi {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = suggestion;
+    final _data = <String, dynamic>{};
+    _data.addAll(suggestion.toJson());
     final _options = _setStreamType<void>(Options(
       method: 'POST',
       headers: _headers,

@@ -6,7 +6,7 @@ part of 'current_week_plan_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$currentWeekPlanHash() => r'96b63c86da86763e654aea157c250c2fbe695387';
+String _$currentWeekPlanHash() => r'8d0de8622266bbe91584eaac014c8a9e8d3c7f77';
 
 /// Provider that manages the current week's meal plan
 ///

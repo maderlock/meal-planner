@@ -6,9 +6,8 @@ part of 'recipe_suggestion.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$RecipeSuggestionImpl _$$RecipeSuggestionImplFromJson(
-        Map<String, dynamic> json) =>
-    _$RecipeSuggestionImpl(
+RecipeSuggestion _$RecipeSuggestionFromJson(Map<String, dynamic> json) =>
+    RecipeSuggestion(
       name: json['name'] as String,
       description: json['description'] as String?,
       ingredients: (json['ingredients'] as List<dynamic>)
@@ -21,8 +20,7 @@ _$RecipeSuggestionImpl _$$RecipeSuggestionImplFromJson(
       sourceUrl: json['sourceUrl'] as String?,
     );
 
-Map<String, dynamic> _$$RecipeSuggestionImplToJson(
-        _$RecipeSuggestionImpl instance) =>
+Map<String, dynamic> _$RecipeSuggestionToJson(RecipeSuggestion instance) =>
     <String, dynamic>{
       'name': instance.name,
       'description': instance.description,
