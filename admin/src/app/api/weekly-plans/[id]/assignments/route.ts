@@ -12,18 +12,30 @@ const mealAssignmentSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const body = await request.json()
     const validatedData = mealAssignmentSchema.parse(body)
 
-    const weeklyPlanId = params.id
+    const weeklyPlanId = context.params.id
 
-    const assignment = await prisma.mealAssignment.create({
-      data: {
+    const assignment = await prisma.mealPlan.upsert({
+      where: {
+        weeklyPlanId_dayOfWeek_mealType: {
+          weeklyPlanId,
+          dayOfWeek: validatedData.dayOfWeek,
+          mealType: validatedData.mealType,
+        },
+      },
+      create: {
         weeklyPlanId,
-        ...validatedData
+        mealId: validatedData.mealId,
+        dayOfWeek: validatedData.dayOfWeek,
+        mealType: validatedData.mealType,
+      },
+      update: {
+        mealId: validatedData.mealId,
       },
       include: {
         meal: true
@@ -45,7 +57,7 @@ export async function POST(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const { searchParams } = new URL(request.url)
@@ -58,10 +70,10 @@ export async function DELETE(
       )
     }
 
-    await prisma.mealAssignment.delete({
+    await prisma.mealPlan.delete({
       where: {
         id: assignmentId,
-        weeklyPlanId: params.id
+        weeklyPlanId: context.params.id
       }
     })
 

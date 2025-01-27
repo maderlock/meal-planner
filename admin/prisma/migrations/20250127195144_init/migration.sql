@@ -80,7 +80,7 @@ CREATE INDEX "meal_plans_weekly_plan_id_idx" ON "meal_plans"("weekly_plan_id");
 CREATE INDEX "meal_plans_meal_id_idx" ON "meal_plans"("meal_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "meal_plans_weekly_plan_id_day_of_week_key" ON "meal_plans"("weekly_plan_id", "day_of_week");
+CREATE UNIQUE INDEX "meal_plans_weekly_plan_id_day_of_week_meal_type_key" ON "meal_plans"("weekly_plan_id", "day_of_week", "meal_type");
 
 -- AddForeignKey
 ALTER TABLE "meals" ADD CONSTRAINT "meals_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

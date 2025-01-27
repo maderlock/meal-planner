@@ -10,7 +10,7 @@ const SaveSuggestionSchema = z.object({
   ingredients: z.array(z.string()),
   instructions: z.array(z.string()),
   cookingTime: z.number().nullable().transform(val => val?.toString() ?? null),
-  sourceUrl: z.string().url().optional(),
+  sourceUrl: z.string().url().nullish(),
 });
 
 export async function POST(request: NextRequest) {

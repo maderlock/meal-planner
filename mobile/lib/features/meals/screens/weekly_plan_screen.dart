@@ -121,8 +121,8 @@ class _WeeklyPlanScreenState extends ConsumerState<WeeklyPlanScreen> {
           _currentPlan!.id,
           {
             'mealId': selectedMeal.id,
-            'day': _getDayName(date),
-            'type': selectedType.name,
+            'dayOfWeek': date.weekday - 1, // Convert 1-7 to 0-6
+            'mealType': selectedType.name.toLowerCase(),
           },
         );
         await _loadData(); // Refresh data

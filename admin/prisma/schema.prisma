@@ -98,7 +98,7 @@ model MealPlan {
   weeklyPlan   WeeklyPlan @relation(fields: [weeklyPlanId], references: [id])
   meal         Meal       @relation(fields: [mealId], references: [id])
 
-  @@unique([weeklyPlanId, dayOfWeek])
+  @@unique([weeklyPlanId, dayOfWeek, mealType])
   @@index([weeklyPlanId])
   @@index([mealId])
   @@map("meal_plans")
