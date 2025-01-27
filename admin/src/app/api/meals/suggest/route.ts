@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import OpenAI from 'openai';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { verifyAuth } from '@/lib/auth'
 
 // Schema for recipe suggestions
 const RecipeSchema = z.object({
@@ -19,7 +19,7 @@ const SuggestionsResponseSchema = z.array(RecipeSchema).length(5);
 type Recipe = z.infer<typeof RecipeSchema>;
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 const SYSTEM_PROMPT = `You are a helpful cooking assistant. When given a meal description, suggest 5 recipes that match the criteria.
@@ -45,13 +45,9 @@ Rules:
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify user is authenticated
-    const user = await getCurrentUser(request);
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+    const userId = await verifyAuth(request);
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get and validate description from request
@@ -60,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     // Generate suggestions using OpenAI
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: `Suggest recipes for: ${description}` }
@@ -85,6 +81,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Handle OpenAI API errors
+    if (error instanceof OpenAI.APIError) {
+      const { status, code, message } = error;
+      
+      // Log detailed error information
+      console.error(`OpenAI API Error:
+        Status: ${status}
+        Code: ${code}
+        Message: ${message}
+      `);
+
+      // Handle rate limiting and quota errors
+      if (status === 429 || code === 'insufficient_quota') {
+        return NextResponse.json(
+          { error: 'Service temporarily unavailable. Please try again later.' },
+          { status: 503 }
+        );
+      }
+
+      // Handle other API errors
+      return NextResponse.json(
+        { error: 'Recipe suggestion service is currently unavailable' },
+        { status: 500 }
+      );
+    }
+
+    // Handle all other errors
     return NextResponse.json(
       { error: 'Failed to suggest recipes' },
       { status: 500 }

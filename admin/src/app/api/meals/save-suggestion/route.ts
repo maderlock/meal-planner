@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { verifyAuth } from '@/lib/auth';
 
 // Schema for saving a suggested recipe
 const SaveSuggestionSchema = z.object({
@@ -16,12 +16,9 @@ const SaveSuggestionSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Verify user is authenticated
-    const user = await getCurrentUser(request);
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+    const userId = await verifyAuth(request);
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Validate request body
@@ -31,7 +28,7 @@ export async function POST(request: NextRequest) {
     // Create meal from suggestion
     const meal = await prisma.meal.create({
       data: {
-        userId: user.id,
+        userId: userId,
         name: recipe.name,
         description: recipe.description,
         ingredients: recipe.ingredients,

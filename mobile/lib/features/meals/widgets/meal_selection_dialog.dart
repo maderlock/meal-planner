@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/meal_model.dart';
 import '../providers/meal_provider.dart';
+import 'recipe_suggestion_dialog.dart';
 
 /// A reusable dialog for selecting meals from a list.
 /// Shows favorites first with a star icon, and includes a button to add new meals.
@@ -57,19 +58,15 @@ class _MealSelectionDialogState extends ConsumerState<MealSelectionDialog> {
   }
 
   Future<void> _showNewMealDialog() async {
-    await showDialog<void>(
+    final result = await showDialog(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('Create New Meal'),
-        content: const Text('AI-powered meal creation coming soon!'),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
+      builder: (context) => const RecipeSuggestionDialog(),
     );
+
+    if (result == true && mounted) {
+      // Refresh the meals list
+      _loadMeals();
+    }
   }
 
   @override
